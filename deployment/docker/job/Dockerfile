@@ -35,7 +35,8 @@ RUN set -eux; \
     done; \
     setsid -w true
 
-RUN install -d -o nobody -g 0 -m 0775 /workspace \
+RUN usermod -d /workspace nobody \
+ && install -d -o nobody -g 0 -m 0775 /workspace \
  && chmod g=u /etc/passwd
 
 ENV OPENTOFU_VERSION="1.11.0"
@@ -57,6 +58,7 @@ RUN mv /tmp/tofu /usr/local/bin/
 RUN mv /tmp/terraform /usr/local/bin/
 RUN mv /tmp/terragrunt /usr/local/bin/
 
+ENV HOME=/workspace
 WORKDIR /workspace
 USER nobody:0
 

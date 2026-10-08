@@ -16,9 +16,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
-RUN install -d -o nobody -g 0 -m 0775 /workspace \
+RUN usermod -d /workspace nobody \
+ && install -d -o nobody -g 0 -m 0775 /workspace \
  && chmod g=u /etc/passwd
 
+ENV HOME=/workspace
 WORKDIR /workspace
 USER nobody:0
 

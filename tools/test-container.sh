@@ -3,10 +3,13 @@ set -euo pipefail
 image=${1:?image required}
 version=${2:?version required}
 role=${3:-server}
+repo=$(cd "$(dirname "$0")/.." && pwd)
 if [[ "$role" == job || "$role" == helper ]]; then
   docker run --rm "$image" sh -ec 'test "$(id -u)" != 0; git --version; ssh -V'
   if [[ "$role" == job ]]; then
     docker run --rm "$image" sh -ec 'ansible-playbook --version; tofu version; terraform version; terragrunt --version'
+    docker run --rm -v "$repo/examples/demo:/examples:ro" "$image" \
+      ansible-playbook -i localhost, -c local /examples/ping.yml
   fi
   exit 0
 fi
