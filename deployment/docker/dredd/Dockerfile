@@ -14,7 +14,6 @@ RUN --mount=type=cache,target=/go/pkg \
     go mod download -x
 
 RUN --mount=type=cache,target=/go/pkg --mount=type=cache,target=/root/.cache/go-build \
-    task deps:tools && \
     task deps:be && \
     task dredd:goodman && \
     task dredd:hooks
