@@ -3,8 +3,8 @@ package db
 import (
 	"time"
 
-	"github.com/semaphoreui/semaphore/pkg/common_errors"
-	"github.com/semaphoreui/semaphore/pkg/tz"
+	"github.com/impishMD/jeh/pkg/common_errors"
+	"github.com/impishMD/jeh/pkg/tz"
 )
 
 // User is the model for an entity which has access to the API

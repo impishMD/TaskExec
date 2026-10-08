@@ -4,8 +4,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/task_logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

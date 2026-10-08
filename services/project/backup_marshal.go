@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 func marshalValue(v reflect.Value) (any, error) {

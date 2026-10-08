@@ -1,8 +1,8 @@
 package tasks
 
 import (
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/db_lib"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/db_lib"
 )
 
 // LocalExecutorProvider is the ExecutorProvider for the "local" strategy: tasks run

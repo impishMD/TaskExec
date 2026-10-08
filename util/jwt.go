@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/semaphoreui/semaphore/pkg/jwt"
+	"github.com/impishMD/jeh/pkg/jwt"
 )
 
 // OptionStore is the minimal interface required to load and persist the JWT

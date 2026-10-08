@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/ssh"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/ssh"
+	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/jeh/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -307,7 +307,7 @@ func TestGalaxyGitEnv_ParsedByGit(t *testing.T) {
 // Only one variable reaches git, so they have to be folded into it together.
 func TestMergeGitConfigParameters(t *testing.T) {
 	repoRewrite := `'url.https://bob:s3cr3t@git.example/.insteadOf=https://git.example/'`
-	mappingRewrite := `'url.git@semaphore-mapping-1:acme/.insteadOf=https://github.com/acme/'`
+	mappingRewrite := `'url.git@jeh-mapping-1:acme/.insteadOf=https://github.com/acme/'`
 
 	env := mergeGitConfigParameters([]string{
 		"GIT_TERMINAL_PROMPT=0",
@@ -401,7 +401,7 @@ func TestAnsibleApp_GalaxyEnv_KeepsRepositoryAgent(t *testing.T) {
 		galaxyInstaller: &agentInstaller{socket: "/tmp/galaxy-key.sock"},
 	}
 
-	generated := "/tmp/semaphore/project_1/ssh-config-test.conf"
+	generated := "/tmp/jeh/project_1/ssh-config-test.conf"
 
 	var noKey ssh.AccessKeyInstallation
 	env, err := app.galaxyEnv(noKey.GetGitEnvWithHostConfigs(

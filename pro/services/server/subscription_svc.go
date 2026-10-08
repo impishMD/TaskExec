@@ -1,8 +1,8 @@
 package server
 
 import (
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pro_interfaces"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pro_interfaces"
 )
 
 func NewSubscriptionService(userRepo db.UserManager, optionsRepo db.OptionsManager, runnerRepo db.RunnerManager, tfRepo db.TerraformStore) pro_interfaces.SubscriptionService {

@@ -1,7 +1,7 @@
 package hooks
 
 import (
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 type AnsibleHook struct {

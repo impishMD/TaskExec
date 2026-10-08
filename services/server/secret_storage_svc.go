@@ -3,10 +3,10 @@ package server
 import (
 	"errors"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/common_errors"
-	"github.com/semaphoreui/semaphore/pkg/random"
-	pro "github.com/semaphoreui/semaphore/pro/services/server"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/common_errors"
+	"github.com/impishMD/jeh/pkg/random"
+	pro "github.com/impishMD/jeh/pro/services/server"
 )
 
 type SecretStorageService interface {
@@ -93,7 +93,7 @@ func (s *SecretStorageServiceImpl) Create(storage db.SecretStorage) (res db.Secr
 	sourceStorageKey := ""
 
 	if !pro.StorageRequiresSecret(storage) {
-		// The storage authenticates without credentials stored in Semaphore
+		// The storage authenticates without credentials stored in JEH
 		// (for example an AWS IAM role), so no access key is created.
 		return s.secretStorageRepo.CreateSecretStorage(storage)
 	}

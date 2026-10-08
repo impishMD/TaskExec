@@ -24,3 +24,7 @@ USER nobody:0
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["sh"]
+LABEL org.opencontainers.image.source="https://github.com/impishMD/jeh" \
+      org.opencontainers.image.title="Job Executor Hub — helper" \
+      org.opencontainers.image.licenses="MIT"
+COPY LICENSE NOTICE THIRD-PARTY-LICENSES.md /usr/share/licenses/jeh/

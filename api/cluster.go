@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/pro_interfaces"
-	taskServices "github.com/semaphoreui/semaphore/services/tasks"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/pro_interfaces"
+	taskServices "github.com/impishMD/jeh/services/tasks"
+	"github.com/impishMD/jeh/util"
 	log "github.com/sirupsen/logrus"
 )
 

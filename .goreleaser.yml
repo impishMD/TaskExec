@@ -1,111 +1,68 @@
 version: 2
-dist: bin
-
+project_name: jeh
 before:
   hooks:
-    - task build:fe
-
+    - make frontend
 builds:
-  - binary: semaphore
-    env:
-      - CGO_ENABLED=0
-    main: ./cli/main.go
-    ldflags: -s -w -X github.com/semaphoreui/semaphore/util.Ver={{ .Version }} -X github.com/semaphoreui/semaphore/util.Commit={{ .ShortCommit }} -X github.com/semaphoreui/semaphore/util.Date={{ .Timestamp }}
-    tags:
-      - netgo
-    goos:
-      - windows
-      - darwin
-      - linux
-      - freebsd
-    goarch:
-      - 386
-      - amd64
-      - arm
-      - arm64
-      - ppc64le
-    ignore:
-      - goos: freebsd
-        goarch: arm
-      - goos: freebsd
-        goarch: 386
-      - goos: freebsd
-        goarch: ppc64le
-      - goos: darwin
-        goarch: 386
-      - goos: darwin
-        goarch: arm
-      - goos: darwin
-        goarch: ppc64le
-      - goos: windows
-        goarch: ppc64le
-      - goos: windows
-        goarch: arm
-
+  - id: jeh
+    binary: jeh
+    main: ./cli
+    env: [CGO_ENABLED=0]
+    tags: [netgo]
+    flags: [-trimpath]
+    ldflags:
+      - -s -w -X github.com/impishMD/jeh/util.Ver=v{{ .Version }} -X github.com/impishMD/jeh/util.Commit={{ .ShortCommit }} -X github.com/impishMD/jeh/util.Date={{ .Date }}
+    goos: [linux, darwin]
+    goarch: [amd64, arm64]
 archives:
-  - files:
+  - formats: [tar.gz]
+    name_template: 'jeh_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    files:
       - LICENSE
-    name_template: "{{ .Env.PROJECT_NAME }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    format_overrides:
-      - goos: windows
-        format: zip
-
-signs:
-  -
-    artifacts: checksum
-    signature: "{{ .Env.PROJECT_NAME }}_{{ .Version }}_checksums.txt.sig"
-    cmd: gpg
-    stdin: '{{ .Env.GPG_PASS_3 }}'
-    args:
-      - "--batch"
-      - "--pinentry-mode"
-      - "loopback"
-      - "--passphrase-fd"
-      - "0"
-      - "-u"
-      - "{{ .Env.GPG_KEY_ID_3 }}"
-      - "--yes"
-      - "--output"
-      - "${signature}"
-      - "--detach-sign"
-      - "${artifact}"
-
+      - NOTICE
+      - THIRD-PARTY-LICENSES.md
+      - README.md
+      - docs/**/*
+      - deployment/systemd/*
+      - compose.yaml
+      - .env.example
+source:
+  enabled: true
+  name_template: 'jeh_{{ .Version }}_source'
 checksum:
-  name_template: "{{ .Env.PROJECT_NAME }}_{{ .Version }}_checksums.txt"
-
+  name_template: checksums.txt
 snapshot:
-  name_template: "{{ .Timestamp }}-{{ .ShortCommit }}-SNAPSHOT"
-
+  version_template: '{{ if .Env.JEH_SNAPSHOT_VERSION }}{{ .Env.JEH_SNAPSHOT_VERSION }}{{ else }}{{ .Version }}-dev{{ end }}'
 nfpms:
-  - id: semaphore
-    file_name_template: "{{ .Env.PROJECT_NAME }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    package_name: "semaphore"
-    description: Modern UI and powerful API for Ansible, Terraform, OpenTofu, PowerShell and other DevOps tools.
-    homepage: https://github.com/semaphoreui/semaphore
-    vendor: Semaphore UI
-    maintainer: Denis Gukov <denis@semaphoreui.com>
+  - id: jeh
+    package_name: jeh
+    file_name_template: 'jeh_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    homepage: https://github.com/impishMD/jeh
+    maintainer: impishMD <impishmd@users.noreply.github.com>
+    description: Job Executor Hub — automation for Ansible, Terraform, OpenTofu and scripts.
     license: MIT
-
-    formats:
-      - deb
-      - rpm
-
-    dependencies:
-      - git
-
-    suggests:
-      - ansible
-
+    formats: [deb, rpm]
     bindir: /usr/bin
-
-    # Embedded RPM signature (rpm -K). Skipped when GPG_KEY_PATH is not set
-    # (e.g. local `task release:test`). Passphrase comes from the
-    # NFPM_SEMAPHORE_PASSPHRASE environment variable.
-    rpm:
-      signature:
-        key_file: '{{ envOrDefault "GPG_KEY_PATH" "" }}'
-
+    dependencies: [git, openssh-client]
+    overrides:
+      rpm:
+        dependencies: [git, openssh-clients, shadow-utils]
+      deb:
+        dependencies: [git, openssh-client, passwd]
+    contents:
+      - src: deployment/systemd/jeh.service
+        dst: /usr/lib/systemd/system/jeh.service
+      - src: LICENSE
+        dst: /usr/share/licenses/jeh/LICENSE
+      - src: NOTICE
+        dst: /usr/share/licenses/jeh/NOTICE
+      - src: THIRD-PARTY-LICENSES.md
+        dst: /usr/share/licenses/jeh/THIRD-PARTY-LICENSES.md
+    scripts:
+      preinstall: deployment/packaging/preinstall.sh
+      postinstall: deployment/packaging/postinstall.sh
 release:
   draft: true
-  use_existing_draft: true
-  name_template: "{{.Tag}}"
+  name_template: '{{ .Tag }}'
+changelog:
+  disable: true

@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
+	"github.com/impishMD/jeh/pkg/task_logger"
 )
 
 const gracePeriod = 15 * time.Second

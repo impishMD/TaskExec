@@ -4,7 +4,7 @@ import (
 	"regexp"
 
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/semaphoreui/semaphore/pkg/common_errors"
+	"github.com/impishMD/jeh/pkg/common_errors"
 )
 
 func ValidateGitBranch(branch string, objectName string) error {

@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/semaphoreui/semaphore/pkg/common_errors"
+	"github.com/impishMD/jeh/pkg/common_errors"
 )
 
 func isHTTPURL(rawURL string) bool {

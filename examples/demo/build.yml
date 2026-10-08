@@ -1,0 +1,8 @@
+---
+- name: Build a demo artifact
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Report the build version
+      ansible.builtin.debug:
+        msg: "JEH demo build {{ jeh_vars.task_details.version | default('local') }}"

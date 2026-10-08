@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/semaphoreui/semaphore/services/audit"
+	"github.com/impishMD/jeh/services/audit"
 )
 
 type Recorded struct {

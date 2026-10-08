@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/db_lib"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
-	"github.com/semaphoreui/semaphore/services/tasks"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/db_lib"
+	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/jeh/services/tasks"
+	"github.com/impishMD/jeh/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -167,14 +167,14 @@ func (d *MockDockerExecutor) Prepare(username string, incomingVersion *string, a
 	}
 
 	envVars := []string{
-		fmt.Sprintf("SEMAPHORE_TASK_ID=%d", d.Task.ID),
-		fmt.Sprintf("SEMAPHORE_USER=%s", username),
+		fmt.Sprintf("JEH_TASK_ID=%d", d.Task.ID),
+		fmt.Sprintf("JEH_USER=%s", username),
 	}
 	mounts := []string{
 		fmt.Sprintf("/tmp/repo_%d:/workspace", d.Repository.ID),
 	}
 
-	c, err := d.Engine.CreateContainer("semaphoreui/job:latest", envVars, mounts)
+	c, err := d.Engine.CreateContainer("impishmd/jeh:latest-job", envVars, mounts)
 	if err != nil {
 		return err
 	}
@@ -385,7 +385,7 @@ func (k *MockK8sExecutor) Prepare(username string, incomingVersion *string, alia
 		return nil
 	}
 
-	k.Namespace = "semaphore-test"
+	k.Namespace = "jeh-test"
 	k.PodName = fmt.Sprintf("task-%d-pod", k.Task.ID)
 
 	_, err := k.Cluster.CreatePod(k.Namespace, k.PodName)

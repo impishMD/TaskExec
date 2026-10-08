@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	proFactory "github.com/semaphoreui/semaphore/pro/db/factory"
-	projectService "github.com/semaphoreui/semaphore/services/project"
+	proFactory "github.com/impishMD/jeh/pro/db/factory"
+	projectService "github.com/impishMD/jeh/services/project"
 	"github.com/spf13/cobra"
 )
 
@@ -42,7 +42,7 @@ var projectExportCmd = &cobra.Command{
 		}
 
 		if !ok {
-			fmt.Println("Use command `semaphore project export --help` for details.")
+			fmt.Println("Use command `jeh project export --help` for details.")
 			os.Exit(1)
 		}
 

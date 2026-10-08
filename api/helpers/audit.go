@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/semaphoreui/semaphore/services/audit"
+	"github.com/impishMD/jeh/services/audit"
 )
 
 func Audit(r *http.Request) audit.Recorder {

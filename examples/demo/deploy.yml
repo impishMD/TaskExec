@@ -1,0 +1,8 @@
+---
+- name: Demonstrate deployment without changing a remote host
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Report the target
+      ansible.builtin.debug:
+        msg: "JEH demo deployment on {{ inventory_hostname }}"

@@ -1,6 +1,6 @@
 package sql
 
-import "github.com/semaphoreui/semaphore/db"
+import "github.com/impishMD/jeh/db"
 
 func (d *SqlDb) GetGlobalRoleBySlug(slug string) (db.Role, error) {
 	var role db.Role

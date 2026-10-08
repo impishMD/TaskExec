@@ -34,7 +34,7 @@ api/public/**/*
 node_modules/
 
 /.idea/
-/semaphore.iml
+/jeh.iml
 /bin/
 
 /vendor/
@@ -62,3 +62,7 @@ __debug_bin*
 /*-config.yml
 /*-config.config
 /*.sqlite*
+/dist/
+/.env
+/.env.*
+!/.env.example

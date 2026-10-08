@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/semaphoreui/semaphore/pkg/conv"
+	"github.com/impishMD/jeh/pkg/conv"
 )
 
 func TestStructToMap(t *testing.T) {

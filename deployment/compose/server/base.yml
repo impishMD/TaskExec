@@ -5,16 +5,16 @@ volumes:
 
 services:
   server:
-    image: docker.io/semaphoreui/semaphore:${SEMAPHORE_VERSION:-latest}
+    image: docker.io/impishmd/jeh:${JEH_VERSION:-latest}
     restart: always
     environment:
-      SEMAPHORE_ADMIN_NAME: ${SEMAPHORE_ADMIN_NAME:-Admin}
-      SEMAPHORE_ADMIN: ${SEMAPHORE_ADMIN_USERNAME:-admin}
-      SEMAPHORE_ADMIN_PASSWORD: ${SEMAPHORE_ADMIN_PASSWORD:-p455w0rd}
-      SEMAPHORE_ADMIN_EMAIL: ${SEMAPHORE_ADMIN_EMAIL:-admin@localhost}
-      SEMAPHORE_WEB_ROOT: ${SEMAPHORE_WEB_ROOT:-http://0.0.0.0:3000}
-      SEMAPHORE_ACCESS_KEY_ENCRYPTION: ${SEMAPHORE_ACCESS_KEY_ENCRYPTION:-IlRqgrrO5Gp27MlWakDX1xVrPv4jhoUx+ARY+qGyDxQ=}
+      JEH_ADMIN_NAME: ${JEH_ADMIN_NAME:-Admin}
+      JEH_ADMIN: ${JEH_ADMIN_USERNAME:-admin}
+      JEH_ADMIN_PASSWORD: ${JEH_ADMIN_PASSWORD:-p455w0rd}
+      JEH_ADMIN_EMAIL: ${JEH_ADMIN_EMAIL:-admin@localhost}
+      JEH_WEB_ROOT: ${JEH_WEB_ROOT:-http://0.0.0.0:3000}
+      JEH_ACCESS_KEY_ENCRYPTION: ${JEH_ACCESS_KEY_ENCRYPTION:-IlRqgrrO5Gp27MlWakDX1xVrPv4jhoUx+ARY+qGyDxQ=}
     volumes:
-      - server:/var/lib/semaphore
+      - server:/var/lib/jeh
     ports:
       - "3000:3000"

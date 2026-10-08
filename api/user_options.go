@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
 )
 
 // allowedUserOptionKeys lists the suffixes a user is allowed to store via the

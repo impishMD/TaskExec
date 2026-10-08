@@ -1,6 +1,6 @@
 package pro_interfaces
 
-import "github.com/semaphoreui/semaphore/db"
+import "github.com/impishMD/jeh/db"
 
 // WorkflowService orchestrates workflow runs: starting a run, progressing it as
 // upstream tasks finish, resolving approvals and merging run artifacts. It is a

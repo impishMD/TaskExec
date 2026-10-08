@@ -1,7 +1,7 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
-$id: "https://semaphoreui.com/schemas/config.schema.json"
-title: Semaphore configuration
-description: Schema for Semaphore UI config.json / config.yaml. Generated from util.ConfigType.
+$id: "https://github.com/impishMD/jeh"
+title: JEH configuration
+description: Schema for Job Executor Hub config.json / config.yaml. Generated from util.ConfigType.
 type: object
 
 properties:
@@ -12,7 +12,7 @@ properties:
     type: string
     enum: [mysql, postgres, sqlite]
     default: sqlite
-    description: Database engine used by Semaphore.
+    description: Database engine used by JEH.
   mysql:    { $ref: "#/$defs/DbConfig" }
   postgres: { $ref: "#/$defs/DbConfig" }
   sqlite:   { $ref: "#/$defs/DbConfig" }
@@ -41,7 +41,7 @@ properties:
   # ==========================================================================
   tmp_path:
     type: string
-    default: /tmp/semaphore
+    default: /tmp/jeh
     description: Working directory for ephemeral project data.
   home_dir_mode:
     type: string
@@ -69,7 +69,7 @@ properties:
   web_host:
     type: string
     format: uri
-    description: Public URL of this Semaphore instance.
+    description: Public URL of this JEH instance.
 
   # ==========================================================================
   # Cookie / access-key secrets (base64-encoded, sensitive)
@@ -275,7 +275,7 @@ $defs:
       enabled:
         type: boolean
         description: >
-          When true, Semaphore mints a short-lived JWT for each task run and
+          When true, JEH mints a short-lived JWT for each task run and
           exposes its public key via /.well-known/jwks.json.
       issuer:
         type: string
@@ -346,7 +346,7 @@ $defs:
       pass:
         type: string
         description: Database password (sensitive).
-      name: { type: string, default: semaphore }
+      name: { type: string, default: jeh }
       options:
         type: object
         additionalProperties: { type: string }
@@ -678,8 +678,8 @@ $defs:
       index:
         type: string
         description: Target index. Empty uses the default index of the token.
-      source: { type: string, default: semaphore }
-      sourcetype: { type: string, default: "semaphore:audit" }
+      source: { type: string, default: jeh }
+      sourcetype: { type: string, default: "jeh:audit" }
       timeout: { type: string, default: 10s }
       ca_file: { type: string }
       server_name:
@@ -696,14 +696,14 @@ $defs:
       server_url:
         type: string
         format: uri
-        default: "https://portal.semaphoreui.com/billing"
+        default: ""
 
   ConfigDirs:
     type: object
     properties:
-      secrets:           { type: string, default: /tmp/semaphore }
+      secrets:           { type: string, default: /tmp/jeh }
       repos:             { type: string }
-      ssh_agent_sockets: { type: string, default: /tmp/semaphore }
+      ssh_agent_sockets: { type: string, default: /tmp/jeh }
 
   RunnerConfig:
     type: object
@@ -738,12 +738,12 @@ $defs:
 
   RunnerConnectionConfig:
     type: object
-    description: Controls how the runner connects to the Semaphore server.
+    description: Controls how the runner connects to the JEH server.
     properties:
       server_ca_cert_file:
         type: string
         description: >
-          PEM bundle used to verify the Semaphore server certificate, in
+          PEM bundle used to verify the JEH server certificate, in
           addition to the system trust store. Set when the server uses a
           self-signed or internal-CA certificate.
       skip_tls_verify:
@@ -770,7 +770,7 @@ $defs:
       kubeconfig:
         type: string
         description: Path to a kubeconfig file. Empty = in-cluster configuration.
-      namespace:    { type: string, default: semaphore }
+      namespace:    { type: string, default: jeh }
       image:        { type: string, default: "alpine:latest" }
       helper_image: { type: string, default: "alpine/git:latest" }
       service_account:
@@ -798,8 +798,8 @@ $defs:
       cert_path:
         type: string
         description: Directory holding ca.pem, cert.pem and key.pem for mutual TLS.
-      image:        { type: string, default: "semaphoreui/job:latest" }
-      helper_image: { type: string, default: "semaphoreui/job:latest" }
+      image:        { type: string, default: "impishmd/jeh:latest-job" }
+      helper_image: { type: string, default: "impishmd/jeh:latest-helper" }
       network:      { type: string, default: bridge }
       pull_policy:
         type: string

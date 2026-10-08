@@ -10,11 +10,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/db_lib"
-	"github.com/semaphoreui/semaphore/pkg/ssh"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/db_lib"
+	"github.com/impishMD/jeh/pkg/ssh"
+	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/jeh/util"
 )
 
 type LocalExecutor struct {
@@ -185,7 +185,7 @@ func (t *LocalExecutor) getEnvironmentExtraVars(username string, incomingVersion
 
 	vars := make(map[string]any)
 	vars["task_details"] = t.getTaskDetails(username, incomingVersion)
-	extraVars["semaphore_vars"] = vars
+	extraVars["jeh_vars"] = vars
 
 	return
 }
@@ -228,7 +228,7 @@ func (t *LocalExecutor) getEnvironmentENV() (res []string, err error) {
 	}
 
 	if t.JWT != "" {
-		res = append(res, fmt.Sprintf("SEMAPHORE_JWT=%s", t.JWT))
+		res = append(res, fmt.Sprintf("JEH_JWT=%s", t.JWT))
 	}
 
 	return
@@ -287,25 +287,25 @@ func (t *LocalExecutor) getSurveyEnvVars() (res []string, err error) {
 	return
 }
 
-// taskIdentityEnv returns the SEMAPHORE_* variables that identify the task and,
+// taskIdentityEnv returns the JEH_* variables that identify the task and,
 // when it is part of a workflow run, the workflow. Unlike the task-details
 // variables they are set for every app, Ansible and Terraform included, so a
-// script can always reach back to Semaphore for the task that started it.
+// script can always reach back to JEH for the task that started it.
 func taskIdentityEnv(task db.Task) (env []string) {
 	env = append(env,
-		fmt.Sprintf("SEMAPHORE_PROJECT_ID=%d", task.ProjectID),
-		fmt.Sprintf("SEMAPHORE_TASK_ID=%d", task.ID))
+		fmt.Sprintf("JEH_PROJECT_ID=%d", task.ProjectID),
+		fmt.Sprintf("JEH_TASK_ID=%d", task.ID))
 
 	if task.WorkflowRunID != nil {
-		env = append(env, fmt.Sprintf("SEMAPHORE_WORKFLOW_RUN_ID=%d", *task.WorkflowRunID))
+		env = append(env, fmt.Sprintf("JEH_WORKFLOW_RUN_ID=%d", *task.WorkflowRunID))
 	}
 
 	if task.WorkflowTemplateID != nil {
-		env = append(env, fmt.Sprintf("SEMAPHORE_WORKFLOW_ID=%d", *task.WorkflowTemplateID))
+		env = append(env, fmt.Sprintf("JEH_WORKFLOW_ID=%d", *task.WorkflowTemplateID))
 	}
 
 	if workflowUrl := task.GetWorkflowUrl(); workflowUrl != nil {
-		env = append(env, fmt.Sprintf("SEMAPHORE_WORKFLOW_URL=%s", *workflowUrl))
+		env = append(env, fmt.Sprintf("JEH_WORKFLOW_URL=%s", *workflowUrl))
 	}
 
 	return
@@ -315,7 +315,7 @@ func (t *LocalExecutor) getShellEnvironmentExtraENV(username string, incomingVer
 	taskDetails := t.getTaskDetails(username, incomingVersion)
 
 	for taskDetail, taskDetailValue := range taskDetails {
-		envVarName := fmt.Sprintf("SEMAPHORE_TASK_DETAILS_%s", strings.ToUpper(taskDetail))
+		envVarName := fmt.Sprintf("JEH_TASK_DETAILS_%s", strings.ToUpper(taskDetail))
 
 		detailAsStr := ""
 		switch taskDetailValueOfType := taskDetailValue.(type) {
@@ -376,7 +376,7 @@ func (t *LocalExecutor) getShellArgs(username string, incomingVersion *string) (
 
 	// Include ExtraVars and Survey Vars
 	for name, value := range extraVars {
-		if name != "semaphore_vars" {
+		if name != "jeh_vars" {
 			args = append(args, fmt.Sprintf("%s=%s", name, formatVarValue(value)))
 		}
 	}
@@ -415,7 +415,7 @@ func (t *LocalExecutor) getTerraformArgs(username string, incomingVersion *strin
 	// Common args for environment variables
 	varArgs := []string{}
 	for name, value := range extraVars {
-		if name == "semaphore_vars" {
+		if name == "jeh_vars" {
 			continue
 		}
 		varArgs = append(varArgs, "-var", fmt.Sprintf("%s=%s", name, formatVarValue(value)))
@@ -954,7 +954,7 @@ func (t *LocalExecutor) Prepare(username string, incomingVersion *string, alias 
 	// Get extra environment vars for non-Terraform apps
 	switch t.Template.App {
 	case db.AppAnsible:
-		// Semaphore vars / task details were already passed
+		// JEH vars / task details were already passed
 		// as 'extra vars' in JSON format
 		break
 	case db.AppTerraform, db.AppTofu, db.AppTerragrunt:
@@ -973,18 +973,18 @@ func (t *LocalExecutor) Prepare(username string, incomingVersion *string, alias 
 
 	if t.Template.Type != db.TemplateTask {
 
-		environmentVariables = append(environmentVariables, fmt.Sprintf("SEMAPHORE_TASK_TYPE=%s", t.Template.Type))
+		environmentVariables = append(environmentVariables, fmt.Sprintf("JEH_TASK_TYPE=%s", t.Template.Type))
 
 		if incomingVersion != nil {
 			environmentVariables = append(
 				environmentVariables,
-				fmt.Sprintf("SEMAPHORE_TASK_INCOMING_VERSION=%s", *incomingVersion))
+				fmt.Sprintf("JEH_TASK_INCOMING_VERSION=%s", *incomingVersion))
 		}
 
 		if t.Template.Type == db.TemplateBuild && t.Task.Version != nil {
 			environmentVariables = append(
 				environmentVariables,
-				fmt.Sprintf("SEMAPHORE_TASK_TARGET_VERSION=%s", *t.Task.Version))
+				fmt.Sprintf("JEH_TASK_TARGET_VERSION=%s", *t.Task.Version))
 		}
 	}
 

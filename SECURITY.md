@@ -1,32 +1,12 @@
-# Security Policy
+# Security policy
 
-## Supported Versions
+The latest JEH release in the 0.0.x series is supported. Versions of the upstream
+project are not JEH release versions.
 
-| Version | Supported          |
-|---------| ------------------ |
-| 2.19.x  | :white_check_mark: |
-| 2.18.x  | :white_check_mark: |
-| < 2.18  | :x:                |
+Report vulnerabilities privately through
+[GitHub private vulnerability reporting](https://github.com/impishMD/jeh/security/advisories/new)
+when enabled. Include the JEH version, reproduction steps and impact, without live credentials.
+If private reporting is unavailable, contact the repository owner through their GitHub profile
+before sending sensitive details. Do not publish working credentials in public issues.
 
-## Reporting a Vulnerability
-
-If you believe you’ve found a security vulnerability in Semaphore UI, we encourage you to let us know as soon as possible.
-
-Please email us at security@semaphoreui.com with:
-
-- A clear description of the vulnerability
-- Steps to reproduce the issue
-- Any related logs, screenshots, or payloads
-
-We take security seriously and will respond as quickly as possible. We aim to confirm receipt within 7 business days and provide a full response within 30 business days.
-
-We ask that you **do not publicly disclose** the issue until we’ve had a chance to investigate and release a fix.
-
-## Scope
-
-This policy applies to:
-
-- Semaphore UI (self-hosted)
-- Official installers, containers, and packages distributed through our GitHub or website
-
-This policy does **not** apply to third-party plugins or custom modifications.
+The scope covers JEH source and artifacts published by this repository.

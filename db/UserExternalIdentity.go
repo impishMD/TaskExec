@@ -8,7 +8,7 @@ const (
 	IdentityTypeOidc = "oidc"
 )
 
-// UserExternalIdentity links a Semaphore user to an identity at an external
+// UserExternalIdentity links a JEH user to an identity at an external
 // auth provider. Provider is "ldap" or a key of the oidc_providers config map.
 // ExternalUID is the provider's stable user ID: the OIDC "sub" claim or the
 // LDAP entry DN. Matching by this pair (instead of by email) prevents account

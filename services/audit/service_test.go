@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

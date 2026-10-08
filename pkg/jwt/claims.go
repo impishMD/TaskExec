@@ -25,7 +25,7 @@ func (a Audience) MarshalJSON() ([]byte, error) {
 // IsZero lets `omitempty` skip an empty audience claim.
 func (a Audience) IsZero() bool { return len(a) == 0 }
 
-// TaskClaims is the JWT payload issued by Semaphore for a single task run.
+// TaskClaims is the JWT payload issued by JEH for a single task run.
 type TaskClaims struct {
 	// Registered claims
 	Issuer    string   `json:"iss,omitempty"`
@@ -36,7 +36,7 @@ type TaskClaims struct {
 	IssuedAt  int64    `json:"iat,omitempty"`
 	JWTID     string   `json:"jti,omitempty"`
 
-	// Semaphore-specific claims
+	// JEH-specific claims
 	TaskID     int  `json:"task_id"`
 	ProjectID  int  `json:"project_id"`
 	TemplateID int  `json:"template_id"`

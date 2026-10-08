@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/ssh"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/ssh"
+	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/jeh/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -104,7 +104,7 @@ func TestGetEnvironmentExtraVars_EmptySecret(t *testing.T) {
 			require.NoError(t, err)
 
 			assert.Equal(t, "hello", extraVars["PLAIN_VAR"])
-			assert.Len(t, extraVars, 2) // PLAIN_VAR + semaphore_vars only
+			assert.Len(t, extraVars, 2) // PLAIN_VAR + jeh_vars only
 		})
 	}
 }
@@ -483,7 +483,7 @@ func TestGetPlaybookArgs_InventorySSHCommonArgs(t *testing.T) {
 	})
 
 	t.Run("mappings point ansible at the generated config", func(t *testing.T) {
-		installation := &ssh.HostConfigInstallation{ConfigFile: "/tmp/semaphore/project_1/ssh-config-x.conf"}
+		installation := &ssh.HostConfigInstallation{ConfigFile: "/tmp/jeh/project_1/ssh-config-x.conf"}
 
 		args, _, err := newExecutor(installation).getPlaybookArgs("admin", nil)
 
@@ -492,7 +492,7 @@ func TestGetPlaybookArgs_InventorySSHCommonArgs(t *testing.T) {
 
 		i := indexOfArg(args, "--ssh-common-args")
 		require.Less(t, i+1, len(args))
-		assert.Equal(t, "-F /tmp/semaphore/project_1/ssh-config-x.conf", args[i+1])
+		assert.Equal(t, "-F /tmp/jeh/project_1/ssh-config-x.conf", args[i+1])
 	})
 }
 
@@ -583,23 +583,23 @@ func TestTaskIdentityEnv(t *testing.T) {
 	}{
 		{
 			name:    "plain task",
-			webHost: "https://semaphore.example.com",
+			webHost: "https://jeh.example.com",
 			task:    db.Task{ID: 11, ProjectID: 3},
 			expected: []string{
-				"SEMAPHORE_PROJECT_ID=3",
-				"SEMAPHORE_TASK_ID=11",
+				"JEH_PROJECT_ID=3",
+				"JEH_TASK_ID=11",
 			},
 		},
 		{
 			name:    "workflow task",
-			webHost: "https://semaphore.example.com",
+			webHost: "https://jeh.example.com",
 			task:    db.Task{ID: 11, ProjectID: 3, WorkflowRunID: &runID, WorkflowTemplateID: &workflowID},
 			expected: []string{
-				"SEMAPHORE_PROJECT_ID=3",
-				"SEMAPHORE_TASK_ID=11",
-				"SEMAPHORE_WORKFLOW_RUN_ID=42",
-				"SEMAPHORE_WORKFLOW_ID=7",
-				"SEMAPHORE_WORKFLOW_URL=https://semaphore.example.com/project/3/workflows/7/runs/42",
+				"JEH_PROJECT_ID=3",
+				"JEH_TASK_ID=11",
+				"JEH_WORKFLOW_RUN_ID=42",
+				"JEH_WORKFLOW_ID=7",
+				"JEH_WORKFLOW_URL=https://jeh.example.com/project/3/workflows/7/runs/42",
 			},
 		},
 		{
@@ -607,10 +607,10 @@ func TestTaskIdentityEnv(t *testing.T) {
 			webHost: "",
 			task:    db.Task{ID: 11, ProjectID: 3, WorkflowRunID: &runID, WorkflowTemplateID: &workflowID},
 			expected: []string{
-				"SEMAPHORE_PROJECT_ID=3",
-				"SEMAPHORE_TASK_ID=11",
-				"SEMAPHORE_WORKFLOW_RUN_ID=42",
-				"SEMAPHORE_WORKFLOW_ID=7",
+				"JEH_PROJECT_ID=3",
+				"JEH_TASK_ID=11",
+				"JEH_WORKFLOW_RUN_ID=42",
+				"JEH_WORKFLOW_ID=7",
 			},
 		},
 	}

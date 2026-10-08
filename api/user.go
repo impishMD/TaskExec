@@ -11,12 +11,12 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/tz"
-	"github.com/semaphoreui/semaphore/pro_interfaces"
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/jeh/pro_interfaces"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/util"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -82,7 +82,7 @@ func linkLdapIdentity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !ldapProfileMatchesSemaphoreUser(*ldapUser, *currentUser) {
+	if !ldapProfileMatchesJEHUser(*ldapUser, *currentUser) {
 		helpers.WriteErrorStatus(w, "LDAP directory profile does not match your account", http.StatusForbidden)
 		return
 	}

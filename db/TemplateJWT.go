@@ -8,9 +8,9 @@ import (
 	"slices"
 	"time"
 
-	"github.com/semaphoreui/semaphore/pkg/common_errors"
-	"github.com/semaphoreui/semaphore/pkg/jwt"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/pkg/common_errors"
+	"github.com/impishMD/jeh/pkg/jwt"
+	"github.com/impishMD/jeh/util"
 )
 
 // maxJWTAudienceEntries caps the number of audience values to keep the token

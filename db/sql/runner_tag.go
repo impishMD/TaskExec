@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 // loadRunnerTags fills the Tags slice on each runner using a single

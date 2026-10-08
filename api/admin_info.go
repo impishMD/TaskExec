@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"runtime"
 
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/util"
 )
 
 func getAdminInfo(w http.ResponseWriter, r *http.Request) {

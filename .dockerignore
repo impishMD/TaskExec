@@ -1,2 +1,13 @@
-web/node_modules/
-vendor/
+.git
+.github
+web/node_modules
+api/public
+!api/public/.gitkeep
+vendor
+bin
+dist
+coverage.out
+*.log
+.env
+.env.*
+!.env.example

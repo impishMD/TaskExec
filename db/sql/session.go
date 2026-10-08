@@ -5,8 +5,8 @@ import (
 	"errors"
 	"regexp"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/tz"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/tz"
 )
 
 func (d *SqlDb) SetSessionVerificationMethod(userID int, sessionID int, verificationMethod db.SessionVerificationMethod) error {

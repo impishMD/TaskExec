@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 // contextKey namespaces the request-scoped values set by these helpers. Using a

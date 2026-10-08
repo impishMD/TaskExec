@@ -12,7 +12,7 @@
       dismissible
       class="mb-6"
     >
-      Use environment variable <code>SEMAPHORE_SCHEDULE_TIMEZONE</code> or config param
+      Use environment variable <code>JEH_SCHEDULE_TIMEZONE</code> or config param
       <code>schedule.timezone</code> to set timezone for Schedule.
     </v-alert>
 

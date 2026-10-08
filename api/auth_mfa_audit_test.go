@@ -11,11 +11,11 @@ import (
 	"time"
 
 	"github.com/pquerna/otp/totp"
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/db/sql"
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/db/sql"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -25,7 +25,7 @@ func totpSession(t *testing.T, path string, body string) (*http.Request, db.User
 	t.Helper()
 	store := setupSessionTest(t)
 	user := createUserOptionsTestUser(t, store, "alice")
-	key, err := totp.Generate(totp.GenerateOpts{Issuer: "Semaphore", AccountName: user.Email})
+	key, err := totp.Generate(totp.GenerateOpts{Issuer: "JEH", AccountName: user.Email})
 	require.NoError(t, err)
 	code, hash, err := util.GenerateRecoveryCode()
 	require.NoError(t, err)

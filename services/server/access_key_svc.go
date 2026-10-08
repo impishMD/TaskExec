@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/common_errors"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/common_errors"
+	"github.com/impishMD/jeh/util"
 )
 
 type AccessKeyService interface {
@@ -178,7 +178,7 @@ func (s *AccessKeyServiceImpl) Create(key db.AccessKey) (newKey db.AccessKey, er
 	}
 
 	// SerializeSecret encrypts/persists the secret for writable backends. For read-only
-	// external storage the secret is not stored in Semaphore, so SerializeSecret fails
+	// external storage the secret is not stored in JEH, so SerializeSecret fails
 	// with ErrReadOnlyStorage; we still create the access key row (metadata / reference).
 	// A generated key is the exception: nobody else holds the private half, so
 	// a storage that cannot persist it must reject the request.

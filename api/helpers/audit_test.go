@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/services/audit/audittest"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/services/audit/audittest"
 	"github.com/stretchr/testify/assert"
 )
 

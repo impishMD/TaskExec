@@ -8,7 +8,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/util"
 )
 
 const interactiveSetupBlurb = `
@@ -17,13 +17,13 @@ Hello! You will now be guided through a setup to:
 1. Set up configuration for a MySQL/MariaDB database
 2. Set up a path for your playbooks (auto-created)
 3. Run database Migrations
-4. Set up initial semaphore user & password
+4. Set up initial jeh user & password
 
 `
 
 func InteractiveRunnerSetup(conf *util.ConfigType) {
 
-	askValue("Semaphore server URL", "", &conf.WebHost)
+	askValue("JEH server URL", "", &conf.WebHost)
 
 	conf.Runner = &util.RunnerConfig{}
 
@@ -105,17 +105,17 @@ func InteractiveSetup(conf *util.ConfigType) {
 		panic("Unsupported database dialect")
 	}
 
-	defaultPlaybookPath := filepath.Join(os.TempDir(), "semaphore")
+	defaultPlaybookPath := filepath.Join(os.TempDir(), "jeh")
 	askValue("Playbook path", defaultPlaybookPath, &conf.TmpPath)
 	conf.TmpPath = filepath.Clean(conf.TmpPath)
 
-	askValue("Public URL (optional, example: https://example.com/semaphore)", "", &conf.WebHost)
+	askValue("Public URL (optional, example: https://example.com/jeh)", "", &conf.WebHost)
 
 	askConfirmation("Enable email alerts?", false, &conf.EmailAlert)
 	if conf.EmailAlert {
 		askValue("Mail server host", "localhost", &conf.EmailHost)
 		askValue("Mail server port", "25", &conf.EmailPort)
-		askValue("Mail sender address", "semaphore@localhost", &conf.EmailSender)
+		askValue("Mail sender address", "jeh@localhost", &conf.EmailSender)
 	}
 
 	askConfirmation("Enable telegram alerts?", false, &conf.TelegramAlert)
@@ -164,7 +164,7 @@ func scanMySQL(conf *util.ConfigType) {
 	askValue("db Hostname", "127.0.0.1:3306", &conf.MySQL.Hostname)
 	askValue("db User", "root", &conf.MySQL.Username)
 	askValue("db Password", "", &conf.MySQL.Password)
-	askValue("db Name", "semaphore", &conf.MySQL.DbName)
+	askValue("db Name", "jeh", &conf.MySQL.DbName)
 }
 
 func scanPostgres(conf *util.ConfigType) {
@@ -172,7 +172,7 @@ func scanPostgres(conf *util.ConfigType) {
 	askValue("db Hostname", "127.0.0.1:5432", &conf.Postgres.Hostname)
 	askValue("db User", "root", &conf.Postgres.Username)
 	askValue("db Password", "", &conf.Postgres.Password)
-	askValue("db Name", "semaphore", &conf.Postgres.DbName)
+	askValue("db Name", "jeh", &conf.Postgres.DbName)
 	if conf.Postgres.Options == nil {
 		conf.Postgres.Options = make(map[string]string)
 	}
@@ -210,9 +210,9 @@ func SaveConfig(config IConfig, defaultFilename string, requiredConfigPath strin
 			configDirectory, err = os.UserConfigDir()
 			if err != nil {
 				// Final fallback
-				configDirectory = "/etc/semaphore"
+				configDirectory = "/etc/jeh"
 			}
-			configDirectory = filepath.Join(configDirectory, "semaphore")
+			configDirectory = filepath.Join(configDirectory, "jeh")
 		}
 
 		askValue("Config output directory", configDirectory, &configDirectory)

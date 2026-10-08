@@ -12,13 +12,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/semaphoreui/semaphore/pkg/conv"
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/services/server"
-	task2 "github.com/semaphoreui/semaphore/services/tasks"
+	"github.com/impishMD/jeh/pkg/conv"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/services/server"
+	task2 "github.com/impishMD/jeh/services/tasks"
 
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
 	log "github.com/sirupsen/logrus"
 	"github.com/thedevsaddam/gojsonq/v2"
 )
@@ -229,16 +229,16 @@ func (c *IntegrationController) ReceiveIntegration(w http.ResponseWriter, r *htt
 
 		task := c.RunIntegration(integration, project, r, payload)
 		if task != nil {
-			w.Header().Add("X-Semaphore-Task-ID", strconv.Itoa(task.ID))
-			w.Header().Add("X-Semaphore-Template-ID", strconv.Itoa(task.TemplateID))
-			w.Header().Add("X-Semaphore-Project-ID", strconv.Itoa(task.ProjectID))
+			w.Header().Add("X-JEH-Task-ID", strconv.Itoa(task.ID))
+			w.Header().Add("X-JEH-Template-ID", strconv.Itoa(task.TemplateID))
+			w.Header().Add("X-JEH-Project-ID", strconv.Itoa(task.ProjectID))
 
 			if task.IntegrationID != nil {
-				w.Header().Add("X-Semaphore-Integration-ID", strconv.Itoa(*task.IntegrationID))
+				w.Header().Add("X-JEH-Integration-ID", strconv.Itoa(*task.IntegrationID))
 			}
 
 			if task.InventoryID != nil {
-				w.Header().Add("X-Semaphore-Inventory-ID", strconv.Itoa(*task.InventoryID))
+				w.Header().Add("X-JEH-Inventory-ID", strconv.Itoa(*task.InventoryID))
 			}
 		}
 	}

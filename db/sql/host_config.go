@@ -1,6 +1,6 @@
 package sql
 
-import "github.com/semaphoreui/semaphore/db"
+import "github.com/impishMD/jeh/db"
 
 func (d *SqlDb) GetHostConfig(projectID int, hostConfigID int) (hostConfig db.HostConfig, err error) {
 	err = d.getObject(projectID, db.HostConfigProps, hostConfigID, &hostConfig)

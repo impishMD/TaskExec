@@ -10,14 +10,14 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pro_interfaces"
-	"github.com/semaphoreui/semaphore/services/audit"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pro_interfaces"
+	"github.com/impishMD/jeh/services/audit"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/util"
 )
 
 type UsersController struct {
@@ -468,7 +468,7 @@ func (c *UsersController) EnableTotp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	key, err := totp.Generate(totp.GenerateOpts{
-		Issuer:      "Semaphore",
+		Issuer:      "JEH",
 		AccountName: user.Email,
 	})
 

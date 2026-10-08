@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/common_errors"
-	"github.com/semaphoreui/semaphore/pkg/tz"
-	pro "github.com/semaphoreui/semaphore/pro/services/server"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/common_errors"
+	"github.com/impishMD/jeh/pkg/tz"
+	pro "github.com/impishMD/jeh/pro/services/server"
 )
 
 const RekeyBatchSize = 100

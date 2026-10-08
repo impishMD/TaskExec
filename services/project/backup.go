@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/random"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/random"
 )
 
 func findNameBySlug[T db.BackupSluggedEntity](slug string, items []T) (*string, error) {

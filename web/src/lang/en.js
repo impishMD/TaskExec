@@ -83,17 +83,17 @@ export default {
   refreshPage: 'Refresh Page',
   relogin: 'Relogin',
   howToFixSigninIssues: 'How to fix sign-in issues',
-  firstlyYouNeedAccessToTheServerWhereSemaphoreRunni:
-    'Firstly, you need access to the server where Semaphore running.',
+  firstlyYouNeedAccessToTheServerWhereJEHRunni:
+    'Firstly, you need access to the server where JEH running.',
   executeTheFollowingCommandOnTheServerToSeeExisting:
     'Execute the following command on the server to see existing users:',
-  semaphoreUserList: 'semaphore user list',
+  jehUserList: 'jeh user list',
   youCanChangePasswordOfExistingUser: 'You can change password of existing user:',
-  semaphoreUserChangebyloginLoginUser123Password:
-    'semaphore user change-by-login --login user123 --password {makePasswordExample}',
+  jehUserChangebyloginLoginUser123Password:
+    'jeh user change-by-login --login user123 --password {makePasswordExample}',
   orCreateNewAdminUser: 'Or create new admin user:',
   close2: 'Close',
-  semaphore: 'SEMAPHORE',
+  jeh: 'JEH',
   dontHaveAccountOrCantSignIn: "Don't have account or can't sign in?",
   password2: 'Password',
   currentPassword: 'Current password',
@@ -113,7 +113,7 @@ export default {
   environmentAndExtraVariablesMustBeValidJsonExample:
     'Environment and extra variables must be valid JSON. Example:',
   dashboard2: 'Dashboard',
-  ansibleSemaphore: 'Semaphore UI',
+  ansibleJEH: 'Job Executor Hub',
   wereSorryButHtmlwebpackpluginoptionstitleDoesntWor:
     "We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.",
   deleteInventory: 'Delete inventory',
@@ -407,16 +407,16 @@ export default {
     + 'token stops working and the runner goes offline until it re-registers with '
     + 'the new token. Continue?',
   askDeleteRunner: 'Do you really want to delete runner {runner}?',
-  roles_only_enterprise: 'Roles are only available in <b>Enterprise</b> edition.',
-  ha_only_enterprise: 'High availability are only available in <b>Enterprise</b> edition.',
-  project_runners_only_pro: 'Project-level runners are only available for <b>PRO</b> users.',
-  secret_storage_only_pro: 'Secret storages are only available for <b>PRO</b> users.',
+  roles_only_enterprise: 'This feature is not included in this JEH release.',
+  ha_only_enterprise: 'This feature is not included in this JEH release.',
+  project_runners_only_pro: 'This feature is not included in this JEH release.',
+  secret_storage_only_pro: 'This feature is not included in this JEH release.',
   foss_runners_limited:
     'The open-source version has limited functionality; full functionality is in the <b>PRO</b> version.',
   learn_more_about_pro: 'Learn more',
-  upgrade_to_pro: 'Upgrade',
-  contact_admin_to_upgrade: 'Contact your admin to activate PRO features.',
-  contact_admin_to_upgrade_enterprise: 'Contact your admin to activate Enterprise features.',
+  upgrade_to_pro: 'Feature availability',
+  contact_admin_to_upgrade: 'This feature is not included in this JEH release.',
+  contact_admin_to_upgrade_enterprise: 'This feature is not included in this JEH release.',
 
   projectRestoreResult: 'Project restore results',
   projectWithNameRestored: 'Project {projectName} successfully restored.',
@@ -599,7 +599,7 @@ export default {
   workflowArtifactsHint: 'Variables produced by this task via Ansible set_stats. Forwarded to downstream tasks in the same workflow run as extra-vars.',
   workflowMergedArtifacts: 'Workflow artifacts (merged)',
   workflowMergedArtifactsHint: 'Combined view of all artifacts produced so far in this run. Later tasks override earlier ones.',
-  workflowArtifactsRemoteRunnerWarning: 'This run contains tasks executed by remote runners. Workflow artifacts (set_stats values) will not flow across remote-runner steps yet — they are only passed between tasks executed locally on the Semaphore server.',
+  workflowArtifactsRemoteRunnerWarning: 'This run contains tasks executed by remote runners. Workflow artifacts (set_stats values) will not flow across remote-runner steps yet — they are only passed between tasks executed locally on the JEH server.',
   workflowSaved: 'Workflow saved',
   workflowLastRun: 'Last run',
   workflowRuns: 'Runs',

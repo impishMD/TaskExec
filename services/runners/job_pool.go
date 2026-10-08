@@ -15,12 +15,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/semaphoreui/semaphore/pkg/tz"
+	"github.com/impishMD/jeh/pkg/tz"
 
-	"github.com/semaphoreui/semaphore/db_lib"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
-	"github.com/semaphoreui/semaphore/services/tasks"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db_lib"
+	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/jeh/services/tasks"
+	"github.com/impishMD/jeh/util"
 	log "github.com/sirupsen/logrus"
 )
 

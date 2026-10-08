@@ -7,21 +7,21 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/semaphoreui/semaphore/pkg/debuglog"
-	"github.com/semaphoreui/semaphore/pkg/jwt"
-	"github.com/semaphoreui/semaphore/pkg/metrics"
-	"github.com/semaphoreui/semaphore/pkg/random"
-	"github.com/semaphoreui/semaphore/pkg/tz"
-	"github.com/semaphoreui/semaphore/pro/pkg/stage_parsers"
-	"github.com/semaphoreui/semaphore/pro_interfaces"
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/services/server"
+	"github.com/impishMD/jeh/pkg/debuglog"
+	"github.com/impishMD/jeh/pkg/jwt"
+	"github.com/impishMD/jeh/pkg/metrics"
+	"github.com/impishMD/jeh/pkg/random"
+	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/jeh/pro/pkg/stage_parsers"
+	"github.com/impishMD/jeh/pro_interfaces"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/services/server"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/db_lib"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/db_lib"
+	"github.com/impishMD/jeh/pkg/task_logger"
 
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/util"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -85,7 +85,7 @@ type TaskPool struct {
 	// when a workflow task finishes. nil in tests / before wiring.
 	workflowService pro_interfaces.WorkflowService
 	// workflowRepo resolves the workflow run a task belongs to, so the task can
-	// be told which workflow it runs in (SEMAPHORE_WORKFLOW_* env). Injected via
+	// be told which workflow it runs in (JEH_WORKFLOW_* env). Injected via
 	// SetWorkflowRepo; nil means tasks never belong to a workflow (CE / tests).
 	workflowRepo db.WorkflowManager
 	// auditRecorder is injected after construction, nil means no audit.

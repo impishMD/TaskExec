@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/semaphoreui/semaphore/db/sql"
+	"github.com/impishMD/jeh/db/sql"
 
-	"github.com/semaphoreui/semaphore/db"
-	proFactory "github.com/semaphoreui/semaphore/pro/db/factory"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	proFactory "github.com/impishMD/jeh/pro/db/factory"
+	"github.com/impishMD/jeh/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -224,8 +224,8 @@ func TestBackup_BackupSecretStorage(t *testing.T) {
 }
 
 // TestBackup_RestoreScheduleWithoutTaskParams is a regression test for
-// https://github.com/semaphoreui/semaphore/issues/3858 . Backups written by
-// older Semaphore versions omit the per-schedule "task_params" object; on
+// https://github.com/impishMD/jeh/issues/3858 . Backups written by
+// older JEH versions omit the per-schedule "task_params" object; on
 // restore, BackupSchedule.Restore used to dereference the nil pointer and
 // crash the HTTP handler with a runtime nil-pointer panic.
 func TestBackup_RestoreScheduleWithoutTaskParams(t *testing.T) {

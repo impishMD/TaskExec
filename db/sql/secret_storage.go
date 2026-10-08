@@ -1,7 +1,7 @@
 package sql
 
 import (
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 func (d *SqlDb) GetSecretStorages(projectID int) (storages []db.SecretStorage, err error) {

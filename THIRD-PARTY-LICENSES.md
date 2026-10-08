@@ -1,6 +1,6 @@
 # Third-Party Licenses
 
-Semaphore UI is built on the work of many open-source projects. This document identifies every third-party component distributed with Semaphore UI, in compliance with the attribution requirements of the respective licenses and with §3.6 of our Master Service Agreement (identification of open-source components by name, version, and license type).
+Job Executor Hub is built on the work of many open-source projects. This document identifies every third-party component distributed with Job Executor Hub, in compliance with the attribution requirements of the respective licenses and with §3.6 of our Master Service Agreement (identification of open-source components by name, version, and license type).
 
 _Generated on **2026-06-13 15:49 UTC** by `scripts/collect_licenses.sh`._
 
@@ -13,7 +13,7 @@ scripts/generate_md.py .licenses-cache/ > THIRD-PARTY-LICENSES.md
 ```
 
 ## Summary
-This document lists **116** third-party components distributed with Semaphore UI, grouped by ecosystem.
+This document lists **116** third-party components distributed with Job Executor Hub, grouped by ecosystem.
 
 | Ecosystem | Components |
 |-----------|------------|
@@ -32,7 +32,7 @@ This document lists **116** third-party components distributed with Semaphore UI
 | ISC | 1 |
 
 ## Go Backend Dependencies
-Modules statically linked into the Semaphore UI server binary. Sourced from `go.mod` (production dependencies only).
+Modules statically linked into the Job Executor Hub server binary. Sourced from `go.mod` (production dependencies only).
 
 | Component | Version(s) | License | Source |
 |-----------|------------|---------|--------|
@@ -163,8 +163,8 @@ Packages bundled into the web UI assets, which are embedded in the server binary
 
 ## License texts
 
-Full license texts for each component are available at the source URLs listed above. For permissively-licensed packages (MIT, BSD, ISC, Apache-2.0), the original LICENSE and NOTICE files are preserved in their respective package directories within the Semaphore UI distribution.
+Full license texts for each component are available at the source URLs listed above. For permissively-licensed packages (MIT, BSD, ISC, Apache-2.0), the original LICENSE and NOTICE files are preserved in their respective package directories within the Job Executor Hub distribution.
 
-If you believe a component is missing from this list or incorrectly attributed, please open an issue at https://github.com/semaphoreui/semaphore/issues.
+If you believe a component is missing from this list or incorrectly attributed, please open an issue at https://github.com/impishMD/jeh/issues.
 
 <!-- end of generated file -->

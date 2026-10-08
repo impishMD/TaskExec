@@ -5,8 +5,8 @@ import (
 	"os"
 	"sort"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/util"
 	"github.com/spf13/cobra"
 )
 

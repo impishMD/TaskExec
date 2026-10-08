@@ -17,17 +17,17 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/semaphoreui/semaphore/pkg/common_errors"
-	"github.com/semaphoreui/semaphore/pkg/tz"
+	"github.com/impishMD/jeh/pkg/common_errors"
+	"github.com/impishMD/jeh/pkg/tz"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/go-ldap/ldap/v3"
 	"github.com/gorilla/mux"
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/random"
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/random"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/util"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
@@ -189,7 +189,7 @@ func createSession(w http.ResponseWriter, r *http.Request, user db.User, meta au
 	}
 
 	// The MFA step records the login with the method of the first step.
-	encoded, err := util.Cookie.Encode("semaphore", map[string]any{
+	encoded, err := util.Cookie.Encode("jeh", map[string]any{
 		"user":     user.ID,
 		"session":  newSession.ID,
 		"method":   meta.Method,
@@ -205,23 +205,23 @@ func createSession(w http.ResponseWriter, r *http.Request, user db.User, meta au
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     "semaphore",
+		Name:     "jeh",
 		Value:    encoded,
 		Path:     "/",
 		HttpOnly: true,
 		// SameSite=Lax prevents the session cookie from being attached to
 		// cross-site POST requests, which mitigates CSRF (e.g. the password
 		// change endpoint). Top-level GET navigations still carry the cookie
-		// so following a link into Semaphore keeps the user logged in.
+		// so following a link into JEH keeps the user logged in.
 		SameSite: http.SameSiteLaxMode,
-		// Secure is only enforced when Semaphore is served over HTTPS, so that
+		// Secure is only enforced when JEH is served over HTTPS, so that
 		// it can still be used without TLS inside private networks.
 		Secure: isSecureWebHost(),
 	})
 	return verified, nil
 }
 
-// isSecureWebHost reports whether Semaphore's public web host uses HTTPS, in
+// isSecureWebHost reports whether JEH's public web host uses HTTPS, in
 // which case cookies should carry the Secure attribute.
 func isSecureWebHost() bool {
 	return util.WebHostURL != nil && util.WebHostURL.Scheme == "https"
@@ -576,7 +576,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     "semaphore",
+		Name:     "jeh",
 		Value:    "",
 		Expires:  tz.Now().Add(24 * 7 * time.Hour * -1),
 		Path:     "/",
@@ -746,7 +746,7 @@ func generateStateOauthCookie(w http.ResponseWriter, returnPath string, link boo
 		Link:   link,
 	}
 
-	// Secure flag is not set to allow Semaphore to be used without HTTPS inside private networks
+	// Secure flag is not set to allow JEH to be used without HTTPS inside private networks
 	cookie := http.Cookie{
 		Name:     "oauthstate",
 		Value:    state.Csrf,

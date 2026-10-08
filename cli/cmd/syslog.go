@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/semaphoreui/semaphore/pkg/debuglog"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/pkg/debuglog"
+	"github.com/impishMD/jeh/util"
 	log "github.com/sirupsen/logrus"
 	lSyslog "github.com/sirupsen/logrus/hooks/syslog"
 )

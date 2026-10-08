@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/semaphoreui/semaphore/pkg/common_errors"
+	"github.com/impishMD/jeh/pkg/common_errors"
 )
 
 type EnvironmentSecretOperation string

@@ -3,7 +3,7 @@ package util
 import (
 	"math/rand"
 
-	"github.com/semaphoreui/semaphore/pkg/tz"
+	"github.com/impishMD/jeh/pkg/tz"
 )
 
 //HELPERS

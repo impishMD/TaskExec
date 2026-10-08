@@ -3,12 +3,12 @@ package projects
 import (
 	"net/http"
 
-	"github.com/semaphoreui/semaphore/services/server"
+	"github.com/impishMD/jeh/services/server"
 
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/util"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -101,8 +101,8 @@ func (c *ProjectsController) createDemoProject(projectID int, noneKeyID int, sto
 	demoRepo, err = store.CreateRepository(db.Repository{
 		Name:      "Demo",
 		ProjectID: projectID,
-		GitURL:    "https://github.com/semaphoreui/semaphore-demo.git",
-		GitBranch: "main",
+		GitURL:    "https://github.com/impishMD/jeh.git",
+		GitBranch: "develop",
 		SSHKeyID:  noneKeyID,
 	})
 
@@ -125,7 +125,7 @@ func (c *ProjectsController) createDemoProject(projectID int, noneKeyID int, sto
 	devInv, err = store.CreateInventory(db.Inventory{
 		Name:      "Dev",
 		ProjectID: projectID,
-		Inventory: "invs/dev/hosts",
+		Inventory: "examples/demo/invs/dev/hosts",
 		Type:      "file",
 		SSHKeyID:  &noneKeyID,
 	})
@@ -137,7 +137,7 @@ func (c *ProjectsController) createDemoProject(projectID int, noneKeyID int, sto
 	prodInv, err = store.CreateInventory(db.Inventory{
 		Name:      "Prod",
 		ProjectID: projectID,
-		Inventory: "invs/prod/hosts",
+		Inventory: "examples/demo/invs/prod/hosts",
 		Type:      "file",
 		SSHKeyID:  &noneKeyID,
 	})
@@ -148,10 +148,10 @@ func (c *ProjectsController) createDemoProject(projectID int, noneKeyID int, sto
 		return
 	}
 
-	desc = "Pings the website to provide a real-world example of using Semaphore."
+	desc = "Checks local execution with Ansible in JEH."
 	_, err = store.CreateTemplate(db.Template{
-		Name:           "Ping semaphoreui.com",
-		Playbook:       "ping.yml",
+		Name:           "Check JEH execution environment",
+		Playbook:       "examples/demo/ping.yml",
 		Description:    &desc,
 		ProjectID:      projectID,
 		InventoryID:    &prodInv.ID,
@@ -165,12 +165,12 @@ func (c *ProjectsController) createDemoProject(projectID int, noneKeyID int, sto
 		return
 	}
 
-	desc = "Creates a demo artifact and stores it in the cache."
+	desc = "Demonstrates a versioned build task."
 
 	var startVersion = "1.0.0"
 	buildTpl, err := store.CreateTemplate(db.Template{
 		Name:           "Build demo app",
-		Playbook:       "build.yml",
+		Playbook:       "examples/demo/build.yml",
 		Type:           db.TemplateBuild,
 		ProjectID:      projectID,
 		InventoryID:    &buildInv.ID,
@@ -189,7 +189,7 @@ func (c *ProjectsController) createDemoProject(projectID int, noneKeyID int, sto
 	template, err = store.CreateTemplate(db.Template{
 		Name:            "Deploy demo app to Dev",
 		Type:            db.TemplateDeploy,
-		Playbook:        "deploy.yml",
+		Playbook:        "examples/demo/deploy.yml",
 		ProjectID:       projectID,
 		InventoryID:     &devInv.ID,
 		EnvironmentIDs:  []int{},
@@ -219,7 +219,7 @@ func (c *ProjectsController) createDemoProject(projectID int, noneKeyID int, sto
 	template, err = store.CreateTemplate(db.Template{
 		Name:            "Deploy demo app to Production",
 		Type:            db.TemplateDeploy,
-		Playbook:        "deploy.yml",
+		Playbook:        "examples/demo/deploy.yml",
 		ProjectID:       projectID,
 		InventoryID:     &prodInv.ID,
 		EnvironmentIDs:  []int{},
@@ -248,7 +248,7 @@ func (c *ProjectsController) createDemoProject(projectID int, noneKeyID int, sto
 	template, err = store.CreateTemplate(db.Template{
 		Name:            "Apply infrastructure (OpenTofu)",
 		Type:            db.TemplateTask,
-		Playbook:        "",
+		Playbook:        "examples/demo",
 		ProjectID:       projectID,
 		EnvironmentIDs:  []int{},
 		RepositoryID:    demoRepo.ID,
@@ -264,7 +264,7 @@ func (c *ProjectsController) createDemoProject(projectID int, noneKeyID int, sto
 	template, err = store.CreateTemplate(db.Template{
 		Name:            "Apply infrastructure (Terragrunt)",
 		Type:            db.TemplateTask,
-		Playbook:        "",
+		Playbook:        "examples/demo",
 		ProjectID:       projectID,
 		EnvironmentIDs:  []int{},
 		RepositoryID:    demoRepo.ID,
@@ -280,7 +280,7 @@ func (c *ProjectsController) createDemoProject(projectID int, noneKeyID int, sto
 	template, err = store.CreateTemplate(db.Template{
 		Name:            "Print system info (Bash)",
 		Type:            db.TemplateTask,
-		Playbook:        "print_system_info.sh",
+		Playbook:        "examples/demo/print_system_info.sh",
 		ProjectID:       projectID,
 		InventoryID:     &prodInv.ID,
 		EnvironmentIDs:  []int{},
@@ -297,7 +297,7 @@ func (c *ProjectsController) createDemoProject(projectID int, noneKeyID int, sto
 	template, err = store.CreateTemplate(db.Template{
 		Name:            "Print system info (PowerShell)",
 		Type:            db.TemplateTask,
-		Playbook:        "print_system_info.ps1",
+		Playbook:        "examples/demo/print_system_info.ps1",
 		ProjectID:       projectID,
 		InventoryID:     &prodInv.ID,
 		EnvironmentIDs:  []int{},

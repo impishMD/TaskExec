@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 func (d *SqlDb) SetOption(key string, value string) error {

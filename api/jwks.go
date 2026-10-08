@@ -3,8 +3,8 @@ package api
 import (
 	"net/http"
 
-	"github.com/semaphoreui/semaphore/pkg/jwt"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/pkg/jwt"
+	"github.com/impishMD/jeh/util"
 	log "github.com/sirupsen/logrus"
 )
 

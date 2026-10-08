@@ -14,8 +14,8 @@ package k8s
 import (
 	"errors"
 
-	"github.com/semaphoreui/semaphore/services/tasks"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/services/tasks"
+	"github.com/impishMD/jeh/util"
 )
 
 func NewProvider(_ util.RunnerK8sConfig) (tasks.ExecutorProvider, error) {

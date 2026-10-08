@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 // Task survey secrets are stored in the access_key table as keys with owner

@@ -5,7 +5,7 @@ import (
 	"math/rand/v2"
 	"time"
 
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 	log "github.com/sirupsen/logrus"
 )
 

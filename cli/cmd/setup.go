@@ -6,10 +6,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/semaphoreui/semaphore/cli/setup"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/db/factory"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/cli/setup"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/db/factory"
+	"github.com/impishMD/jeh/util"
 	"github.com/spf13/cobra"
 )
 
@@ -75,8 +75,8 @@ func doSetup() int {
 		fmt.Printf("\n You are all setup %v!\n", user.Name)
 	}
 
-	fmt.Printf(" Re-launch this program pointing to the configuration file\n\n./semaphore server --config %v\n\n", resultConfigPath)
-	fmt.Printf(" To run as daemon:\n\nnohup ./semaphore server --config %v &\n\n", resultConfigPath)
+	fmt.Printf(" Re-launch this program pointing to the configuration file\n\n./jeh server --config %v\n\n", resultConfigPath)
+	fmt.Printf(" To run as daemon:\n\nnohup ./jeh server --config %v &\n\n", resultConfigPath)
 	fmt.Printf(" You can login with %v or %v.\n", user.Email, user.Username)
 
 	return 0

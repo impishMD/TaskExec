@@ -3,9 +3,9 @@ package services
 import (
 	"net/http"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/tz"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/jeh/util"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -27,7 +27,7 @@ func (s *sessionServiceImpl) GetSession(cookie http.Cookie) (*db.Session, bool) 
 	var err error
 
 	value := make(map[string]any)
-	if err = util.Cookie.Decode("semaphore", cookie.Value, &value); err != nil {
+	if err = util.Cookie.Decode("jeh", cookie.Value, &value); err != nil {
 		//w.WriteHeader(http.StatusUnauthorized)
 		return nil, false
 	}

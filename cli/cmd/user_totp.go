@@ -7,8 +7,8 @@ import (
 
 	"github.com/mdp/qrterminal/v3"
 	"github.com/pquerna/otp/totp"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/util"
 	"github.com/spf13/cobra"
 )
 
@@ -53,7 +53,7 @@ var totpEnableCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		issuer := "Semaphore"
+		issuer := "JEH"
 		if util.Config.Mfa.Totp.Issuer != "" {
 			issuer = util.Config.Mfa.Totp.Issuer
 		}

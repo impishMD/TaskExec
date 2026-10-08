@@ -8,10 +8,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/random"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/random"
+	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/jeh/util"
 )
 
 // HostConfigInstallation is the ssh config and git rewrites generated from the

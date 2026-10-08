@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/semaphoreui/semaphore/pkg/common_errors"
-	"github.com/semaphoreui/semaphore/pkg/galaxy"
-	"github.com/semaphoreui/semaphore/pkg/git"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/pkg/common_errors"
+	"github.com/impishMD/jeh/pkg/galaxy"
+	"github.com/impishMD/jeh/pkg/git"
+	"github.com/impishMD/jeh/util"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -88,7 +88,7 @@ func (t TemplateApp) RepositoryFileFilter() RepositoryFileFilter {
 	case AppAnsible, "":
 		return RepositoryFileFilter{Extensions: []string{".yml", ".yaml"}}
 	default:
-		// An app from the configuration file: Semaphore knows nothing about its
+		// An app from the configuration file: JEH knows nothing about its
 		// files and must not hide the one the user wants.
 		return RepositoryFileFilter{}
 	}
@@ -335,7 +335,7 @@ type Template struct {
 	// Deprecated: Use EnvironmentIDs instead.
 	EnvironmentID int `db:"-" json:"environment_id" backup:"-"`
 
-	// Name as described in https://github.com/semaphoreui/semaphore/issues/188
+	// Name as described in https://github.com/impishMD/jeh/issues/188
 	Name string `db:"name" json:"name"`
 	// playbook name in the form of "some_play.yml"
 	Playbook string `db:"playbook" json:"playbook"`
@@ -344,7 +344,7 @@ type Template struct {
 	WorkingDirectory *string `db:"working_directory" json:"working_directory,omitempty"`
 	// to fit into []string
 	Arguments *string `db:"arguments" json:"arguments,omitempty"`
-	// if true, semaphore will not prepend any arguments to `arguments` like inventory, etc
+	// if true, jeh will not prepend any arguments to `arguments` like inventory, etc
 	AllowOverrideArgsInTask bool `db:"allow_override_args_in_task" json:"allow_override_args_in_task,omitempty"`
 
 	Description *string `db:"description" json:"description,omitempty"`

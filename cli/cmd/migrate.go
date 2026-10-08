@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/util"
 	"github.com/spf13/cobra"
 )
 

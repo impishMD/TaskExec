@@ -1,7 +1,7 @@
 package tasks
 
 import (
-	"github.com/semaphoreui/semaphore/services/tasks"
+	"github.com/impishMD/jeh/services/tasks"
 )
 
 func NewTaskStateStore() tasks.TaskStateStore {

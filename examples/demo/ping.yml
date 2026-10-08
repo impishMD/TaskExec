@@ -1,0 +1,7 @@
+---
+- name: Check the JEH execution environment
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Verify Ansible can execute locally
+      ansible.builtin.ping:

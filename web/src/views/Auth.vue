@@ -11,20 +11,20 @@
         </v-card-title>
         <v-card-text>
           <p class="text-body-1">
-            {{ $t('firstlyYouNeedAccessToTheServerWhereSemaphoreRunni') }}
+            {{ $t('firstlyYouNeedAccessToTheServerWhereJEHRunni') }}
           </p>
           <p class="text-body-1">
             {{ $t('executeTheFollowingCommandOnTheServerToSeeExisting') }}
           </p>
           <v-alert dense text color="info" style="font-family: monospace">
-            {{ $t('semaphoreUserList') }}
+            {{ $t('jehUserList') }}
           </v-alert>
           <p class="text-body-1">
             {{ $t('youCanChangePasswordOfExistingUser') }}
           </p>
           <v-alert dense text color="info" style="font-family: monospace">
             {{
-              $t('semaphoreUserChangebyloginLoginUser123Password', {
+              $t('jehUserChangebyloginLoginUser123Password', {
                 makePasswordExample: makePasswordExample(),
               })
             }}
@@ -33,7 +33,7 @@
             {{ $t('orCreateNewAdminUser') }}
           </p>
           <v-alert dense text color="info" style="font-family: monospace">
-            semaphore user add --admin --login user123 --name User123 --email user123@example.com
+            jeh user add --admin --login user123 --name User123 --email user123@example.com
             --password {{ makePasswordExample() }}
           </v-alert>
         </v-card-text>
@@ -60,10 +60,14 @@
               width="80"
               height="80"
               transition="0"
-              src="favicon.png"
+              src="favicon.svg"
+              alt="JEH"
               style="margin: auto"
               class="mb-4"
             />
+
+            <div class="text-center font-weight-bold text-h6">Job Executor Hub</div>
+            <div class="text-center text-caption mb-2">JEH · Automation in one place</div>
 
             <h2 v-if="screen === 'verification'" class="text-center pt-4 pb-6">
               Two-step verification

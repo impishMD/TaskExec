@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/semaphoreui/semaphore/pkg/jwt"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/pkg/jwt"
+	"github.com/impishMD/jeh/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

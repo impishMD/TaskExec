@@ -3,7 +3,7 @@ package pro_interfaces
 import "time"
 
 // NodeRegistry manages node heartbeats and cluster membership tracking
-// in HA mode. In active-active setups every Semaphore instance registers
+// in HA mode. In active-active setups every JEH instance registers
 // itself and periodically refreshes a heartbeat so other nodes can detect
 // liveness.
 type NodeRegistry interface {

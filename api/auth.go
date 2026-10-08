@@ -9,12 +9,12 @@ import (
 	"strings"
 
 	"github.com/pquerna/otp"
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/tz"
-	proApi "github.com/semaphoreui/semaphore/pro/api"
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/tz"
+	proApi "github.com/impishMD/jeh/pro/api"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/util"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/pquerna/otp/totp"
@@ -22,13 +22,13 @@ import (
 
 func getSession(r *http.Request) (*db.Session, bool) {
 	// fetch session from cookie
-	cookie, err := r.Cookie("semaphore")
+	cookie, err := r.Cookie("jeh")
 	if err != nil {
 		return nil, false
 	}
 
 	value := make(map[string]any)
-	if err = util.Cookie.Decode("semaphore", cookie.Value, &value); err != nil {
+	if err = util.Cookie.Decode("jeh", cookie.Value, &value); err != nil {
 		//w.WriteHeader(http.StatusUnauthorized)
 		return nil, false
 	}
@@ -69,8 +69,8 @@ func getSession(r *http.Request) (*db.Session, bool) {
 // recordLoginAfterMFA records the login once the second factor is accepted.
 func recordLoginAfterMFA(ctx context.Context, r *http.Request, user db.User) {
 	value := make(map[string]any)
-	if cookie, err := r.Cookie("semaphore"); err == nil {
-		_ = util.Cookie.Decode("semaphore", cookie.Value, &value)
+	if cookie, err := r.Cookie("jeh"); err == nil {
+		_ = util.Cookie.Decode("jeh", cookie.Value, &value)
 	}
 	method, _ := value["method"].(string)
 	provider, _ := value["provider"].(string)
@@ -436,7 +436,7 @@ func requestOriginHost(r *http.Request) (string, bool) {
 	return "", false
 }
 
-// isSameOriginHost reports whether host belongs to Semaphore itself. Both the
+// isSameOriginHost reports whether host belongs to JEH itself. Both the
 // configured public web host and the host the request was addressed to are
 // accepted, so reverse-proxy deployments keep working.
 func isSameOriginHost(host string, r *http.Request) bool {

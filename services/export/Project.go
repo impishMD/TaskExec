@@ -1,6 +1,6 @@
 package export
 
-import "github.com/semaphoreui/semaphore/db"
+import "github.com/impishMD/jeh/db"
 
 type ProjectExporter struct {
 	ValueMap[db.Project]

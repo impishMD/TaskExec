@@ -12,7 +12,7 @@
             "cwd": "${workspaceFolder}",
             "env": {
                 "PATH": "${workspaceFolder}/.venv/bin:${env:PATH}",
-                "SEMAPHORE_ADMIN_PASSWORD": "test123"
+                "JEH_ADMIN_PASSWORD": "test123"
             }
         }, 
         {
@@ -25,7 +25,7 @@
             "cwd": "${workspaceFolder}",
             "env": {
                 "PATH": "${workspaceFolder}/.venv/bin:${env:PATH}",
-                "SEMAPHORE_USE_REMOTE_RUNNER": "true"
+                "JEH_USE_REMOTE_RUNNER": "true"
             }
         }, 
         {

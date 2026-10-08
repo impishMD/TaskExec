@@ -140,7 +140,7 @@
             <a
               v-if="features.secret_storage_management && !features.secret_storage_management_ex"
               class="SecretStoragesEnterpriseMenu__overlay"
-              href="https://semaphoreui.com/enterprise"
+              href="https://github.com/impishMD/jeh/blob/develop/docs/en/configuration.md#feature-scope"
               target="_blank"
             >
               <div class="SecretStoragesEnterpriseMenu__button">

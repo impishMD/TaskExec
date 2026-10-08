@@ -1,0 +1,11 @@
+Job Executor Hub (JEH)
+Copyright (c) 2026 JEH contributors
+
+Derived from Semaphore UI (https://github.com/semaphoreui/semaphore),
+upstream commit fc66be94a96cb54c21d28b071382f0cf04554d08.
+Copyright (c) 2021 Denis Gukov
+Copyright (c) 2014-2021 Castaway Labs LLC
+
+The upstream MIT license and copyright notices are preserved in LICENSE.
+Third-party attributions are listed in THIRD-PARTY-LICENSES.md.
+JEH is an independent fork and is not affiliated with the upstream project.

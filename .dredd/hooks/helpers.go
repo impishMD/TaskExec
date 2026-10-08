@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/semaphoreui/semaphore/pkg/tz"
+	"github.com/impishMD/jeh/pkg/tz"
 
 	"github.com/go-gorp/gorp/v3"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/db/factory"
-	"github.com/semaphoreui/semaphore/db/sql"
-	"github.com/semaphoreui/semaphore/pkg/random"
-	proFactory "github.com/semaphoreui/semaphore/pro/db/factory"
-	proFeatures "github.com/semaphoreui/semaphore/pro/pkg/features"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/db/factory"
+	"github.com/impishMD/jeh/db/sql"
+	"github.com/impishMD/jeh/pkg/random"
+	proFactory "github.com/impishMD/jeh/pro/db/factory"
+	proFeatures "github.com/impishMD/jeh/pro/pkg/features"
+	"github.com/impishMD/jeh/util"
 	"github.com/snikch/goodman/transaction"
 )
 
@@ -24,7 +24,7 @@ func addTestRunnerUser() {
 	testRunnerUser = &db.User{
 		Username: "ITU-" + uid,
 		Name:     "ITU-" + uid,
-		Email:    uid + "@semaphore.test",
+		Email:    uid + "@jeh.test",
 		Created:  db.GetParsedTime(tz.Now()),
 		Admin:    true,
 	}
@@ -177,7 +177,7 @@ func addUser() *db.User {
 	user := db.User{
 		Created:  tz.Now(),
 		Username: "ITU-" + uid,
-		Email:    "test@semaphore." + uid,
+		Email:    "test@jeh." + uid,
 		Name:     "ITU-" + uid,
 	}
 
@@ -465,7 +465,7 @@ func loadConfig() {
 	// The hooks decode the config file directly instead of going through
 	// util.ConfigInit, so util.Config.Apps stays empty and Template.Validate
 	// rejects every fixture template with "invalid app: <app>". The server under
-	// test gets the same whitelist from SEMAPHORE_APPS in server-wrapper.sh,
+	// test gets the same whitelist from JEH_APPS in server-wrapper.sh,
 	// which does not reach this process because dredd spawns it separately.
 	if util.Config.Apps == nil {
 		util.Config.Apps = make(map[string]util.App)

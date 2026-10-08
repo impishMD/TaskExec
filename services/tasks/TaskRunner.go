@@ -9,18 +9,18 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/semaphoreui/semaphore/db_lib"
-	"github.com/semaphoreui/semaphore/pkg/jwt"
-	"github.com/semaphoreui/semaphore/pkg/tz"
-	"github.com/semaphoreui/semaphore/pro_interfaces"
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/services/server"
-	"github.com/semaphoreui/semaphore/services/tasks/hooks"
+	"github.com/impishMD/jeh/db_lib"
+	"github.com/impishMD/jeh/pkg/jwt"
+	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/jeh/pro_interfaces"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/services/server"
+	"github.com/impishMD/jeh/services/tasks/hooks"
 
-	"github.com/semaphoreui/semaphore/api/sockets"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api/sockets"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/jeh/util"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -64,7 +64,7 @@ type TaskRunner struct {
 	// dispatchFailed marks a task the server failed before handing it to the runner that polled it.
 	dispatchFailed bool
 
-	// job executes Ansible and returns stdout to Semaphore logs
+	// job executes Ansible and returns stdout to JEH logs
 	job Job
 
 	Username        string
@@ -257,7 +257,7 @@ func (t *TaskRunner) run() {
 	}
 
 	// For locally-executed tasks, mint a JWT and pass it to the LocalJob so it
-	// can be exposed to the playbook as SEMAPHORE_JWT. Remote runners receive
+	// can be exposed to the playbook as JEH_JWT. Remote runners receive
 	// the JWT inside the JobData payload returned by the API.
 	if localJob, ok := t.job.(*LocalExecutor); ok {
 

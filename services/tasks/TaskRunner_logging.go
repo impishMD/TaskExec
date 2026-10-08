@@ -10,12 +10,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/semaphoreui/semaphore/pkg/tz"
+	"github.com/impishMD/jeh/pkg/tz"
 
-	"github.com/semaphoreui/semaphore/api/sockets"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api/sockets"
+	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/util"
 	log "github.com/sirupsen/logrus"
 )
 

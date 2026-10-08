@@ -1,6 +1,6 @@
 package sql
 
-import "github.com/semaphoreui/semaphore/db"
+import "github.com/impishMD/jeh/db"
 
 func (d *SqlDb) GetView(projectID int, viewID int) (view db.View, err error) {
 	err = d.getObject(projectID, db.ViewProps, viewID, &view)

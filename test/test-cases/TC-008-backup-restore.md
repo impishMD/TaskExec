@@ -10,7 +10,7 @@
 ## Objective
 
 Exporting a project produces a backup JSON that can be re-imported into the
-same or another Semaphore instance, recreating templates, inventories,
+same or another JEH instance, recreating templates, inventories,
 repositories, variable groups, schedules and integrations (secret values are
 not included).
 

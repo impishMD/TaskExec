@@ -1,11 +1,11 @@
 ---
 swagger: '2.0'
 info:
-  title: Semaphore API
+  title: JEH API
   description: |
-    Semaphore API provides endpoints for managing and interacting with the Semaphore UI.
+    JEH API provides endpoints for managing and interacting with the Job Executor Hub.
     This documentation outlines the available operations and data models.
-  version: "2.16.14"
+  version: "0.0.1"
 
 consumes:
   - application/json
@@ -57,7 +57,7 @@ definitions:
       auth:
         type: string
         description: Username/Email address
-        x-example: user@semaphoreui.com
+        x-example: user@example.com
       password:
         type: string
         format: password
@@ -94,8 +94,8 @@ definitions:
         example: test-user
       email:
         type: string
-        x-example: test@ansiblesemaphore.test
-        example: test@ansiblesemaphore.test
+        x-example: test@ansiblejeh.test
+        example: test@ansiblejeh.test
       password:
         type: string
         format: password
@@ -119,8 +119,8 @@ definitions:
         example: test-user2
       email:
         type: string
-        x-example: test2@ansiblesemaphore.test
-        example: test2@ansiblesemaphore.test
+        x-example: test2@ansiblejeh.test
+        example: test2@ansiblejeh.test
       alert:
         type: boolean
       admin:
@@ -244,7 +244,7 @@ definitions:
 
   ProjectBackup:
     type: object
-    example: {"meta":{"name":"homelab","alert":true,"alert_chat":"Test","max_parallel_tasks":0,"type":null},"templates":[{"inventory":"Build","repository":"Demo","environment":"Empty","name":"Build","playbook":"build.yml","app":"ansible","working_directory":".","arguments":"[]","allow_override_args_in_task":false,"description":"Build Job","vault_key":null,"type":"build","start_version":"1.0.0","build_template":null,"view":"Build","autorun":false,"survey_vars":[],"suppress_success_alerts":false,"suppress_error_alerts":false,"cron":"* * * * *"}],"repositories":[{"name":"Demo","git_url":"https://github.com/semaphoreui/semaphore-demo.git","git_branch":"main","ssh_key":"None"}],"keys":[{"name":"None","type":"none"},{"name":"Vault Password","type":"login_password"}],"views":[{"title":"Build","position":0}],"inventories":[{"name":"Build","inventory":"","ssh_key":"None","become_key":"None","type":"static"},{"name":"Dev","inventory":"","ssh_key":"None","become_key":"None","type":"file"},{"name":"Prod","inventory":"","ssh_key":"None","become_key":"None","type":"file"}],"environments":[{"name":"Empty","password":null,"json":"{}","env":null}]}
+    example: {"meta":{"name":"homelab","alert":true,"alert_chat":"Test","max_parallel_tasks":0,"type":null},"templates":[{"inventory":"Build","repository":"Demo","environment":"Empty","name":"Build","playbook":"examples/demo/build.yml","app":"ansible","working_directory":".","arguments":"[]","allow_override_args_in_task":false,"description":"Build Job","vault_key":null,"type":"build","start_version":"1.0.0","build_template":null,"view":"Build","autorun":false,"survey_vars":[],"suppress_success_alerts":false,"suppress_error_alerts":false,"cron":"* * * * *"}],"repositories":[{"name":"Demo","git_url":"https://github.com/impishMD/jeh.git","git_branch":"develop","ssh_key":"None"}],"keys":[{"name":"None","type":"none"},{"name":"Vault Password","type":"login_password"}],"views":[{"title":"Build","position":0}],"inventories":[{"name":"Build","inventory":"","ssh_key":"None","become_key":"None","type":"static"},{"name":"Dev","inventory":"","ssh_key":"None","become_key":"None","type":"file"},{"name":"Prod","inventory":"","ssh_key":"None","become_key":"None","type":"file"}],"environments":[{"name":"Empty","password":null,"json":"{}","env":null}]}
     properties:
       meta:
         type: object
@@ -1120,7 +1120,7 @@ definitions:
         description: >-
           Container image used to run the task by the Docker and Kubernetes runner
           executors. Empty means the image configured on the runner is used.
-        example: semaphoreui/job:latest
+        example: impishmd/jeh:latest-job
 
   TemplateSurveyVar:
     type: object
@@ -1794,7 +1794,7 @@ paths:
 
   /info:
     get:
-      summary: Fetches information about semaphore
+      summary: Fetches information about jeh
       description: you must be authenticated to use this
       responses:
         200:
@@ -2012,7 +2012,7 @@ paths:
       description: The user agent is redirected here by the OIDC provider to complete authentication
       responses:
         302:
-          description: Redirection to the Semaphore root URL on success, or to the login page on error
+          description: Redirection to the JEH root URL on success, or to the login page on error
 
   # User Tokens
   /user/:
@@ -2265,7 +2265,7 @@ paths:
 
   /events:
     get:
-      summary: Get Events related to Semaphore and projects you are part of
+      summary: Get Events related to JEH and projects you are part of
       responses:
         200:
           description: Array of events in chronological order
@@ -2276,7 +2276,7 @@ paths:
   
   /events/last:
     get:
-      summary: Get last 200 Events related to Semaphore and projects you are part of
+      summary: Get last 200 Events related to JEH and projects you are part of
       responses:
         200:
           description: Array of events in chronological order

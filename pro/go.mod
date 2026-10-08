@@ -1,8 +1,8 @@
-module github.com/semaphoreui/semaphore/pro
+module github.com/impishMD/jeh/pro
 
 go 1.26.4
 
-require github.com/semaphoreui/semaphore v0.0.0-20250712180151-72836311c5b9
+require github.com/impishMD/jeh v0.0.0
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
@@ -64,4 +64,4 @@ require (
 	modernc.org/sqlite v1.58.0 // indirect
 )
 
-replace github.com/semaphoreui/semaphore => ../
+replace github.com/impishMD/jeh => ../

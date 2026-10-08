@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/semaphoreui/semaphore/pkg/common_errors"
+	"github.com/impishMD/jeh/pkg/common_errors"
 )
 
 type HostConfigType string
@@ -151,5 +151,5 @@ func (h *HostConfig) ValidateCredential(keyType AccessKeyType) error {
 }
 
 func (h HostConfig) SSHAlias() string {
-	return "semaphore-mapping-" + strconv.Itoa(h.ID)
+	return "jeh-mapping-" + strconv.Itoa(h.ID)
 }

@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -35,26 +35,26 @@ func TestIsStateChangingMethod(t *testing.T) {
 func TestRequestOriginHost(t *testing.T) {
 	t.Run("from Origin header", func(t *testing.T) {
 		r := httptest.NewRequest(http.MethodPost, "/api/users/1/password", nil)
-		r.Header.Set("Origin", "https://semaphore.example.com")
+		r.Header.Set("Origin", "https://jeh.example.com")
 
 		host, ok := requestOriginHost(r)
 		assert.True(t, ok)
-		assert.Equal(t, "semaphore.example.com", host)
+		assert.Equal(t, "jeh.example.com", host)
 	})
 
 	t.Run("falls back to Referer", func(t *testing.T) {
 		r := httptest.NewRequest(http.MethodPost, "/api/users/1/password", nil)
-		r.Header.Set("Referer", "https://semaphore.example.com/project/1")
+		r.Header.Set("Referer", "https://jeh.example.com/project/1")
 
 		host, ok := requestOriginHost(r)
 		assert.True(t, ok)
-		assert.Equal(t, "semaphore.example.com", host)
+		assert.Equal(t, "jeh.example.com", host)
 	})
 
 	t.Run("Origin takes precedence over Referer", func(t *testing.T) {
 		r := httptest.NewRequest(http.MethodPost, "/api/users/1/password", nil)
 		r.Header.Set("Origin", "https://attacker.com")
-		r.Header.Set("Referer", "https://semaphore.example.com/")
+		r.Header.Set("Referer", "https://jeh.example.com/")
 
 		host, ok := requestOriginHost(r)
 		assert.True(t, ok)
@@ -83,7 +83,7 @@ func TestCsrfProtectionMiddleware(t *testing.T) {
 	orig := util.WebHostURL
 	defer func() { util.WebHostURL = orig }()
 
-	webHost, err := url.Parse("https://semaphore.example.com")
+	webHost, err := url.Parse("https://jeh.example.com")
 	require.NoError(t, err)
 	util.WebHostURL = webHost
 
@@ -100,7 +100,7 @@ func TestCsrfProtectionMiddleware(t *testing.T) {
 		{
 			name:         "safe method is always allowed",
 			method:       http.MethodGet,
-			host:         "semaphore.example.com",
+			host:         "jeh.example.com",
 			origin:       "https://attacker.com",
 			wantStatus:   http.StatusNoContent,
 			wantForwPass: true,
@@ -108,15 +108,15 @@ func TestCsrfProtectionMiddleware(t *testing.T) {
 		{
 			name:         "same origin POST is allowed",
 			method:       http.MethodPost,
-			host:         "semaphore.example.com",
-			origin:       "https://semaphore.example.com",
+			host:         "jeh.example.com",
+			origin:       "https://jeh.example.com",
 			wantStatus:   http.StatusNoContent,
 			wantForwPass: true,
 		},
 		{
 			name:         "cross origin POST is blocked",
 			method:       http.MethodPost,
-			host:         "semaphore.example.com",
+			host:         "jeh.example.com",
 			origin:       "https://attacker.com",
 			wantStatus:   http.StatusForbidden,
 			wantForwPass: false,
@@ -124,7 +124,7 @@ func TestCsrfProtectionMiddleware(t *testing.T) {
 		{
 			name:         "cross origin DELETE is blocked",
 			method:       http.MethodDelete,
-			host:         "semaphore.example.com",
+			host:         "jeh.example.com",
 			origin:       "https://attacker.com:1337",
 			wantStatus:   http.StatusForbidden,
 			wantForwPass: false,
@@ -132,7 +132,7 @@ func TestCsrfProtectionMiddleware(t *testing.T) {
 		{
 			name:         "cross origin via Referer is blocked",
 			method:       http.MethodPost,
-			host:         "semaphore.example.com",
+			host:         "jeh.example.com",
 			referer:      "https://attacker.com/evil",
 			wantStatus:   http.StatusForbidden,
 			wantForwPass: false,
@@ -140,14 +140,14 @@ func TestCsrfProtectionMiddleware(t *testing.T) {
 		{
 			name:         "missing origin and referer is allowed",
 			method:       http.MethodPost,
-			host:         "semaphore.example.com",
+			host:         "jeh.example.com",
 			wantStatus:   http.StatusNoContent,
 			wantForwPass: true,
 		},
 		{
 			name:         "bearer token bypasses origin check",
 			method:       http.MethodPost,
-			host:         "semaphore.example.com",
+			host:         "jeh.example.com",
 			origin:       "https://attacker.com",
 			authHeader:   "Bearer sometoken",
 			wantStatus:   http.StatusNoContent,

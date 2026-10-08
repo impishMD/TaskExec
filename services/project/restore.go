@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/common_errors"
-	"github.com/semaphoreui/semaphore/pkg/random"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/common_errors"
+	"github.com/impishMD/jeh/pkg/random"
 )
 
 func getEntryByName[T BackupEntry](name *string, items []T) *T {

@@ -2,24 +2,24 @@
 set -e
 echoerr() { printf "%s\n" "$*" >&2; }
 
-export SEMAPHORE_CONFIG_PATH="${SEMAPHORE_CONFIG_PATH:-/etc/semaphore}"
-export SEMAPHORE_TMP_PATH="${SEMAPHORE_TMP_PATH:-/tmp/semaphore}"
-export SEMAPHORE_DATA_PATH="${SEMAPHORE_DATA_PATH:-/var/lib/semaphore}"
+export JEH_CONFIG_PATH="${JEH_CONFIG_PATH:-/etc/jeh}"
+export JEH_TMP_PATH="${JEH_TMP_PATH:-/tmp/jeh}"
+export JEH_DATA_PATH="${JEH_DATA_PATH:-/var/lib/jeh}"
 
-if test -f "${SEMAPHORE_CONFIG_PATH}/requirements.txt"; then
+if test -f "${JEH_CONFIG_PATH}/requirements.txt"; then
     echoerr "Installing additional python dependencies"
-    pip3 install --upgrade -r "${SEMAPHORE_CONFIG_PATH}/requirements.txt"
+    pip3 install --upgrade -r "${JEH_CONFIG_PATH}/requirements.txt"
 else
     echoerr "No additional python dependencies to install"
 fi
 
-echoerr "Starting semaphore runner"
+echoerr "Starting jeh runner"
 
-RUNNER_CMD="/usr/local/bin/semaphore runner start --no-config"
+RUNNER_CMD="/usr/local/bin/jeh runner start --no-config"
 
-if [ -n "${SEMAPHORE_RUNNER_REGISTRATION_TOKEN:-}" ] || [ -n "${SEMAPHORE_RUNNER_REGISTRATION_TOKEN_FILE:-}" ]; then
-  if [ -z "${SEMAPHORE_RUNNER_TOKEN:-}" ] && [ -z "${SEMAPHORE_RUNNER_TOKEN_FILE:-}" ]; then
-    export SEMAPHORE_RUNNER_TOKEN_FILE="${SEMAPHORE_DATA_PATH}/runner_token.txt"
+if [ -n "${JEH_RUNNER_REGISTRATION_TOKEN:-}" ] || [ -n "${JEH_RUNNER_REGISTRATION_TOKEN_FILE:-}" ]; then
+  if [ -z "${JEH_RUNNER_TOKEN:-}" ] && [ -z "${JEH_RUNNER_TOKEN_FILE:-}" ]; then
+    export JEH_RUNNER_TOKEN_FILE="${JEH_DATA_PATH}/runner_token.txt"
   fi
   echoerr "Registration token provided, starting runner in registration mode"
   exec ${RUNNER_CMD} --register

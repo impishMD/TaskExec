@@ -10,26 +10,26 @@ import (
 	"strings"
 	"time"
 
-	"github.com/semaphoreui/semaphore/pro_interfaces"
+	"github.com/impishMD/jeh/pro_interfaces"
 
-	proApi "github.com/semaphoreui/semaphore/pro/api"
-	proProjects "github.com/semaphoreui/semaphore/pro/api/projects"
-	"github.com/semaphoreui/semaphore/services/server"
-	taskServices "github.com/semaphoreui/semaphore/services/tasks"
+	proApi "github.com/impishMD/jeh/pro/api"
+	proProjects "github.com/impishMD/jeh/pro/api/projects"
+	"github.com/impishMD/jeh/services/server"
+	taskServices "github.com/impishMD/jeh/services/tasks"
 
-	"github.com/semaphoreui/semaphore/api/tasks"
-	"github.com/semaphoreui/semaphore/pkg/jwt"
-	"github.com/semaphoreui/semaphore/pkg/metrics"
-	"github.com/semaphoreui/semaphore/pkg/tz"
+	"github.com/impishMD/jeh/api/tasks"
+	"github.com/impishMD/jeh/pkg/jwt"
+	"github.com/impishMD/jeh/pkg/metrics"
+	"github.com/impishMD/jeh/pkg/tz"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/semaphoreui/semaphore/api/runners"
+	"github.com/impishMD/jeh/api/runners"
 
 	"github.com/gorilla/mux"
-	"github.com/semaphoreui/semaphore/api/projects"
-	"github.com/semaphoreui/semaphore/api/sockets"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api/projects"
+	"github.com/impishMD/jeh/api/sockets"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/util"
 )
 
 var startTime = tz.Now()

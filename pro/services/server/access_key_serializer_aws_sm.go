@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 type AwsSmStorageTokenDeserializer interface {

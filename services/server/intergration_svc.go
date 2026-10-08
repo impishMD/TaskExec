@@ -1,6 +1,6 @@
 package server
 
-import "github.com/semaphoreui/semaphore/db"
+import "github.com/impishMD/jeh/db"
 
 type IntegrationService interface {
 	FillIntegration(integration *db.Integration) error

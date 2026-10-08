@@ -8,10 +8,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/semaphoreui/semaphore/pkg/tz"
+	"github.com/impishMD/jeh/pkg/tz"
 
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
-	"github.com/semaphoreui/semaphore/services/tasks"
+	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/jeh/services/tasks"
 	log "github.com/sirupsen/logrus"
 )
 

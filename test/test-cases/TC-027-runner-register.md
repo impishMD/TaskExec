@@ -9,15 +9,15 @@
 
 ## Objective
 
-A remote `semaphore runner` process registers itself against the server with a
+A remote `jeh runner` process registers itself against the server with a
 valid registration token, becomes visible in **Runners**, and picks up tasks.
 
 ## Preconditions
 
-* Semaphore server reachable over network from a second host.
+* JEH server reachable over network from a second host.
 * `runner_registration_token` configured on the server (or generated via the
   admin UI).
-* Semaphore binary present on the runner host.
+* JEH binary present on the runner host.
 
 ## Steps
 
@@ -25,7 +25,7 @@ valid registration token, becomes visible in **Runners**, and picks up tasks.
    **Admin → Runners → Registration token**.
 2. On the runner host run:
    ```
-   semaphore runner --config /etc/semaphore/runner.json
+   jeh runner --config /etc/jeh/runner.json
    ```
    with `registration_token` and `server_url` set in the config.
 3. Refresh **Admin → Runners** in the UI.

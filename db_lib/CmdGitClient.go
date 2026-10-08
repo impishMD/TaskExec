@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/semaphoreui/semaphore/pkg/ssh"
+	"github.com/impishMD/jeh/pkg/ssh"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/util"
 
 	log "github.com/sirupsen/logrus"
 )

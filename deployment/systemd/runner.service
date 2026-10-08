@@ -1,13 +1,13 @@
 [Unit]
-Description=Semaphore Runner
+Description=JEH Runner
 Requires=network.target
 
 [Service]
-EnvironmentFile=/etc/semaphore/env
-ExecStart=/usr/bin/semaphore runner start --config ${SEMAPHORE_CONFIG}
+EnvironmentFile=/etc/jeh/env
+ExecStart=/usr/bin/jeh runner start --config ${JEH_CONFIG}
 ExecReload=/bin/kill -HUP $MAINPID
-User=semaphore
-Group=semaphore
+User=jeh
+Group=jeh
 Restart=always
 RestartSec=3s
 

@@ -9,9 +9,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/semaphoreui/semaphore/db"
-	proFactory "github.com/semaphoreui/semaphore/pro/db/factory"
-	projectService "github.com/semaphoreui/semaphore/services/project"
+	"github.com/impishMD/jeh/db"
+	proFactory "github.com/impishMD/jeh/pro/db/factory"
+	projectService "github.com/impishMD/jeh/services/project"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -53,7 +53,7 @@ var projectImportCmd = &cobra.Command{
 		}
 
 		if !ok {
-			fmt.Println("Use command `semaphore project import --help` for details.")
+			fmt.Println("Use command `jeh project import --help` for details.")
 			os.Exit(1)
 		}
 

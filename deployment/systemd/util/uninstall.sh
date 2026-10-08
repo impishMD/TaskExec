@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-systemctl stop semaphore.service
-systemctl disable semaphore.service
-rm /etc/systemd/system/semaphore.service
-rm -rf /etc/semaphore
+systemctl stop jeh.service
+systemctl disable jeh.service
+rm /etc/systemd/system/jeh.service
+rm -rf /etc/jeh

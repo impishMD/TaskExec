@@ -6,7 +6,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
+	"github.com/impishMD/jeh/pkg/task_logger"
 )
 
 type Metrics struct {
@@ -26,12 +26,12 @@ func NewMetrics() *Metrics {
 	)
 
 	tasksRunning := prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "semaphore_tasks_running",
+		Name: "jeh_tasks_running",
 		Help: "Number of tasks currently running.",
 	})
 
 	tasksTotal := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "semaphore_tasks_total",
+		Name: "jeh_tasks_total",
 		Help: "Total number of tasks that finished, by outcome.",
 	}, []string{"status"})
 

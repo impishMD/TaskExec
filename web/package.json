@@ -1,6 +1,6 @@
 {
-  "name": "web",
-  "version": "0.1.0",
+  "name": "jeh-web",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "sync:api-docs": "node -e \"require('fs').copyFileSync('../api-docs.yml', 'public/swagger/api-docs.yml')\"",
@@ -9,7 +9,8 @@
     "prebuild": "npm run sync:api-docs",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit --include tests/unit/setup.js",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "postbuild": "node -e \"require('fs').writeFileSync('../api/public/.gitkeep', String.fromCharCode(10))\""
   },
   "dependencies": {
     "@mdi/font": "^7.0.0",

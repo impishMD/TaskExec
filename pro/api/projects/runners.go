@@ -3,9 +3,9 @@ package projects
 import (
 	"net/http"
 
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/pro_interfaces"
-	"github.com/semaphoreui/semaphore/services/server"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/pro_interfaces"
+	"github.com/impishMD/jeh/services/server"
 )
 
 // NewProjectRunnerController creates a new ProjectRunnerController instance.

@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/semaphoreui/semaphore/pkg/common_errors"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
+	"github.com/impishMD/jeh/pkg/common_errors"
+	"github.com/impishMD/jeh/pkg/task_logger"
 
 	log "github.com/sirupsen/logrus"
 )

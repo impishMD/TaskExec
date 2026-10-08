@@ -5,7 +5,7 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 type EventExporter struct {

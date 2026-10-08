@@ -1,8 +1,8 @@
 package features
 
 import (
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pro_interfaces"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pro_interfaces"
 )
 
 func GetFeatures(user *db.User, plan string) pro_interfaces.Features {

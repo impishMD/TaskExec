@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 func (d *SqlDb) CreateSchedule(schedule db.Schedule) (newSchedule db.Schedule, err error) {

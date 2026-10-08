@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/services/server"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/services/server"
+	"github.com/impishMD/jeh/util"
 	"github.com/spf13/cobra"
 )
 

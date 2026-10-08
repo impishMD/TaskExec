@@ -2,8 +2,8 @@ package sql
 
 import (
 	"github.com/Masterminds/squirrel"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/tz"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/tz"
 )
 
 func (d *SqlDb) CreateProject(project db.Project) (newProject db.Project, err error) {

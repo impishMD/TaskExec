@@ -1,12 +1,12 @@
 file:
   /usr/local/bin/server-wrapper:
     exists: true
-    owner: semaphore
+    owner: jeh
     group: root
     filetype: file
-  /usr/local/bin/semaphore:
+  /usr/local/bin/jeh:
     exists: true
-    owner: semaphore
+    owner: jeh
     group: root
     filetype: file
 
@@ -48,13 +48,13 @@ package:
     installed: true
 
 user:
-  semaphore:
+  jeh:
     exists: true
     uid: 1001
     gid: 0
-    home: /home/semaphore
+    home: /home/jeh
 
 command:
-  semaphore:
+  jeh:
     exit-status: 0
     timeout: 10000

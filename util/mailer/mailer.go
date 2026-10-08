@@ -10,8 +10,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/semaphoreui/semaphore/pkg/tz"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/jeh/util"
 )
 
 const (

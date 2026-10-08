@@ -1,116 +1,83 @@
-# Semaphore UI
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-dark.svg">
+    <img src="docs/assets/logo-light.svg" alt="Job Executor Hub — JEH" width="540">
+  </picture>
+</p>
 
-Modern UI for Ansible, Terraform/OpenTofu/Terragrunt, PowerShell and other DevOps tools.
-<!--
-[![](https://img.shields.io/github/license/semaphoreui/semaphore)](LICENSE)
--->
+<p align="center"><strong>Ansible · Terraform · OpenTofu · Scripts</strong></p>
 
-[![Dev](https://github.com/semaphoreui/semaphore/actions/workflows/dev.yml/badge.svg)](https://github.com/semaphoreui/semaphore/actions/workflows/dev.yml)
-[![](https://img.shields.io/docker/pulls/semaphoreui/semaphore.svg)](https://hub.docker.com/r/semaphoreui/semaphore)
+[![CI](https://github.com/impishMD/jeh/actions/workflows/ci.yml/badge.svg)](https://github.com/impishMD/jeh/actions/workflows/ci.yml)
+[![Release](https://github.com/impishMD/jeh/actions/workflows/release.yml/badge.svg)](https://github.com/impishMD/jeh/actions/workflows/release.yml)
+[![Docker pulls](https://img.shields.io/docker/pulls/impishmd/jeh)](https://hub.docker.com/r/impishmd/jeh)
 
-<!-- 
-[![roadmap](https://img.shields.io/badge/roadmap-gray?style=for-the-badge&logo=github)](https://github.com/orgs/semaphoreui/projects/11)
-[![telegram](https://img.shields.io/badge/discord_community-510b80?style=for-the-badge&logo=discord)](https://discord.gg/5R6k7hNGcH) 
-[![youtube](https://img.shields.io/badge/youtube_channel-red?style=for-the-badge&logo=youtube)](https://www.youtube.com/@semaphoreui) 
-[![docker](https://img.shields.io/badge/container_configurator-white?style=for-the-badge&logo=docker)](https://semaphoreui.com/install/docker/)
--->
+**English** | [Русский](docs/ru/README.md)
 
+Job Executor Hub (JEH) is a self-hosted web interface and API for running automation jobs.
+Manage projects, repositories, inventories, credentials, reusable task templates,
+schedules and execution logs in one place.
 
-![responsive-ui-phone1](https://user-images.githubusercontent.com/914224/134777345-8789d9e4-ff0d-439c-b80e-ddc56b74fcee.png)
+## Quick start
 
-If your project has grown and deploying from the terminal is no longer feasible, then Semaphore UI is the tool you need.
-
-## Demo
-
-[Try Semaphore UI online](https://portal.semaphoreui.com/demo)
-
-<!--
-## Live Demo
-
-Try the latest version of Semaphore at [https://portal.semaphoreui.com](https://portal.semaphoreui.com).
--->
-
-## What is Semaphore UI?
-
-Semaphore UI is a modern web interface for managing popular DevOps tools.
-
-Semaphore UI allows you to:
-* Easily run Ansible playbooks, Terraform and OpenTofu code, as well as Bash and PowerShell scripts.
-* Receive notifications about failed tasks.
-* Control access to your deployment system.
-
-## Key Concepts
-
-1. **Projects** is a collection of related resources, configurations, and tasks.
-2. **Task Templates** are reusable definitions of tasks that can be executed on demand or scheduled.
-3. **Task** is a specific instance of a job or operation executed by Semaphore.
-4. **Schedules** allow you to automate task execution at specified times or intervals.
-5. **Inventory** is a collection of target hosts (servers, virtual machines, containers, etc.) on which tasks will be executed.
-6. **Variable Group** refers to a configuration context that holds sensitive information such as environment variables and secrets used by tasks during execution.
-
-## Getting Started
-
-You can install Semaphore using the following methods:
-* [Docker](https://semaphoreui.com/install/docker)
-* Deploy a VM from a marketplace:
-  * [AWS](https://aws.amazon.com/marketplace/pp/prodview-xavlsdkqybxtq)
-  * [Cloudzy](https://cloudzy.com/marketplace/semaphore-ui)
-  * [DigitalOcean](https://marketplace.digitalocean.com/apps/semaphore?refcode=b55d7c0077b8&action=deploy)
-  * [Vultr](https://www.vultr.com/marketplace/apps/semaphore)
-  * [Yandex Cloud](https://yandex.cloud/ru/marketplace/products/fastlix/semaphore)
-  * [RepoCloud](https://repocloud.io/details/Semaphore/)
-* [Snap](http://snapcraft.io/semaphore)
-* [Binary file](https://semaphoreui.com/install/binary)
-* [Debian or RPM package](https://semaphoreui.com/install/binary)
-
-### Docker
-
-The most popular way to install Semaphore is via Docker.
-
-```
-docker run -p 3000:3000 --name semaphore \
-	-e SEMAPHORE_DB_DIALECT=sqlite \
-	-e SEMAPHORE_ADMIN=admin \
-	-e SEMAPHORE_ADMIN_PASSWORD=changeme \
-	-e SEMAPHORE_ADMIN_NAME=Admin \
-	-e SEMAPHORE_ADMIN_EMAIL=admin@localhost \
-	-d semaphoreui/semaphore:latest
+```sh
+git clone https://github.com/impishMD/jeh.git
+cd jeh
+cp .env.example .env
+openssl rand -base64 32
+# Set JEH_ADMIN_PASSWORD and JEH_ACCESS_KEY_ENCRYPTION in .env.
+docker compose up -d
 ```
 
-We recommend using the [Container Configurator](https://semaphoreui.com/install/docker/) to get the ideal Docker configuration for Semaphore.
+Open <http://localhost:3000> and sign in with the credentials from `.env`.
+The default Compose configuration listens on loopback and persists both configuration
+and SQLite data. Set `JEH_BIND_ADDRESS` when exposing it through your own proxy.
 
-<!--
-### SaaS
+Images for Linux amd64 and arm64 are published to both registries:
 
-We offer a SaaS solution for using Semaphore UI without installation. Check it out at [Semaphore Cloud](https://portal.semaphoreui.com).
--->
+```text
+impishmd/jeh:v0.0.1
+ghcr.io/impishmd/jeh:v0.0.1
+```
 
-### Other Installation Methods
-
-For more installation options, visit our [Installation page](https://semaphoreui.com/install).
+Use `v0.0.1-runner`, `v0.0.1-job` and `v0.0.1-helper` for the corresponding
+execution images. Stable aliases are `latest`, `latest-runner`, `latest-job`
+and `latest-helper`. [Container guide](docs/en/containers.md).
 
 ## Documentation
 
-* [User Guide](https://docs.semaphoreui.com)
-* [API Reference](https://semaphoreui.com/api-docs)
-* [Postman Collection](https://www.postman.com/semaphoreui)
+| Topic | Guide |
+| --- | --- |
+| Installation and operation | [English](docs/en/README.md) · [Русский](docs/ru/README.md) |
+| Containers and runners | [English](docs/en/containers.md) · [Русский](docs/ru/containers.md) |
+| Configuration and backups | [English](docs/en/configuration.md) · [Русский](docs/ru/configuration.md) |
+| Linux packages and service | [English](docs/en/linux.md) · [Русский](docs/ru/linux.md) |
+| API | [English](docs/en/api.md) · [Русский](docs/ru/api.md) |
+| Building and testing | [English](docs/en/development.md) · [Русский](docs/ru/development.md) |
+| Migration from upstream | [English](docs/en/migration.md) · [Русский](docs/ru/migration.md) |
+| Release process | [English](docs/en/releasing.md) · [Русский](docs/ru/releasing.md) |
+| First release | [v0.0.1](docs/en/releases/v0.0.1.md) · [v0.0.1 RU](docs/ru/releases/v0.0.1.md) |
 
-## Awesome Semaphore
+## Build from source
 
-A curated list of awesome things related to Semaphore UI.
+Use the Go version in `go.mod`, Node.js 24 and npm:
 
-* [Ebdruplab — Ansible Collections](https://github.com/Ebdruplab/ansible-collection_ebdruplab) &mdash; Ansible modules and a role for managing Semaphore.
-* [SemaphoreUI MCP Server](https://github.com/cloin/semaphore-mcp) &mdash; A Model Context Protocol (MCP) server that provides AI assistants with powerful automation capabilities for SemaphoreUI.
-* [Terraform SemaphoreUI Provider](https://github.com/CruGlobal/terraform-provider-semaphoreui) &mdash; Manage Semaphore UI resources using Terraform.
-* [PSSemaphore](https://github.com/robinmalik/PSSemaphore) &mdash; A PowerShell module designed to work against the Ansible Semaphore REST API.
+```sh
+make deps
+make build
+./bin/jeh setup
+./bin/jeh server --config ./config.json
+```
 
-[//]: # (* [Ansible UI Semaphore]&#40;https://github.com/morbidick/ansible-role-semaphore&#41; &mdash; Ansible role to install and configure the Ansible UI Semaphore.)
+Release downloads include Linux/macOS binaries, Linux DEB/RPM packages and a source archive.
+Install Ansible and other execution tools separately when using a native binary.
+Containers already include Ansible, Terraform, OpenTofu and Terragrunt.
 
-## Contribution
+## Project and license
 
-* [Contribution Guide](https://github.com/semaphoreui/semaphore/blob/develop/CONTRIBUTING.md)
-* [Dev Container](https://codespaces.new/semaphoreui/semaphore) (default user `admin` / `changeme`)
+JEH is an independent fork of Semaphore UI. Original copyright notices remain in
+[LICENSE](LICENSE) and [NOTICE](NOTICE); dependencies are attributed in
+[THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md).
+This release builds the available open-source code. Upstream proprietary Pro/Enterprise
+implementations are not included; see [feature scope](docs/en/configuration.md#feature-scope).
 
-## License
-
-MIT © [Denis Gukov](https://github.com/fiftin)
+[Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Changelog](CHANGELOG.md)

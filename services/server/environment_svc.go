@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 // ErrSecretsLeftBehind means the object row is deleted but some of its secrets were not.

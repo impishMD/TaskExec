@@ -3,7 +3,7 @@ package sql
 import (
 	"time"
 
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 func (d *SqlDb) GetSyncEnabledSecretSyncs() (syncs []db.SecretSync, err error) {

@@ -1,0 +1,19 @@
+name: jeh
+services:
+  jeh:
+    image: ${JEH_IMAGE:-impishmd/jeh}:${JEH_VERSION:-v0.0.1}
+    restart: unless-stopped
+    ports: ["${JEH_BIND_ADDRESS:-127.0.0.1}:3000:3000"]
+    environment:
+      JEH_DB_DIALECT: sqlite
+      JEH_ADMIN: ${JEH_ADMIN:-admin}
+      JEH_ADMIN_NAME: ${JEH_ADMIN_NAME:-Administrator}
+      JEH_ADMIN_EMAIL: ${JEH_ADMIN_EMAIL:-admin@localhost}
+      JEH_ADMIN_PASSWORD: ${JEH_ADMIN_PASSWORD:?Set JEH_ADMIN_PASSWORD in .env}
+      JEH_ACCESS_KEY_ENCRYPTION: ${JEH_ACCESS_KEY_ENCRYPTION:?Set a base64 32-byte encryption key in .env}
+    volumes:
+      - jeh-config:/etc/jeh
+      - jeh-data:/var/lib/jeh
+volumes:
+  jeh-config:
+  jeh-data:

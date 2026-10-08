@@ -8,10 +8,10 @@ import (
 	"reflect"
 	"sort"
 
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/conv"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/conv"
+	"github.com/impishMD/jeh/util"
 )
 
 func validateAppID(str string) error {

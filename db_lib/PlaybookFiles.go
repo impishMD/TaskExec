@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 // maxRepositoryFiles caps the number of paths returned by FindRepositoryFiles.

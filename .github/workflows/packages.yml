@@ -1,0 +1,75 @@
+name: Packages
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      release:
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm --prefix web ci --no-audit --no-fund
+      - uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94
+        with:
+          version: v2.18.2
+          install-only: true
+      - run: make release-check
+      - name: Build snapshot
+        if: ${{ !inputs.release }}
+        run: make release-snapshot
+      - name: Build tagged release
+        if: ${{ inputs.release }}
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]
+          test "$(cat VERSION)" = "${RELEASE_TAG#v}"
+          test -s "docs/en/releases/$RELEASE_TAG.md"
+          test -s "docs/ru/releases/$RELEASE_TAG.md"
+          goreleaser release --clean --skip=publish --release-notes "docs/en/releases/$RELEASE_TAG.md"
+      - run: python3 tools/verify-release.py dist
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: release-packages
+          if-no-files-found: error
+          path: |
+            dist/*.tar.gz
+            dist/*.deb
+            dist/*.rpm
+            dist/checksums.txt
+
+  install:
+    needs: build
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        format: [deb, rpm]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: release-packages
+          path: dist
+      - run: bash tools/test-packages.sh "${{ matrix.format }}" dist

@@ -1,1 +1,7 @@
-<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 87.5 100"><defs><style>.cls-1{fill:#1697f6;}.cls-2{fill:#7bc6ff;}.cls-3{fill:#1867c0;}.cls-4{fill:#aeddff;}</style></defs><title>Artboard 46</title><polyline class="cls-1" points="43.75 0 23.31 0 43.75 48.32"/><polygon class="cls-2" points="43.75 62.5 43.75 100 0 14.58 22.92 14.58 43.75 62.5"/><polyline class="cls-3" points="43.75 0 64.19 0 43.75 48.32"/><polygon class="cls-4" points="64.58 14.58 87.5 14.58 43.75 100 43.75 62.5 64.58 14.58"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="JEH">
+  <rect width="96" height="96" rx="22" fill="#142536"/>
+  <path d="M24 25v46M24 25h45M24 48h27M24 71h45" fill="none" stroke="#69d2b0" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="24" cy="25" r="7" fill="#69d2b0"/><circle cx="24" cy="71" r="7" fill="#69d2b0"/>
+  <circle cx="70" cy="25" r="6" fill="#69d2b0"/><circle cx="70" cy="71" r="6" fill="#69d2b0"/>
+  <path d="M52 34l23 14-23 14z" fill="#ffba63"/>
+</svg>

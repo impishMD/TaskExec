@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/semaphoreui/semaphore/cli/setup"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/cli/setup"
+	"github.com/impishMD/jeh/util"
 	"github.com/spf13/cobra"
 )
 
@@ -40,8 +40,8 @@ func doRunnerSetup() int {
 		}
 	}
 
-	fmt.Printf(" Re-launch this program pointing to the configuration file\n\n./semaphore runner start --config %v\n\n", resultConfigPath)
-	fmt.Printf(" To run as daemon:\n\nnohup ./semaphore runner start --config %v &\n\n", resultConfigPath)
+	fmt.Printf(" Re-launch this program pointing to the configuration file\n\n./jeh runner start --config %v\n\n", resultConfigPath)
+	fmt.Printf(" To run as daemon:\n\nnohup ./jeh runner start --config %v &\n\n", resultConfigPath)
 
 	return 0
 }

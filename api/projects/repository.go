@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/db_lib"
-	"github.com/semaphoreui/semaphore/pkg/git"
-	"github.com/semaphoreui/semaphore/pkg/ssh"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/db_lib"
+	"github.com/impishMD/jeh/pkg/git"
+	"github.com/impishMD/jeh/pkg/ssh"
+	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/util"
 )
 
 // RepositoryMiddleware ensures a repository exists and loads it to the context

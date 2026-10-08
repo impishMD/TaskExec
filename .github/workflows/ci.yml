@@ -1,0 +1,52 @@
+name: CI
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: make deps
+      - run: make check
+      - run: go test -race -coverprofile=coverage.out ./...
+      - run: npm --prefix web run test:unit
+      - run: make build
+      - run: bash tools/test-binary.sh ./bin/jeh "v$(cat VERSION)"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: coverage
+          path: coverage.out
+  container:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
+        with:
+          context: .
+          target: server
+          load: true
+          tags: jeh:ci
+          cache-from: type=gha,scope=ci-${{ runner.arch }}
+          cache-to: type=gha,scope=ci-${{ runner.arch }},mode=max
+      - run: bash tools/test-container.sh jeh:ci dev server

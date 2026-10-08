@@ -267,7 +267,7 @@
                   "
                   class="pa-2"
                 >
-semaphore runner start --config /path/to/config/file</pre
+jeh runner start --config /path/to/config/file</pre
                 >
               </div>
             </v-tab-item>
@@ -304,7 +304,7 @@ semaphore runner start --config /path/to/config/file</pre
                   "
                   class="pa-2"
                 >
-semaphore runner start --config ./config.runner.json</pre
+jeh runner start --config ./config.runner.json</pre
                 >
               </div>
             </v-tab-item>
@@ -421,7 +421,7 @@ semaphore runner start --config ./config.runner.json</pre
       Global runners
       <a
         target="_blank"
-        href="https://docs.semaphoreui.com/administration-guide/runners/#set-up-a-server"
+        href="https://github.com/impishMD/jeh/tree/develop/docs/en"
       >disabled</a
       >.
     </v-alert>
@@ -701,13 +701,13 @@ export default {
 
     runnerRegisterEnvCommand() {
       const advancedOptions = this.advancedOptions
-        ? `SEMAPHORE_RUNNER_CHECK_INTERVAL_SECONDS=${this.checkInterval} \\\n`
+        ? `JEH_RUNNER_CHECK_INTERVAL_SECONDS=${this.checkInterval} \\\n`
         : '';
-      return `SEMAPHORE_WEB_ROOT=${this.webHost} \\
-SEMAPHORE_RUNNER_REGISTRATION_TOKEN=${(this.newRunner || {}).registration_token} \\
-${advancedOptions}semaphore runner register --config ./config.runner.json
+      return `JEH_WEB_ROOT=${this.webHost} \\
+JEH_RUNNER_REGISTRATION_TOKEN=${(this.newRunner || {}).registration_token} \\
+${advancedOptions}jeh runner register --config ./config.runner.json
 
-${advancedOptions}semaphore runner start --config ./config.runner.json`;
+${advancedOptions}jeh runner start --config ./config.runner.json`;
     },
 
     runnerRegisterConfigContent() {
@@ -722,19 +722,19 @@ ${advancedOptions}semaphore runner start --config ./config.runner.json`;
     },
 
     runnerRegisterConfigCommand() {
-      return `SEMAPHORE_RUNNER_REGISTRATION_TOKEN=${(this.newRunner || {}).registration_token} \\
-semaphore runner register --config ./config.runner.json
+      return `JEH_RUNNER_REGISTRATION_TOKEN=${(this.newRunner || {}).registration_token} \\
+jeh runner register --config ./config.runner.json
 
-semaphore runner start --config ./config.runner.json`;
+jeh runner start --config ./config.runner.json`;
     },
 
     runnerRegisterDockerCommand() {
       const advancedOptions = this.advancedOptions
-        ? `-e SEMAPHORE_RUNNER_CHECK_INTERVAL_SECONDS=${this.checkInterval} \\\n` : '';
+        ? `-e JEH_RUNNER_CHECK_INTERVAL_SECONDS=${this.checkInterval} \\\n` : '';
       return `docker run \\
--e SEMAPHORE_WEB_ROOT=${this.webHost} \\
--e SEMAPHORE_RUNNER_REGISTRATION_TOKEN=${(this.newRunner || {}).registration_token} \\
-${advancedOptions}-d semaphoreui/runner:${this.version}`;
+-e JEH_WEB_ROOT=${this.webHost} \\
+-e JEH_RUNNER_REGISTRATION_TOKEN=${(this.newRunner || {}).registration_token} \\
+${advancedOptions}-d impishmd/jeh:${this.version}-runner`;
     },
 
     runnerConfigCommand() {
@@ -758,16 +758,16 @@ ${(this.newRunner || {}).token}
 ./
 EOF
 
-semaphore runner setup --config ./config.runner.json < /tmp/config.runner.stdin`;
+jeh runner setup --config ./config.runner.json < /tmp/config.runner.stdin`;
     },
 
     runnerEnvCommand() {
       const advancedOptions = this.advancedOptions
-        ? `SEMAPHORE_RUNNER_CHECK_INTERVAL_SECONDS=${this.checkInterval} \\\n`
+        ? `JEH_RUNNER_CHECK_INTERVAL_SECONDS=${this.checkInterval} \\\n`
         : '';
-      return `SEMAPHORE_WEB_ROOT=${this.webHost} \\
-${advancedOptions}SEMAPHORE_RUNNER_TOKEN=${(this.newRunner || {}).token} \\
-semaphore runner start --no-config`;
+      return `JEH_WEB_ROOT=${this.webHost} \\
+${advancedOptions}JEH_RUNNER_TOKEN=${(this.newRunner || {}).token} \\
+jeh runner start --no-config`;
     },
 
     filteredItems() {
@@ -792,12 +792,12 @@ semaphore runner start --no-config`;
 
     runnerDockerCommand() {
       const advancedOptions = this.advancedOptions
-        ? `-e SEMAPHORE_RUNNER_CHECK_INTERVAL_SECONDS=${this.checkInterval} \\\n`
+        ? `-e JEH_RUNNER_CHECK_INTERVAL_SECONDS=${this.checkInterval} \\\n`
         : '';
       return `docker run \\
--e SEMAPHORE_WEB_ROOT=${this.webHost} \\
--e SEMAPHORE_RUNNER_TOKEN=${(this.newRunner || {}).token} \\
-${advancedOptions}-d semaphoreui/runner:${this.version}`;
+-e JEH_WEB_ROOT=${this.webHost} \\
+-e JEH_RUNNER_TOKEN=${(this.newRunner || {}).token} \\
+${advancedOptions}-d impishmd/jeh:${this.version}-runner`;
     },
   },
 

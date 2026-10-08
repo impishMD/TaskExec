@@ -3,12 +3,12 @@ package tasks
 import (
 	"net/http"
 
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
+	"github.com/impishMD/jeh/pkg/task_logger"
 
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/services/audit"
-	task2 "github.com/semaphoreui/semaphore/services/tasks"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/services/audit"
+	task2 "github.com/impishMD/jeh/services/tasks"
 )
 
 func TaskMiddleware(next http.Handler) http.Handler {

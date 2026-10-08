@@ -2,13 +2,13 @@ version: "3.4"
 
 services:
   runner:
-    image: docker.io/semaphoreui/runner:${SEMAPHORE_VERSION:-latest}
+    image: docker.io/impishmd/jeh:${JEH_VERSION:-latest}-runner
     restart: always
     environment:
-      SEMAPHORE_WEB_ROOT: ${SEMAPHORE_WEB_ROOT:-http://server:3000}
-      SEMAPHORE_RUNNER_API_URL: ${SEMAPHORE_RUNNER_API_URL:-http://server:3000/internal}
-      SEMAPHORE_RUNNER_REGISTRATION_TOKEN: ${SEMAPHORE_RUNNER_REGISTRATION_TOKEN:-H1wDyorbg6gTSwJlVwle2Fne}
+      JEH_WEB_ROOT: ${JEH_WEB_ROOT:-http://server:3000}
+      JEH_RUNNER_API_URL: ${JEH_RUNNER_API_URL:-http://server:3000/internal}
+      JEH_RUNNER_REGISTRATION_TOKEN: ${JEH_RUNNER_REGISTRATION_TOKEN:-H1wDyorbg6gTSwJlVwle2Fne}
 
   server:
     environment:
-      SEMAPHORE_RUNNER_REGISTRATION_TOKEN: ${SEMAPHORE_RUNNER_REGISTRATION_TOKEN:-H1wDyorbg6gTSwJlVwle2Fne}
+      JEH_RUNNER_REGISTRATION_TOKEN: ${JEH_RUNNER_REGISTRATION_TOKEN:-H1wDyorbg6gTSwJlVwle2Fne}

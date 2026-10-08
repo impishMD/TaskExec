@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	taskServices "github.com/semaphoreui/semaphore/services/tasks"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	taskServices "github.com/impishMD/jeh/services/tasks"
+	"github.com/impishMD/jeh/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

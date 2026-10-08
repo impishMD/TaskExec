@@ -1,8 +1,8 @@
 package tasks
 
 import (
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/task_logger"
 )
 
 // ExecutorProvider is the long-lived factory that produces per-task Executors. One

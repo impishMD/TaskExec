@@ -10,10 +10,10 @@ import (
 	"text/template"
 
 	"github.com/go-gorp/gorp/v3"
-	"github.com/semaphoreui/semaphore/pkg/tz"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/jeh/util"
 
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 	log "github.com/sirupsen/logrus"
 )
 

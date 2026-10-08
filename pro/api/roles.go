@@ -3,8 +3,8 @@ package api
 import (
 	"net/http"
 
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
 )
 
 type RolesController struct {

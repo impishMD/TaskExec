@@ -6,12 +6,12 @@ volumes:
 services:
   server:
     environment:
-      SEMAPHORE_DB_DIALECT: mysql
-      SEMAPHORE_DB_HOST: db
-      SEMAPHORE_DB_PORT: 3306
-      SEMAPHORE_DB_USER: ${MARIADB_USERNAME:-semaphore}
-      SEMAPHORE_DB_PASS: ${MARIADB_PASSWORD:-semaphore}
-      SEMAPHORE_DB: ${MARIADB_DATABASE:-semaphore}
+      JEH_DB_DIALECT: mysql
+      JEH_DB_HOST: db
+      JEH_DB_PORT: 3306
+      JEH_DB_USER: ${MARIADB_USERNAME:-jeh}
+      JEH_DB_PASS: ${MARIADB_PASSWORD:-jeh}
+      JEH_DB: ${MARIADB_DATABASE:-jeh}
     depends_on:
       - db
 
@@ -20,8 +20,8 @@ services:
     restart: always
     environment:
       MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT:-root}
-      MARIADB_USER: ${MARIADB_USERNAME:-semaphore}
-      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-semaphore}
-      MARIADB_DATABASE: ${MARIADB_DATABASE:-semaphore}
+      MARIADB_USER: ${MARIADB_USERNAME:-jeh}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-jeh}
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-jeh}
     volumes:
       - mariadb:/var/lib/mysql

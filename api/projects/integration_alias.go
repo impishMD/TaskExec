@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/random"
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/random"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/util"
 )
 
 type publicAlias struct {

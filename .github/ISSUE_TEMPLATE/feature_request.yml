@@ -11,18 +11,18 @@ body:
       value: |
         Please make sure to go through these steps **before opening an issue**:
         
-        - [ ] Read the [documentation](https://docs.semaphoreui.com/)
-          - [ ] Read the [troubleshooting guide](https://docs.semaphoreui.com/administration-guide/troubleshooting)
-          - [ ] Read the [documentation regarding manual installations](https://docs.semaphoreui.com/administration-guide/installation_manually) if you did install Semaphore that way
+        - [ ] Read the [documentation](https://github.com/impishMD/jeh/tree/develop/docs/en)
+          - [ ] Read the [troubleshooting guide](https://github.com/impishMD/jeh/tree/develop/docs/en)
+          - [ ] Read the [documentation regarding manual installations](https://github.com/impishMD/jeh/tree/develop/docs/en) if you did install JEH that way
 
-        - [ ] Check if there are existing [issues](https://github.com/semaphoreui/semaphore/issues) or [discussions](https://github.com/semaphoreui/semaphore/discussions) regarding your topic
+        - [ ] Check if there are existing [issues](https://github.com/impishMD/jeh/issues) or [discussions](https://github.com/impishMD/jeh/discussions) regarding your topic
 
   - type: dropdown
     id: related-to
     attributes:
       label: Related to
       description: |
-        To what parts of Semaphore is the feature related?
+        To what parts of JEH is the feature related?
 
       multiple: true
       options:
@@ -42,7 +42,7 @@ body:
     attributes:
       label: Impact
       description: |
-        What impact would the feature have for Semaphore users?
+        What impact would the feature have for JEH users?
 
       multiple: false
       options:

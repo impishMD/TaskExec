@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,12 +15,12 @@ func TestGetEnvironmentVars_ExplicitForwardingOnly(t *testing.T) {
 	t.Cleanup(func() { util.Config = original })
 
 	t.Setenv("HTTP_PROXY", "http://proxy.corp:8080")
-	t.Setenv("SEMAPHORE_TEST", "test123")
-	t.Setenv("SEMAPHORE_TEST2", "test222")
+	t.Setenv("JEH_TEST", "test123")
+	t.Setenv("JEH_TEST2", "test222")
 	t.Setenv("PASSWORD", "secret")
 
 	util.Config = &util.ConfigType{
-		ForwardedEnvVars: []string{"SEMAPHORE_TEST", "HTTP_PROXY"},
+		ForwardedEnvVars: []string{"JEH_TEST", "HTTP_PROXY"},
 		EnvVars: map[string]string{
 			"ANSIBLE_FORCE_COLOR": "False",
 		},
@@ -29,7 +29,7 @@ func TestGetEnvironmentVars_ExplicitForwardingOnly(t *testing.T) {
 	res := getEnvironmentVars()
 
 	// Explicitly forwarded vars must be present
-	assert.True(t, containsPrefix(res, "SEMAPHORE_TEST=test123"), "expected SEMAPHORE_TEST in result, got %v", res)
+	assert.True(t, containsPrefix(res, "JEH_TEST=test123"), "expected JEH_TEST in result, got %v", res)
 	assert.True(t, containsPrefix(res, "HTTP_PROXY=http://proxy.corp:8080"), "expected HTTP_PROXY in result, got %v", res)
 
 	// Config.EnvVars must be present
@@ -40,7 +40,7 @@ func TestGetEnvironmentVars_ExplicitForwardingOnly(t *testing.T) {
 
 	// Vars NOT in ForwardedEnvVars or EnvVars must not be leaked
 	assert.False(t, containsPrefix(res, "PASSWORD="), "PASSWORD should not be forwarded, got %v", res)
-	assert.False(t, containsPrefix(res, "SEMAPHORE_TEST2="), "SEMAPHORE_TEST2 should not be forwarded, got %v", res)
+	assert.False(t, containsPrefix(res, "JEH_TEST2="), "JEH_TEST2 should not be forwarded, got %v", res)
 }
 
 func TestGetEnvironmentVars_EnvVarsOverrideForwarded(t *testing.T) {
@@ -119,28 +119,28 @@ func TestGetHomeDir(t *testing.T) {
 		{
 			name:         "ProjectHome mode",
 			homeDirMode:  util.HomeDirModeProjectHome,
-			tmpPath:      "/tmp/semaphore",
-			expectedHome: "/tmp/semaphore/project_42",
+			tmpPath:      "/tmp/jeh",
+			expectedHome: "/tmp/jeh/project_42",
 			description:  "Should return project temp directory",
 		},
 		{
 			name:         "TemplateDir mode",
 			homeDirMode:  util.HomeDirModeTemplateDir,
-			tmpPath:      "/tmp/semaphore",
+			tmpPath:      "/tmp/jeh",
 			expectedHome: "/home/testuser",
 			description:  "Should return real user HOME",
 		},
 		{
 			name:         "UserHome mode",
 			homeDirMode:  util.HomeDirModeUserHome,
-			tmpPath:      "/tmp/semaphore",
+			tmpPath:      "/tmp/jeh",
 			expectedHome: "/home/testuser",
 			description:  "Should return real user HOME",
 		},
 		{
 			name:         "Empty/default mode",
 			homeDirMode:  "",
-			tmpPath:      "/tmp/semaphore",
+			tmpPath:      "/tmp/jeh",
 			expectedHome: "",
 			description:  "Should return empty string for unknown mode",
 		},

@@ -3,12 +3,12 @@ package runners
 import (
 	"fmt"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/db_lib"
-	"github.com/semaphoreui/semaphore/pro/services/tasks/docker"
-	"github.com/semaphoreui/semaphore/pro/services/tasks/k8s"
-	"github.com/semaphoreui/semaphore/services/tasks"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/db_lib"
+	"github.com/impishMD/jeh/pro/services/tasks/docker"
+	"github.com/impishMD/jeh/pro/services/tasks/k8s"
+	"github.com/impishMD/jeh/services/tasks"
+	"github.com/impishMD/jeh/util"
 )
 
 // newExecutorProvider picks the ExecutorProvider implementation that matches the

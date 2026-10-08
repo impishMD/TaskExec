@@ -12,22 +12,22 @@ import (
 	"time"
 
 	"github.com/gorilla/handlers"
-	"github.com/semaphoreui/semaphore/api"
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/api/sockets"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/db/factory"
-	"github.com/semaphoreui/semaphore/pkg/debuglog"
-	"github.com/semaphoreui/semaphore/pkg/metrics"
-	proFactory "github.com/semaphoreui/semaphore/pro/db/factory"
-	proHA "github.com/semaphoreui/semaphore/pro/services/ha"
-	proServer "github.com/semaphoreui/semaphore/pro/services/server"
-	proTasks "github.com/semaphoreui/semaphore/pro/services/tasks"
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/services/schedules"
-	"github.com/semaphoreui/semaphore/services/server"
-	"github.com/semaphoreui/semaphore/services/tasks"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/api/sockets"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/db/factory"
+	"github.com/impishMD/jeh/pkg/debuglog"
+	"github.com/impishMD/jeh/pkg/metrics"
+	proFactory "github.com/impishMD/jeh/pro/db/factory"
+	proHA "github.com/impishMD/jeh/pro/services/ha"
+	proServer "github.com/impishMD/jeh/pro/services/server"
+	proTasks "github.com/impishMD/jeh/pro/services/tasks"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/services/schedules"
+	"github.com/impishMD/jeh/services/server"
+	"github.com/impishMD/jeh/services/tasks"
+	"github.com/impishMD/jeh/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -40,11 +40,11 @@ var persistentFlags struct {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "semaphore",
-	Short: "Semaphore UI is a beautiful web UI for Ansible",
-	Long: `Semaphore UI is a beautiful web UI for Ansible.
-Source code is available at https://github.com/semaphoreui/semaphore.
-Complete documentation is available at https://semaphoreui.com.`,
+	Use:   "jeh",
+	Short: "Job Executor Hub (JEH) runs Ansible, Terraform, OpenTofu and scripts",
+	Long: `Job Executor Hub (JEH) runs Ansible, Terraform, OpenTofu and scripts.
+Source code is available at https://github.com/impishMD/jeh.
+Complete documentation is available at https://github.com/impishMD/jeh`,
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = cmd.Help()
 		os.Exit(0)
@@ -53,7 +53,7 @@ Complete documentation is available at https://semaphoreui.com.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		str := persistentFlags.logLevel
 		if str == "" {
-			str = os.Getenv("SEMAPHORE_LOG_LEVEL")
+			str = os.Getenv("JEH_LOG_LEVEL")
 		}
 
 		if str != "" {
@@ -71,7 +71,7 @@ Complete documentation is available at https://semaphoreui.com.`,
 }
 
 // initDebugFilter installs a Node.js-`debug`-style namespace filter for DEBUG
-// logs, driven by the --debug-filter flag or SEMAPHORE_DEBUG_FILTER env var.
+// logs, driven by the --debug-filter flag or JEH_DEBUG_FILTER env var.
 // The filter only narrows DEBUG-level output and only takes effect when the log
 // level is already DEBUG; otherwise there are no debug entries to filter and the
 // logger is left untouched.
@@ -92,7 +92,7 @@ func initDebugFilter() {
 func configuredDebugFilter() (string, *debuglog.Filter) {
 	spec := persistentFlags.debugFilter
 	if spec == "" {
-		spec = os.Getenv("SEMAPHORE_DEBUG_FILTER")
+		spec = os.Getenv("JEH_DEBUG_FILTER")
 	}
 
 	if spec == "" || log.GetLevel() < log.DebugLevel {
@@ -242,7 +242,7 @@ func runService() {
 	defer taskPool.Stop()
 
 	// --- Active-Active HA Setup ---
-	// When HA is enabled, multiple Semaphore nodes share the same Redis-backed
+	// When HA is enabled, multiple JEH nodes share the same Redis-backed
 	// task state and coordinate via Pub/Sub. The following components ensure:
 	// 1. Node registry: heartbeat-based cluster membership
 	// 2. Schedule deduplication: only one node fires each schedule occurrence
@@ -303,7 +303,7 @@ func runService() {
 	}
 
 	fmt.Printf("Tmp Path (projects home) %v\n", util.Config.TmpPath)
-	fmt.Printf("Semaphore %v\n", util.Version())
+	fmt.Printf("JEH %v\n", util.Version())
 	fmt.Printf("Interface %v\n", util.Config.Interface)
 	fmt.Printf("Port %v\n", util.Config.Port)
 

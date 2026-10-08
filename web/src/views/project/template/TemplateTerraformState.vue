@@ -201,7 +201,7 @@
             </span>
           <v-btn
             color="hsl(348deg, 86%, 61%)"
-            href="https://semaphoreui.com/pro#runners"
+            href="https://github.com/impishMD/jeh/blob/develop/docs/en/configuration.md#feature-scope"
           >
             Learn more
             <v-icon>mdi-chevron-right</v-icon>

@@ -13,10 +13,10 @@ func TestValidateGitURL(t *testing.T) {
 		url     string
 		wantErr bool
 	}{
-		{"https", "https://github.com/semaphoreui/semaphore.git", false},
+		{"https", "https://github.com/impishMD/jeh.git", false},
 		{"http", "http://example.com/repo.git", false},
 		{"ssh scheme", "ssh://git@example.com/repo.git", false},
-		{"scp-like ssh", "git@github.com:semaphoreui/semaphore.git", false},
+		{"scp-like ssh", "git@github.com:impishmd/jeh.git", false},
 		{"git scheme", "git://example.com/repo.git", false},
 		{"file scheme", "file:///srv/git/repo.git", false},
 		{"local absolute path", "/srv/git/repo.git", false},
@@ -121,7 +121,7 @@ func TestRepositoryValidate_RejectsMalformedHTTPURL(t *testing.T) {
 func TestRepositoryValidate_AcceptsNormalURL(t *testing.T) {
 	repo := Repository{
 		Name:      "ok",
-		GitURL:    "https://github.com/semaphoreui/semaphore.git",
+		GitURL:    "https://github.com/impishMD/jeh.git",
 		GitBranch: "main",
 		SSHKeyID:  1,
 	}

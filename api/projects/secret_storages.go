@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	pro "github.com/semaphoreui/semaphore/pro/services/server"
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/services/server"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	pro "github.com/impishMD/jeh/pro/services/server"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/services/server"
 )
 
 type SecretStorageController struct {

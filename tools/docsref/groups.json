@@ -2,7 +2,7 @@
   "groups": [
     {
       "title": "Database",
-      "intro": "Semaphore creates and migrates its own tables on start. Pick the dialect before the first run; changing it later means migrating the data yourself.",
+      "intro": "JEH creates and migrates its own tables on start. Pick the dialect before the first run; changing it later means migrating the data yourself.",
       "prefixes": [
         "dialect",
         "mysql.",
@@ -28,7 +28,7 @@
     },
     {
       "title": "Paths and storage",
-      "intro": "Directories Semaphore writes to. Everything here except the database is a cache that can be recreated.",
+      "intro": "Directories JEH writes to. Everything here except the database is a cache that can be recreated.",
       "prefixes": [
         "tmp_path",
         "secrets_path",
@@ -48,7 +48,7 @@
     },
     {
       "title": "Authentication",
-      "intro": "How users sign in. See [Authentication](/admin-guide/authentication) for the provider-side setup.",
+      "intro": "How users sign in. See [Authentication](../configuration.md) for the provider-side setup.",
       "prefixes": [
         "auth.",
         "mfa.",
@@ -62,7 +62,7 @@
     },
     {
       "title": "Git",
-      "intro": "How repositories are cloned. See [Repositories](/user-guide/repositories).",
+      "intro": "How repositories are cloned. See [Repositories](../configuration.md).",
       "prefixes": [
         "git_client",
         "git_attempts",
@@ -87,7 +87,7 @@
     },
     {
       "title": "Runners",
-      "intro": "Server-side switches first, then the keys a runner reads from its own configuration file. See [Runners](/admin-guide/runners).",
+      "intro": "Server-side switches first, then the keys a runner reads from its own configuration file. See [Runners](../configuration.md).",
       "prefixes": [
         "use_remote_runner",
         "runner_registration_token",
@@ -97,14 +97,14 @@
     },
     {
       "title": "Task JWT",
-      "intro": "Short-lived tokens that identify a task to external systems. See [Task JWTs](/user-guide/task-templates/jwt).",
+      "intro": "Short-lived tokens that identify a task to external systems. See [Task JWTs](../configuration.md).",
       "prefixes": [
         "jwt."
       ]
     },
     {
       "title": "Notifications",
-      "intro": "Delivery channels for alerts. See [Notifications](/admin-guide/notifications).",
+      "intro": "Delivery channels for alerts. See [Notifications](../configuration.md).",
       "prefixes": [
         "email_*",
         "telegram_*",
@@ -119,7 +119,7 @@
     },
     {
       "title": "Logging and metrics",
-      "intro": "Where server, event, and task logs go, and the Prometheus endpoint. See [Logs](/admin-guide/logs) and [Metrics](/admin-guide/metrics).",
+      "intro": "Where server, event, and task logs go, and the Prometheus endpoint. See [Logs](../configuration.md) and [Metrics](../configuration.md).",
       "prefixes": [
         "log.",
         "syslog.",
@@ -128,21 +128,21 @@
     },
     {
       "title": "Teams and invitations",
-      "intro": "How people are added to projects. See [Teams](/user-guide/team).",
+      "intro": "How people are added to projects. See [Teams](../configuration.md).",
       "prefixes": [
         "teams."
       ]
     },
     {
       "title": "Subscription",
-      "intro": "Activating Pro or Enterprise. See [License](/admin-guide/license).",
+      "intro": "Upstream subscription interface options. Proprietary implementations are not included in JEH. See [feature scope](../configuration.md#feature-scope).",
       "prefixes": [
         "subscription."
       ]
     },
     {
       "title": "High availability",
-      "intro": "Running several nodes against one database. See [High availability](/admin-guide/ha).",
+      "intro": "Running several nodes against one database. See [High availability](../configuration.md).",
       "edition": "enterprise",
       "prefixes": [
         "ha."
@@ -150,7 +150,7 @@
     },
     {
       "title": "Audit log",
-      "intro": "Recording who did what in Semaphore, and sending the events to a SIEM. See [Audit log](/admin-guide/audit-log).",
+      "intro": "Recording who did what in JEH, and sending the events to a SIEM. See [Audit log](../configuration.md).",
       "prefixes": [
         "audit."
       ]

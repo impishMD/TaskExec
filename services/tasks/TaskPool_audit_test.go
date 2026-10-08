@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/db/sql"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/services/audit/audittest"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/db/sql"
+	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/services/audit/audittest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

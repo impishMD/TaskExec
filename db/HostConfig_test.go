@@ -111,7 +111,7 @@ func TestHostConfig_SSHAlias(t *testing.T) {
 	a := HostConfig{ID: 7, Type: HostConfigURL, Name: "https://github.com/acme/"}
 	b := HostConfig{ID: 8, Type: HostConfigURL, Name: "https://github.com/other/"}
 
-	assert.Equal(t, "semaphore-mapping-7", a.SSHAlias())
+	assert.Equal(t, "jeh-mapping-7", a.SSHAlias())
 	assert.NotEqual(t, a.SSHAlias(), b.SSHAlias())
 }
 

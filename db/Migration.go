@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/semaphoreui/semaphore/pkg/tz"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/jeh/util"
 )
 
 // Migration represents sql schema version

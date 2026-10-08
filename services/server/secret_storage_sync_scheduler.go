@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/tz"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/tz"
 	log "github.com/sirupsen/logrus"
 )
 

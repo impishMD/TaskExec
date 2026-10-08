@@ -26,7 +26,7 @@ var userDeleteCmd = &cobra.Command{
 		}
 
 		if !ok {
-			fmt.Println("Use command `semaphore user delete --help` for details.")
+			fmt.Println("Use command `jeh user delete --help` for details.")
 			os.Exit(1)
 		}
 

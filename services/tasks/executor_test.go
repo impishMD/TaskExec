@@ -3,7 +3,7 @@ package tasks
 import (
 	"testing"
 
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 	"github.com/stretchr/testify/assert"
 )
 

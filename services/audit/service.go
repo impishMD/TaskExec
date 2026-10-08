@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"net/netip"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pro_interfaces"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pro_interfaces"
+	"github.com/impishMD/jeh/util"
 )
 
 type Service struct {

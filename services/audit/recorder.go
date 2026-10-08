@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 	log "github.com/sirupsen/logrus"
 )
 

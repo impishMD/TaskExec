@@ -1,8 +1,8 @@
 package migration
 
 import (
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/services/export"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/services/export"
 )
 
 type Migrator struct {

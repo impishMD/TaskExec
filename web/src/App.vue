@@ -81,7 +81,7 @@
     >
       <template v-slot:title="{}">
         {{
-          user.has_active_subscription ? 'Subscription &amp; Billing' : 'Upgrade to Semaphore PRO'
+          'JEH feature availability'
         }}
       </template>
 
@@ -129,7 +129,7 @@
     <v-navigation-drawer
       app
       dark
-      :color="darkMode ? '#003236' : '#005057'"
+      :color="darkMode ? '#101d2b' : '#142536'"
       fixed
       width="260"
       v-model="drawer"
@@ -139,6 +139,10 @@
       v-if="$route.path.startsWith('/project/')"
       class="NavDrawer"
     >
+      <router-link to="/" class="jeh-brand" aria-label="Job Executor Hub home">
+        <img src="favicon.svg" width="32" height="32" alt="" />
+        <span v-if="!navMini"><strong>JEH</strong><small>Job Executor Hub</small></span>
+      </router-link>
       <v-menu bottom max-width="235" max-height="100%" v-if="project">
         <template v-slot:activator="{ on, attrs }">
           <v-list class="pa-0 overflow-y-auto">
@@ -442,9 +446,7 @@
 
                 <v-list-item-content>
                   {{
-                    user.has_active_subscription
-                      ? 'Subscription &amp; Billing'
-                      : 'Upgrade to PRO or EE'
+                    'JEH feature availability'
                   }}
                 </v-list-item-content>
               </v-list-item>
@@ -594,6 +596,11 @@
   <v-app v-else></v-app>
 </template>
 <style lang="scss">
+.jeh-brand { display: flex; gap: 12px; align-items: center; padding: 16px 14px;
+  color: #fff !important; text-decoration: none; }
+.jeh-brand strong { display: block; font-size: 20px; letter-spacing: 3px; }
+.jeh-brand small { display: block; color: #b8c8d8; font-size: 11px; }
+
 // Vuetify's reset forces `overflow-y: scroll` on <html>, so every page draws
 // an empty scrollbar track on the right. Show the page scrollbar only when
 // the content actually overflows. `:root` outranks Vuetify's `html` selector,

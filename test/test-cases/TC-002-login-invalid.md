@@ -41,7 +41,7 @@ issue a session cookie.
 * All three cases display the same generic error (e.g. *"Invalid credentials"*)
   — the UI must not distinguish "user not found" from "wrong password".
 * HTTP status is `401` (or `400` for the empty password case), and no
-  `Set-Cookie: semaphore=…` header is returned.
+  `Set-Cookie: jeh=…` header is returned.
 * No session cookie is created in the browser.
 * Repeated failures either rate-limit or log a warning to the server log; if
   rate-limited, the response is `429` or includes a `Retry-After` header.

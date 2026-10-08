@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 func VerifySessionByEmail(session *db.Session, w http.ResponseWriter, r *http.Request) {

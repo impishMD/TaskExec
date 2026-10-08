@@ -3,7 +3,7 @@ package db
 import (
 	"testing"
 
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/util"
 )
 
 func TestConfig_assignMapToStruct(t *testing.T) {

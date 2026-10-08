@@ -12,6 +12,12 @@ import AzureKvIcon from '../components/AzureKvIcon.vue';
 Vue.use(Vuetify);
 
 export default new Vuetify({
+  theme: {
+    themes: {
+      light: { primary: '#167561', secondary: '#142536', accent: '#b36a16' },
+      dark: { primary: '#69d2b0', secondary: '#142536', accent: '#ffba63' },
+    },
+  },
   icons: {
     values: {
       tofu: {

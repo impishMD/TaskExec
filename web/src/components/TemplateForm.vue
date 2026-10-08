@@ -43,7 +43,7 @@
           <p>
             {{ $t('forMoreInformationAboutBuildingSeeThe') }}
             <a
-              href="https://docs.semaphoreui.com/user-guide/task-templates#build"
+              href="https://github.com/impishMD/jeh/tree/develop/docs/en"
               target="_blank"
             >{{ $t('taskTemplateReference') }}</a
             >.
@@ -56,7 +56,7 @@
           <p>
             {{ $t('forMoreInformationAboutDeployingSeeThe') }}
             <a
-              href="https://docs.semaphoreui.com/user-guide/task-templates#build"
+              href="https://github.com/impishMD/jeh/tree/develop/docs/en"
               target="_blank"
             >{{ $t('taskTemplateReference2') }}</a
             >.
@@ -335,7 +335,7 @@
               v-model="item.executor_image"
               :label="$t('executor_image')"
               persistent-hint
-              placeholder="semaphoreui/job:latest"
+              placeholder="impishmd/jeh:latest-job"
               outlined
               dense
               clearable

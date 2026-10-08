@@ -1,29 +1,15 @@
-# web
+# JEH web interface
 
-## Project setup
-```
-npm install
-```
+Vue 2 and Vuetify frontend for Job Executor Hub.
 
-### Compiles and hot-reloads for development
-```
+```sh
+npm ci
 npm run serve
-```
-
-### Compiles and minifies for production
-```
+npm run test:unit
+npm run lint -- --no-fix
 npm run build
 ```
 
-### Run your unit tests
-```
-npm run test:unit
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+Development proxies `/api` to port 3000. Production output is written to `../api/public`
+and embedded in the Go binary. API documentation is synchronized before builds.
+[Development guide](../docs/en/development.md) · [Русский](../docs/ru/development.md).

@@ -7,10 +7,10 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/db/sql"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/db/sql"
+	"github.com/impishMD/jeh/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -145,25 +145,25 @@ func TestDeleteUserIdentity_AllowsLocalUserToUnlinkLastIdentity(t *testing.T) {
 	assert.Empty(t, ids)
 }
 
-func TestLdapProfileMatchesSemaphoreUser(t *testing.T) {
-	semaphoreUser := db.User{Username: "jdoe", Email: "jdoe@example.com"}
+func TestLdapProfileMatchesJEHUser(t *testing.T) {
+	jehUser := db.User{Username: "jdoe", Email: "jdoe@example.com"}
 
-	assert.True(t, ldapProfileMatchesSemaphoreUser(
+	assert.True(t, ldapProfileMatchesJEHUser(
 		db.User{Username: "jdoe", Email: "jdoe@example.com"},
-		semaphoreUser,
+		jehUser,
 	))
-	assert.True(t, ldapProfileMatchesSemaphoreUser(
+	assert.True(t, ldapProfileMatchesJEHUser(
 		db.User{Username: "JDOE", Email: "other@example.com"},
-		semaphoreUser,
+		jehUser,
 	))
-	assert.True(t, ldapProfileMatchesSemaphoreUser(
+	assert.True(t, ldapProfileMatchesJEHUser(
 		db.User{Username: "other", Email: "JDOE@example.com"},
-		semaphoreUser,
+		jehUser,
 	))
 
-	assert.False(t, ldapProfileMatchesSemaphoreUser(
+	assert.False(t, ldapProfileMatchesJEHUser(
 		db.User{Username: "alice", Email: "alice@example.com"},
-		semaphoreUser,
+		jehUser,
 	))
 }
 

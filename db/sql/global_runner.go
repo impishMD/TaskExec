@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/tz"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/tz"
 )
 
 func (d *SqlDb) GetRunnerByToken(token string) (runner db.Runner, err error) {

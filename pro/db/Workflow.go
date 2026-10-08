@@ -1,8 +1,8 @@
 package db
 
 import (
-	coreDB "github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
+	coreDB "github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/task_logger"
 )
 
 func WorkflowConditionMatches(status task_logger.TaskStatus, condition coreDB.WorkflowEdgeCondition) bool {

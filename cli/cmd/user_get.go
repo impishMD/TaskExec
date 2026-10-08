@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 	"github.com/spf13/cobra"
 )
 
@@ -28,7 +28,7 @@ var userGetCmd = &cobra.Command{
 		}
 
 		if !ok {
-			fmt.Println("Use command `semaphore user get --help` for details.")
+			fmt.Println("Use command `jeh user get --help` for details.")
 			os.Exit(1)
 		}
 

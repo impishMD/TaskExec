@@ -3,8 +3,8 @@ package api
 import (
 	"net/http"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/services/server"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/services/server"
 )
 
 type TerraformController struct {

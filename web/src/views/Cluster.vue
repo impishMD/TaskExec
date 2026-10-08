@@ -66,7 +66,7 @@
         depressed
         v-if="isAdmin"
         color="amber darken-3"
-        href="https://semaphoreui.com/enterprise?utm_source=app&utm_content=feature_cluster"
+        href="https://github.com/impishMD/jeh/blob/develop/docs/en/configuration.md#feature-scope"
         target="_blank"
       >
         {{ $t('upgrade_to_pro') }}

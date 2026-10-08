@@ -32,7 +32,7 @@ const (
 	AccessKeySourceStorageFile  AccessKeySourceStorageType = "file"
 )
 
-// AccessKey represents a key used to access a machine with ansible from semaphore
+// AccessKey represents a key used to access a machine with ansible from jeh
 type AccessKey struct {
 	ID   int    `db:"id" json:"id" backup:"-"`
 	Name string `db:"name" json:"name" binding:"required"`

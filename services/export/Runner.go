@@ -1,7 +1,7 @@
 package export
 
 import (
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 type RunnerExporter struct {

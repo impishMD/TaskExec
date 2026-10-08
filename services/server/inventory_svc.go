@@ -1,6 +1,6 @@
 package server
 
-import "github.com/semaphoreui/semaphore/db"
+import "github.com/impishMD/jeh/db"
 
 type InventoryService interface {
 	GetInventory(projectID int, inventoryID int) (inventory db.Inventory, err error)

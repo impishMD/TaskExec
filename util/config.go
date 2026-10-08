@@ -32,7 +32,7 @@ import (
 // Cookie is a runtime generated secure cookie used for authentication
 var Cookie *securecookie.SecureCookie
 
-// WebHostURL is the public route to the semaphore server
+// WebHostURL is the public route to the jeh server
 var WebHostURL *url.URL
 
 const (
@@ -61,18 +61,18 @@ const (
 type DbConfig struct {
 	Dialect string `json:"-"`
 
-	Hostname string            `json:"host,omitempty" env:"SEMAPHORE_DB_HOST" default:"0.0.0.0"`
-	Username string            `json:"user,omitempty" env:"SEMAPHORE_DB_USER"`
-	Password string            `json:"pass,omitempty" env:"SEMAPHORE_DB_PASS,sensitive"`
-	DbName   string            `json:"name,omitempty" env:"SEMAPHORE_DB" default:"semaphore"`
-	Options  map[string]string `json:"options,omitempty" env:"SEMAPHORE_DB_OPTIONS"`
+	Hostname string            `json:"host,omitempty" env:"JEH_DB_HOST" default:"0.0.0.0"`
+	Username string            `json:"user,omitempty" env:"JEH_DB_USER"`
+	Password string            `json:"pass,omitempty" env:"JEH_DB_PASS,sensitive"`
+	DbName   string            `json:"name,omitempty" env:"JEH_DB" default:"jeh"`
+	Options  map[string]string `json:"options,omitempty" env:"JEH_DB_OPTIONS"`
 }
 
 type LdapMappings struct {
-	DN   string `json:"dn" env:"SEMAPHORE_LDAP_MAPPING_DN" default:"dn"`
-	Mail string `json:"mail" env:"SEMAPHORE_LDAP_MAPPING_MAIL" default:"mail"`
-	UID  string `json:"uid" env:"SEMAPHORE_LDAP_MAPPING_UID" default:"uid"`
-	CN   string `json:"cn" env:"SEMAPHORE_LDAP_MAPPING_CN" default:"cn"`
+	DN   string `json:"dn" env:"JEH_LDAP_MAPPING_DN" default:"dn"`
+	Mail string `json:"mail" env:"JEH_LDAP_MAPPING_MAIL" default:"mail"`
+	UID  string `json:"uid" env:"JEH_LDAP_MAPPING_UID" default:"uid"`
+	CN   string `json:"cn" env:"JEH_LDAP_MAPPING_CN" default:"cn"`
 }
 
 func (p *LdapMappings) GetUsernameClaim() string {
@@ -117,15 +117,15 @@ const (
 // */
 
 // RunnerConnectionConfig controls how the runner connects to the
-// Semaphore server.
+// JEH server.
 type RunnerConnectionConfig struct {
-	// ServerCACertFile is a PEM bundle used to verify the Semaphore
+	// ServerCACertFile is a PEM bundle used to verify the JEH
 	// server's certificate, in addition to the system trust store.
 	// Set this when the server uses a self-signed or internal-CA cert.
-	ServerCACertFile string `json:"server_ca_cert_file,omitempty" env:"SEMAPHORE_RUNNER_SERVER_CA_CERT_FILE"`
+	ServerCACertFile string `json:"server_ca_cert_file,omitempty" env:"JEH_RUNNER_SERVER_CA_CERT_FILE"`
 	// SkipTLSVerify disables server certificate verification entirely.
 	// This is insecure (vulnerable to MITM) — use only for testing.
-	SkipTLSVerify bool `json:"skip_tls_verify,omitempty" env:"SEMAPHORE_RUNNER_SKIP_TLS_VERIFY"`
+	SkipTLSVerify bool `json:"skip_tls_verify,omitempty" env:"JEH_RUNNER_SKIP_TLS_VERIFY"`
 }
 
 // ExecutorType identifies the strategy the runner uses to execute each task. The default
@@ -140,40 +140,40 @@ const (
 )
 
 type ExecutorConfig struct {
-	Type   ExecutorType       `json:"type" default:"local" env:"SEMAPHORE_RUNNER_EXECUTOR_TYPE"`
+	Type   ExecutorType       `json:"type" default:"local" env:"JEH_RUNNER_EXECUTOR_TYPE"`
 	K8s    RunnerK8sConfig    `json:"k8s"`
 	Docker RunnerDockerConfig `json:"docker"`
 }
 
 type RunnerConfig struct {
-	RegistrationToken     string `json:"-" env:"SEMAPHORE_RUNNER_REGISTRATION_TOKEN"`
-	RegistrationTokenFile string `json:"registration_token_file,omitempty" env:"SEMAPHORE_RUNNER_REGISTRATION_TOKEN_FILE"`
-	Token                 string `json:"token,omitempty" env:"SEMAPHORE_RUNNER_TOKEN,sensitive"`
-	TokenFile             string `json:"token_file,omitempty" env:"SEMAPHORE_RUNNER_TOKEN_FILE"`
+	RegistrationToken     string `json:"-" env:"JEH_RUNNER_REGISTRATION_TOKEN"`
+	RegistrationTokenFile string `json:"registration_token_file,omitempty" env:"JEH_RUNNER_REGISTRATION_TOKEN_FILE"`
+	Token                 string `json:"token,omitempty" env:"JEH_RUNNER_TOKEN,sensitive"`
+	TokenFile             string `json:"token_file,omitempty" env:"JEH_RUNNER_TOKEN_FILE"`
 
 	// OneOff indicates than runner runs only one job and exit. It is very useful for dynamic runners.
 	// How it works?
 	// Example:
 	// 1) User starts the task.
-	// 2) Semaphore found runner for task and calls runner's webhook if it provided.
+	// 2) JEH found runner for task and calls runner's webhook if it provided.
 	// 3) Your server or lambda handling the call and starts the one-off runner.
-	// 4) The runner connects to the Semaphore server and handles the enqueued task(s).
-	OneOff bool `json:"one_off,omitempty" env:"SEMAPHORE_RUNNER_ONE_OFF"`
+	// 4) The runner connects to the JEH server and handles the enqueued task(s).
+	OneOff bool `json:"one_off,omitempty" env:"JEH_RUNNER_ONE_OFF"`
 
-	Enabled          bool     `json:"enabled,omitempty" env:"SEMAPHORE_RUNNER_ENABLED"`
-	Webhook          string   `json:"webhook,omitempty" env:"SEMAPHORE_RUNNER_WEBHOOK"`
-	Name             string   `json:"name,omitempty" env:"SEMAPHORE_RUNNER_NAME"`
-	Tags             []string `json:"tags,omitempty" env:"SEMAPHORE_RUNNER_TAGS"`
-	MaxParallelTasks int      `json:"max_parallel_tasks,omitempty" default:"9999" env:"SEMAPHORE_RUNNER_MAX_PARALLEL_TASKS"`
-	ProjectID        *int     `json:"project_id,omitempty" env:"SEMAPHORE_RUNNER_PROJECT_ID"`
+	Enabled          bool     `json:"enabled,omitempty" env:"JEH_RUNNER_ENABLED"`
+	Webhook          string   `json:"webhook,omitempty" env:"JEH_RUNNER_WEBHOOK"`
+	Name             string   `json:"name,omitempty" env:"JEH_RUNNER_NAME"`
+	Tags             []string `json:"tags,omitempty" env:"JEH_RUNNER_TAGS"`
+	MaxParallelTasks int      `json:"max_parallel_tasks,omitempty" default:"9999" env:"JEH_RUNNER_MAX_PARALLEL_TASKS"`
+	ProjectID        *int     `json:"project_id,omitempty" env:"JEH_RUNNER_PROJECT_ID"`
 
 	// CheckIntervalSeconds is how often the runner polls the server for new jobs.
 	// Plain int, not time.Duration, for env-binding simplicity.
-	CheckIntervalSeconds int `json:"check_interval_seconds,omitempty" default:"1" env:"SEMAPHORE_RUNNER_CHECK_INTERVAL_SECONDS"`
+	CheckIntervalSeconds int `json:"check_interval_seconds,omitempty" default:"1" env:"JEH_RUNNER_CHECK_INTERVAL_SECONDS"`
 
 	Connection *RunnerConnectionConfig `json:"connection,omitempty"`
 
-	Executor *ExecutorConfig `json:"executor,omitempty" env:"SEMAPHORE_RUNNER_EXECUTOR"`
+	Executor *ExecutorConfig `json:"executor,omitempty" env:"JEH_RUNNER_EXECUTOR"`
 }
 
 // RunnerK8sConfig holds runner-side configuration for the Kubernetes executor. Field
@@ -182,30 +182,30 @@ type RunnerConfig struct {
 type RunnerK8sConfig struct {
 	// KubeconfigPath is the path to a kubeconfig file. When empty, in-cluster
 	// configuration is used (ServiceAccount token + CA cert mounted by Kubernetes).
-	KubeconfigPath string `json:"kubeconfig,omitempty" env:"SEMAPHORE_RUNNER_K8S_KUBECONFIG"`
+	KubeconfigPath string `json:"kubeconfig,omitempty" env:"JEH_RUNNER_K8S_KUBECONFIG"`
 
 	// Namespace is where ephemeral task Pods are created.
-	Namespace string `json:"namespace,omitempty" default:"semaphore" env:"SEMAPHORE_RUNNER_K8S_NAMESPACE"`
+	Namespace string `json:"namespace,omitempty" default:"jeh" env:"JEH_RUNNER_K8S_NAMESPACE"`
 
 	// Image is the default container image used for the build container of each
 	// task Pod. Templates may override this in a future phase.
-	Image string `json:"image,omitempty" default:"semaphoreui/job:latest" env:"SEMAPHORE_RUNNER_K8S_IMAGE"`
+	Image string `json:"image,omitempty" default:"impishmd/jeh:latest-job" env:"JEH_RUNNER_K8S_IMAGE"`
 
 	// HelperImage is the image used for the git-clone init container (Phase 3+).
-	HelperImage string `json:"helper_image,omitempty" default:"semaphoreui/helper:latest" env:"SEMAPHORE_RUNNER_K8S_HELPER_IMAGE"`
+	HelperImage string `json:"helper_image,omitempty" default:"impishmd/jeh:latest-helper" env:"JEH_RUNNER_K8S_HELPER_IMAGE"`
 
 	// ServiceAccount that task Pods run under. Defaults to the namespace's default SA.
-	ServiceAccount string `json:"service_account,omitempty" default:"default" env:"SEMAPHORE_RUNNER_K8S_SERVICE_ACCOUNT"`
+	ServiceAccount string `json:"service_account,omitempty" default:"default" env:"JEH_RUNNER_K8S_SERVICE_ACCOUNT"`
 
 	// PullSecrets is a comma-separated list of imagePullSecrets attached to each Pod.
-	PullSecrets string `json:"pull_secrets,omitempty" env:"SEMAPHORE_RUNNER_K8S_PULL_SECRETS"`
+	PullSecrets string `json:"pull_secrets,omitempty" env:"JEH_RUNNER_K8S_PULL_SECRETS"`
 
 	// PollIntervalSeconds controls how often the executor polls Pod status. Defaults
 	// to 3 seconds. Kept as a plain int (not time.Duration) for env-binding simplicity.
-	PollIntervalSeconds int `json:"poll_interval_seconds,omitempty" default:"3" env:"SEMAPHORE_RUNNER_K8S_POLL_INTERVAL_SECONDS"`
+	PollIntervalSeconds int `json:"poll_interval_seconds,omitempty" default:"3" env:"JEH_RUNNER_K8S_POLL_INTERVAL_SECONDS"`
 
 	// CleanupGraceSeconds is the grace period when deleting Pods. Defaults to 30s.
-	CleanupGraceSeconds int `json:"cleanup_grace_seconds,omitempty" default:"30" env:"SEMAPHORE_RUNNER_K8S_CLEANUP_GRACE_SECONDS"`
+	CleanupGraceSeconds int `json:"cleanup_grace_seconds,omitempty" default:"30" env:"JEH_RUNNER_K8S_CLEANUP_GRACE_SECONDS"`
 }
 
 // RunnerDockerConfig holds runner-side configuration for the Docker executor. Each task
@@ -216,41 +216,41 @@ type RunnerDockerConfig struct {
 	// Host is the Docker daemon URL. Supports unix://, tcp:// and npipe:// schemes.
 	// When empty the standard environment (DOCKER_HOST) and the platform default
 	// socket are used.
-	Host string `json:"host,omitempty" env:"SEMAPHORE_RUNNER_DOCKER_HOST"`
+	Host string `json:"host,omitempty" env:"JEH_RUNNER_DOCKER_HOST"`
 
 	// TLSVerify enables TLS certificate verification for tcp:// connections.
-	TLSVerify bool `json:"tls_verify,omitempty" env:"SEMAPHORE_RUNNER_DOCKER_TLS_VERIFY"`
+	TLSVerify bool `json:"tls_verify,omitempty" env:"JEH_RUNNER_DOCKER_TLS_VERIFY"`
 
 	// CertPath is the directory holding ca.pem, cert.pem and key.pem for mutual TLS
 	// against a remote daemon.
-	CertPath string `json:"cert_path,omitempty" env:"SEMAPHORE_RUNNER_DOCKER_CERT_PATH"`
+	CertPath string `json:"cert_path,omitempty" env:"JEH_RUNNER_DOCKER_CERT_PATH"`
 
 	// Image is the default image used for the build container of each task.
-	Image string `json:"image,omitempty" default:"semaphoreui/job:latest" env:"SEMAPHORE_RUNNER_DOCKER_IMAGE"`
+	Image string `json:"image,omitempty" default:"impishmd/jeh:latest-job" env:"JEH_RUNNER_DOCKER_IMAGE"`
 
 	// HelperImage is the image used for the transient git-clone container.
-	HelperImage string `json:"helper_image,omitempty" default:"semaphoreui/helper:latest" env:"SEMAPHORE_RUNNER_DOCKER_HELPER_IMAGE"`
+	HelperImage string `json:"helper_image,omitempty" default:"impishmd/jeh:latest-helper" env:"JEH_RUNNER_DOCKER_HELPER_IMAGE"`
 
 	// Network is the Docker network the build container joins. Defaults to "bridge".
-	Network string `json:"network,omitempty" default:"bridge" env:"SEMAPHORE_RUNNER_DOCKER_NETWORK"`
+	Network string `json:"network,omitempty" default:"bridge" env:"JEH_RUNNER_DOCKER_NETWORK"`
 
 	// PullPolicy controls image pulling: always, if-not-present or never.
-	PullPolicy string `json:"pull_policy,omitempty" default:"if-not-present" env:"SEMAPHORE_RUNNER_DOCKER_PULL_POLICY"`
+	PullPolicy string `json:"pull_policy,omitempty" default:"if-not-present" env:"JEH_RUNNER_DOCKER_PULL_POLICY"`
 
 	// CPULimit, when > 0, caps the build container CPU (passed as --cpus).
-	CPULimit float64 `json:"cpu_limit,omitempty" env:"SEMAPHORE_RUNNER_DOCKER_CPU_LIMIT"`
+	CPULimit float64 `json:"cpu_limit,omitempty" env:"JEH_RUNNER_DOCKER_CPU_LIMIT"`
 
 	// MemoryLimit, when non-empty, caps the build container memory (e.g. "2g").
-	MemoryLimit string `json:"memory_limit,omitempty" env:"SEMAPHORE_RUNNER_DOCKER_MEMORY_LIMIT"`
+	MemoryLimit string `json:"memory_limit,omitempty" env:"JEH_RUNNER_DOCKER_MEMORY_LIMIT"`
 
 	// PollIntervalSeconds controls how often container status is polled. Defaults to 2s.
-	PollIntervalSeconds int `json:"poll_interval_seconds,omitempty" default:"2" env:"SEMAPHORE_RUNNER_DOCKER_POLL_INTERVAL_SECONDS"`
+	PollIntervalSeconds int `json:"poll_interval_seconds,omitempty" default:"2" env:"JEH_RUNNER_DOCKER_POLL_INTERVAL_SECONDS"`
 
 	// CleanupGraceSeconds is the timeout passed to docker stop. Defaults to 30s.
-	CleanupGraceSeconds int `json:"cleanup_grace_seconds,omitempty" default:"30" env:"SEMAPHORE_RUNNER_DOCKER_CLEANUP_GRACE_SECONDS"`
+	CleanupGraceSeconds int `json:"cleanup_grace_seconds,omitempty" default:"30" env:"JEH_RUNNER_DOCKER_CLEANUP_GRACE_SECONDS"`
 
 	// Privileged runs the build container with --privileged. Dangerous; off by default.
-	Privileged bool `json:"privileged,omitempty" env:"SEMAPHORE_RUNNER_DOCKER_PRIVILEGED"`
+	Privileged bool `json:"privileged,omitempty" env:"JEH_RUNNER_DOCKER_PRIVILEGED"`
 }
 
 type DefultGlobalRunnerMode string
@@ -264,51 +264,51 @@ const (
 
 // RunnersConfig holds server-side settings describing how the server treats
 // its runner fleet. It is unrelated to RunnerConfig, which configures a runner
-// process itself: server-side fleet settings use the SEMAPHORE_RUNNERS_* env
-// prefix, runner-process settings use SEMAPHORE_RUNNER_*.
+// process itself: server-side fleet settings use the JEH_RUNNERS_* env
+// prefix, runner-process settings use JEH_RUNNER_*.
 type RunnersConfig struct {
 	// OfflineTimeoutSec is the heartbeat staleness after which a runner is
 	// considered offline: it receives no new tasks and its "starting" tasks
 	// are reassigned to another runner. Must be comfortably larger than the
 	// runner poll interval (a few multiples) so a healthy-but-slow runner is
 	// never marked offline.
-	OfflineTimeoutSec int `json:"offline_timeout_sec,omitempty" default:"120" env:"SEMAPHORE_RUNNERS_OFFLINE_TIMEOUT_SEC"`
+	OfflineTimeoutSec int `json:"offline_timeout_sec,omitempty" default:"120" env:"JEH_RUNNERS_OFFLINE_TIMEOUT_SEC"`
 
 	// TaskFailTimeoutSec is the heartbeat staleness after which a runner's
 	// "running" tasks are failed. Between OfflineTimeoutSec and this value a
 	// running task is deliberately left alone: an offline runner may still be
 	// executing its jobs and resumes reporting if it reconnects in time.
 	// Values below OfflineTimeoutSec are clamped to it.
-	TaskFailTimeoutSec int `json:"task_fail_timeout_sec,omitempty" default:"420" env:"SEMAPHORE_RUNNERS_TASK_FAIL_TIMEOUT_SEC"`
+	TaskFailTimeoutSec int `json:"task_fail_timeout_sec,omitempty" default:"420" env:"JEH_RUNNERS_TASK_FAIL_TIMEOUT_SEC"`
 
 	// ReconcileIntervalSec is how often the server scans dispatched tasks
 	// against runner liveness.
-	ReconcileIntervalSec int `json:"reconcile_interval_sec,omitempty" default:"30" env:"SEMAPHORE_RUNNERS_RECONCILE_INTERVAL_SEC"`
+	ReconcileIntervalSec int `json:"reconcile_interval_sec,omitempty" default:"30" env:"JEH_RUNNERS_RECONCILE_INTERVAL_SEC"`
 
 	// RunnerRegistrationToken is deprecated, use Runners field instead of it.
-	RegistrationToken string `json:"registration_token,omitempty" env:"SEMAPHORE_RUNNER_REGISTRATION_TOKEN"`
+	RegistrationToken string `json:"registration_token,omitempty" env:"JEH_RUNNER_REGISTRATION_TOKEN"`
 
-	DefaultGlobalRunnersMode DefultGlobalRunnerMode `json:"default_global_runners_mode" env:"SEMAPHORE_DEFAULT_GLOBAL_RUNNERS_MODE"`
+	DefaultGlobalRunnersMode DefultGlobalRunnerMode `json:"default_global_runners_mode" env:"JEH_DEFAULT_GLOBAL_RUNNERS_MODE"`
 }
 
 type TLSConfig struct {
-	Enabled          bool   `json:"enabled" env:"SEMAPHORE_TLS_ENABLED"`
-	CertFile         string `json:"cert_file" env:"SEMAPHORE_TLS_CERT_FILE"`
-	KeyFile          string `json:"key_file" env:"SEMAPHORE_TLS_KEY_FILE"`
-	HTTPRedirectAddr string `json:"http_redirect_addr,omitempty" env:"SEMAPHORE_TLS_HTTP_REDIRECT_ADDR"`
-	HTTPRedirectPort *int   `json:"http_redirect_port,omitempty" env:"SEMAPHORE_TLS_HTTP_REDIRECT_PORT"`
+	Enabled          bool   `json:"enabled" env:"JEH_TLS_ENABLED"`
+	CertFile         string `json:"cert_file" env:"JEH_TLS_CERT_FILE"`
+	KeyFile          string `json:"key_file" env:"JEH_TLS_KEY_FILE"`
+	HTTPRedirectAddr string `json:"http_redirect_addr,omitempty" env:"JEH_TLS_HTTP_REDIRECT_ADDR"`
+	HTTPRedirectPort *int   `json:"http_redirect_port,omitempty" env:"JEH_TLS_HTTP_REDIRECT_PORT"`
 }
 
 type TotpConfig struct {
-	Enabled       bool   `json:"enabled" env:"SEMAPHORE_TOTP_ENABLED"`
-	AllowRecovery bool   `json:"allow_recovery" env:"SEMAPHORE_TOTP_ALLOW_RECOVERY"`
-	Issuer        string `json:"app_name" env:"SEMAPHORE_TOTP_ISSUER"`
+	Enabled       bool   `json:"enabled" env:"JEH_TOTP_ENABLED"`
+	AllowRecovery bool   `json:"allow_recovery" env:"JEH_TOTP_ALLOW_RECOVERY"`
+	Issuer        string `json:"app_name" env:"JEH_TOTP_ISSUER"`
 }
 
 type EventLogType struct {
-	Format  string             `json:"format,omitempty" env:"SEMAPHORE_EVENT_LOG_FORMAT"`
-	Enabled bool               `json:"enabled" env:"SEMAPHORE_EVENT_LOG_ENABLED"`
-	Logger  *lumberjack.Logger `json:"logger,omitempty" env:"SEMAPHORE_EVENT_LOGGER"`
+	Format  string             `json:"format,omitempty" env:"JEH_EVENT_LOG_FORMAT"`
+	Enabled bool               `json:"enabled" env:"JEH_EVENT_LOG_ENABLED"`
+	Logger  *lumberjack.Logger `json:"logger,omitempty" env:"JEH_EVENT_LOGGER"`
 }
 
 const (
@@ -317,10 +317,10 @@ const (
 )
 
 type TaskLogType struct {
-	Enabled      bool               `json:"enabled" env:"SEMAPHORE_TASK_LOG_ENABLED"`
-	Format       string             `json:"format,omitempty" env:"SEMAPHORE_TASK_LOG_FORMAT"`
-	Logger       *lumberjack.Logger `json:"logger,omitempty" env:"SEMAPHORE_TASK_LOGGER"`
-	ResultLogger *lumberjack.Logger `json:"result_logger,omitempty" env:"SEMAPHORE_TASK_RESULT_LOGGER"`
+	Enabled      bool               `json:"enabled" env:"JEH_TASK_LOG_ENABLED"`
+	Format       string             `json:"format,omitempty" env:"JEH_TASK_LOG_FORMAT"`
+	Logger       *lumberjack.Logger `json:"logger,omitempty" env:"JEH_TASK_LOGGER"`
+	ResultLogger *lumberjack.Logger `json:"result_logger,omitempty" env:"JEH_TASK_RESULT_LOGGER"`
 }
 
 type ConfigLog struct {
@@ -336,25 +336,25 @@ const (
 )
 
 type SyslogConfig struct {
-	Enabled bool         `json:"enabled" env:"SEMAPHORE_SYSLOG_ENABLED"`
-	Network string       `json:"network,omitempty" env:"SEMAPHORE_SYSLOG_NETWORK"`
-	Address string       `json:"address,omitempty" env:"SEMAPHORE_SYSLOG_ADDRESS"`
-	Tag     string       `json:"tag,omitempty" env:"SEMAPHORE_SYSLOG_TAG"`
-	Format  SyslogFormat `json:"format,omitempty" env:"SEMAPHORE_SYSLOG_FORMAT"`
+	Enabled bool         `json:"enabled" env:"JEH_SYSLOG_ENABLED"`
+	Network string       `json:"network,omitempty" env:"JEH_SYSLOG_NETWORK"`
+	Address string       `json:"address,omitempty" env:"JEH_SYSLOG_ADDRESS"`
+	Tag     string       `json:"tag,omitempty" env:"JEH_SYSLOG_TAG"`
+	Format  SyslogFormat `json:"format,omitempty" env:"JEH_SYSLOG_FORMAT"`
 }
 
 type MetricsConfig struct {
-	Enabled  bool   `json:"enabled" env:"SEMAPHORE_METRICS_ENABLED"`
-	Username string `json:"username,omitempty" env:"SEMAPHORE_METRICS_USERNAME"`
-	Password string `json:"password,omitempty" env:"SEMAPHORE_METRICS_PASSWORD,sensitive"`
+	Enabled  bool   `json:"enabled" env:"JEH_METRICS_ENABLED"`
+	Username string `json:"username,omitempty" env:"JEH_METRICS_USERNAME"`
+	Password string `json:"password,omitempty" env:"JEH_METRICS_PASSWORD,sensitive"`
 }
 
 type ConfigProcess struct {
-	User       string  `json:"user,omitempty" env:"SEMAPHORE_PROCESS_USER"`
-	UID        *uint32 `json:"uid,omitempty" env:"SEMAPHORE_PROCESS_UID"`
-	Chroot     string  `json:"chroot,omitempty" env:"SEMAPHORE_PROCESS_CHROOT"`
-	GID        *uint32 `json:"gid,omitempty" env:"SEMAPHORE_PROCESS_GID"`
-	NoNewPrivs bool    `json:"no_new_privs,omitempty" env:"SEMAPHORE_PROCESS_NO_NEW_PRIVS"`
+	User       string  `json:"user,omitempty" env:"JEH_PROCESS_USER"`
+	UID        *uint32 `json:"uid,omitempty" env:"JEH_PROCESS_UID"`
+	Chroot     string  `json:"chroot,omitempty" env:"JEH_PROCESS_CHROOT"`
+	GID        *uint32 `json:"gid,omitempty" env:"JEH_PROCESS_GID"`
+	NoNewPrivs bool    `json:"no_new_privs,omitempty" env:"JEH_PROCESS_NO_NEW_PRIVS"`
 
 	// AppNamespaces controls Linux namespace isolation for child apps
 	// (ansible, terraform, shell templates). Git is never isolated —
@@ -367,38 +367,38 @@ type ConfigProcess struct {
 type ConfigAppNamespaces struct {
 	// User isolates UIDs/GIDs (CLONE_NEWUSER). Enables unprivileged use
 	// of the other namespaces.
-	User bool `json:"user,omitempty" env:"SEMAPHORE_PROCESS_APP_NS_USER"`
+	User bool `json:"user,omitempty" env:"JEH_PROCESS_APP_NS_USER"`
 	// Mount hides host mount points such as secret tmpfs (CLONE_NEWNS).
-	Mount bool `json:"mount,omitempty" env:"SEMAPHORE_PROCESS_APP_NS_MOUNT"`
+	Mount bool `json:"mount,omitempty" env:"JEH_PROCESS_APP_NS_MOUNT"`
 	// PID hides host processes from child apps (CLONE_NEWPID).
-	PID bool `json:"pid,omitempty" env:"SEMAPHORE_PROCESS_APP_NS_PID"`
+	PID bool `json:"pid,omitempty" env:"JEH_PROCESS_APP_NS_PID"`
 	// IPC isolates SysV IPC and POSIX message queues (CLONE_NEWIPC).
-	IPC bool `json:"ipc,omitempty" env:"SEMAPHORE_PROCESS_APP_NS_IPC"`
+	IPC bool `json:"ipc,omitempty" env:"JEH_PROCESS_APP_NS_IPC"`
 	// UTS isolates hostname and domain (CLONE_NEWUTS).
-	UTS bool `json:"uts,omitempty" env:"SEMAPHORE_PROCESS_APP_NS_UTS"`
+	UTS bool `json:"uts,omitempty" env:"JEH_PROCESS_APP_NS_UTS"`
 }
 
 type ScheduleConfig struct {
-	Timezone string `json:"timezone,omitempty" env:"SEMAPHORE_SCHEDULE_TIMEZONE" default:"UTC"`
+	Timezone string `json:"timezone,omitempty" env:"JEH_SCHEDULE_TIMEZONE" default:"UTC"`
 }
 
 type DebuggingConfig struct {
-	ApiDelay     string `json:"api_delay,omitempty" env:"SEMAPHORE_API_DELAY"`
-	PprofDumpDir string `json:"pprof_dump_dir,omitempty" env:"SEMAPHORE_PPROF_DUMP_DIR"`
+	ApiDelay     string `json:"api_delay,omitempty" env:"JEH_API_DELAY"`
+	PprofDumpDir string `json:"pprof_dump_dir,omitempty" env:"JEH_PPROF_DUMP_DIR"`
 }
 
 type HARedisConfig struct {
-	Addr          string `json:"addr,omitempty" env:"SEMAPHORE_HA_REDIS_ADDR"`
-	DB            int    `json:"db,omitempty" env:"SEMAPHORE_HA_REDIS_DB"`
-	Pass          string `json:"pass,omitempty" env:"SEMAPHORE_HA_REDIS_PASS,sensitive"`
-	User          string `json:"user,omitempty" env:"SEMAPHORE_HA_REDIS_USER"`
-	TLS           bool   `json:"tls,omitempty" env:"SEMAPHORE_HA_REDIS_TLS"`
-	TLSSkipVerify bool   `json:"tls_skip_verify,omitempty" env:"SEMAPHORE_HA_REDIS_TLS_SKIP_VERIFY"`
+	Addr          string `json:"addr,omitempty" env:"JEH_HA_REDIS_ADDR"`
+	DB            int    `json:"db,omitempty" env:"JEH_HA_REDIS_DB"`
+	Pass          string `json:"pass,omitempty" env:"JEH_HA_REDIS_PASS,sensitive"`
+	User          string `json:"user,omitempty" env:"JEH_HA_REDIS_USER"`
+	TLS           bool   `json:"tls,omitempty" env:"JEH_HA_REDIS_TLS"`
+	TLSSkipVerify bool   `json:"tls_skip_verify,omitempty" env:"JEH_HA_REDIS_TLS_SKIP_VERIFY"`
 }
 
 type HAConfig struct {
-	Enabled bool           `json:"enabled" env:"SEMAPHORE_HA_ENABLED"`
-	NodeID  string         `json:"node_id,omitempty" env:"SEMAPHORE_HA_NODE_ID"` // auto-generated if empty
+	Enabled bool           `json:"enabled" env:"JEH_HA_ENABLED"`
+	NodeID  string         `json:"node_id,omitempty" env:"JEH_HA_NODE_ID"` // auto-generated if empty
 	Redis   *HARedisConfig `json:"redis,omitempty"`
 }
 
@@ -435,23 +435,23 @@ const (
 )
 
 type TeamsConfig struct {
-	InvitesEnabled  bool           `json:"invites_enabled,omitempty" env:"SEMAPHORE_TEAMS_INVITES_ENABLED"`
-	InviteType      TeamInviteType `json:"invite_type,omitempty" env:"SEMAPHORE_TEAMS_INVITE_TYPE" default:"username"`
-	MembersCanLeave bool           `json:"members_can_leave,omitempty" env:"SEMAPHORE_TEAMS_MEMBERS_CAN_LEAVE"`
+	InvitesEnabled  bool           `json:"invites_enabled,omitempty" env:"JEH_TEAMS_INVITES_ENABLED"`
+	InviteType      TeamInviteType `json:"invite_type,omitempty" env:"JEH_TEAMS_INVITE_TYPE" default:"username"`
+	MembersCanLeave bool           `json:"members_can_leave,omitempty" env:"JEH_TEAMS_MEMBERS_CAN_LEAVE"`
 }
 
 type ConfigDirs struct {
-	Secrets         string `json:"secrets,omitempty" env:"SEMAPHORE_SECRETS_PATH" default:"/tmp/semaphore"`
-	Repos           string `json:"repos,omitempty" env:"SEMAPHORE_REPOS_DIR"`
-	SSHAgentSockets string `json:"ssh_agent_sockets,omitempty" env:"SEMAPHORE_SSH_AGENT_SOCKETS_DIR" default:"/tmp/semaphore"`
+	Secrets         string `json:"secrets,omitempty" env:"JEH_SECRETS_PATH" default:"/tmp/jeh"`
+	Repos           string `json:"repos,omitempty" env:"JEH_REPOS_DIR"`
+	SSHAgentSockets string `json:"ssh_agent_sockets,omitempty" env:"JEH_SSH_AGENT_SOCKETS_DIR" default:"/tmp/jeh"`
 }
 
 // JWTConfig issuance for task executions (used by playbooks to authenticate to
 type JWTConfig struct {
-	Enabled    bool   `json:"enabled,omitempty" env:"SEMAPHORE_JWT_ENABLED"`
-	Issuer     string `json:"issuer,omitempty" env:"SEMAPHORE_JWT_ISSUER"`
-	DefaultTTL string `json:"default_ttl,omitempty" env:"SEMAPHORE_JWT_DEFAULT_TTL" default:"1h"`
-	MaxTTL     string `json:"max_ttl,omitempty" env:"SEMAPHORE_JWT_MAX_TTL" default:"24h"`
+	Enabled    bool   `json:"enabled,omitempty" env:"JEH_JWT_ENABLED"`
+	Issuer     string `json:"issuer,omitempty" env:"JEH_JWT_ISSUER"`
+	DefaultTTL string `json:"default_ttl,omitempty" env:"JEH_JWT_DEFAULT_TTL" default:"1h"`
+	MaxTTL     string `json:"max_ttl,omitempty" env:"JEH_JWT_MAX_TTL" default:"24h"`
 }
 
 // KeySource supplies a single secret key either inline (Value) or from a file
@@ -491,10 +491,10 @@ type EncryptionKeysConfig struct {
 // separate keys file and controls how often that file is polled for changes.
 type EncryptionConfig struct {
 	// KeysFile is the path to the EncryptionKeysConfig file (the keyrings).
-	KeysFile string `json:"keys_file,omitempty" env:"SEMAPHORE_ENCRYPTION_KEYS_FILE"`
+	KeysFile string `json:"keys_file,omitempty" env:"JEH_ENCRYPTION_KEYS_FILE"`
 	// KeysPollInterval is how often the keys file is checked for changes (a Go
 	// duration like "15s"). "0" disables polling (SIGHUP still forces a reload).
-	KeysPollInterval string `json:"keys_poll_interval,omitempty" env:"SEMAPHORE_ENCRYPTION_KEYS_POLL_INTERVAL" default:"15s"`
+	KeysPollInterval string `json:"keys_poll_interval,omitempty" env:"JEH_ENCRYPTION_KEYS_POLL_INTERVAL" default:"15s"`
 }
 
 type SshStrictHostKeyChecking string
@@ -508,16 +508,16 @@ const (
 type SshConfig struct {
 	// SshConfigPath is a path to the custom SSH config file.
 	// Default path is ~/.ssh/config.
-	ConfigPath string `json:"config_path,omitempty" env:"SEMAPHORE_SSH_PATH"`
+	ConfigPath string `json:"config_path,omitempty" env:"JEH_SSH_PATH"`
 
 	// SshKnownHostsFile is a path to the SSH known_hosts file used to verify git
 	// server host keys. When set, host-key checking is strict: a key that is
 	// missing from (or changed relative to) this file aborts the connection,
 	// preventing a network attacker from impersonating the git server. When
-	// empty, Semaphore uses a persistent trust-on-first-use file under TmpPath
+	// empty, JEH uses a persistent trust-on-first-use file under TmpPath
 	// (StrictHostKeyChecking=accept-new): the first connection to a host is
 	// trusted and pinned, and any later host-key change is rejected.
-	KnownHostsFile string `json:"known_hosts_file,omitempty" env:"SEMAPHORE_SSH_KNOWN_HOSTS_FILE"`
+	KnownHostsFile string `json:"known_hosts_file,omitempty" env:"JEH_SSH_KNOWN_HOSTS_FILE"`
 
 	StrictHostKeyChecking SshStrictHostKeyChecking `json:"strict_host_key_checking,omitempty" env:"" default:"no"`
 }
@@ -528,11 +528,11 @@ type ConfigType struct {
 	Postgres *DbConfig `json:"postgres,omitempty"`
 	SQLite   *DbConfig `json:"sqlite,omitempty"`
 
-	Dialect string `json:"dialect,omitempty" default:"sqlite" rule:"^mysql|postgres|sqlite$" env:"SEMAPHORE_DB_DIALECT"`
+	Dialect string `json:"dialect,omitempty" default:"sqlite" rule:"^mysql|postgres|sqlite$" env:"JEH_DB_DIALECT"`
 
 	// Format `:port_num` eg, :3000
 	// if : is missing it will be corrected
-	Port string     `json:"port,omitempty" default:":3000" rule:"^:?([0-9]{1,5})$" env:"SEMAPHORE_PORT"`
+	Port string     `json:"port,omitempty" default:":3000" rule:"^:?([0-9]{1,5})$" env:"JEH_PORT"`
 	TLS  *TLSConfig `json:"tls,omitempty"`
 
 	Auth *AuthConfig            `json:"auth,omitempty"`
@@ -540,14 +540,14 @@ type ConfigType struct {
 
 	// Interface ip, put in front of the port.
 	// defaults to empty
-	Interface string `json:"interface,omitempty" env:"SEMAPHORE_INTERFACE"`
+	Interface string `json:"interface,omitempty" env:"JEH_INTERFACE"`
 
-	// semaphore stores ephemeral projects here
-	TmpPath string `json:"tmp_path,omitempty" default:"/tmp/semaphore" env:"SEMAPHORE_TMP_PATH"`
+	// jeh stores ephemeral projects here
+	TmpPath string `json:"tmp_path,omitempty" default:"/tmp/jeh" env:"JEH_TMP_PATH"`
 
 	// SecretsPath is a legacy top-level setting for backwards compatibility.
 	// Users should prefer configuring dirs.secrets instead.
-	SecretsPath string `json:"secrets_path,omitempty" env:"SEMAPHORE_SECRETS_PATH"`
+	SecretsPath string `json:"secrets_path,omitempty" env:"JEH_SECRETS_PATH"`
 
 	// HomeDirMode controls how the HOME environment variable is set for tasks.
 	//   "template_home" (default) — HOME is set to a per-template directory,
@@ -557,19 +557,19 @@ type ConfigType struct {
 	//       behavior). Parallel ansible-galaxy runs in the same project may conflict.
 	//   "user_home" — HOME is not overridden (keeps the real user HOME).
 	//       ANSIBLE_HOME is set per template to isolate .ansible/ for Ansible tasks.
-	HomeDirMode string `json:"home_dir_mode,omitempty" rule:"^(user_home|project_home|template_dir)?$" env:"SEMAPHORE_HOME_DIR_MODE" default:"template_dir"`
+	HomeDirMode string `json:"home_dir_mode,omitempty" rule:"^(user_home|project_home|template_dir)?$" env:"JEH_HOME_DIR_MODE" default:"template_dir"`
 
 	// SshConfigPath is a path to the custom SSH config file.
 	// Default path is ~/.ssh/config.
-	SshConfigPath string `json:"ssh_config_path,omitempty" env:"SEMAPHORE_SSH_PATH"`
+	SshConfigPath string `json:"ssh_config_path,omitempty" env:"JEH_SSH_PATH"`
 
 	Ssh *SshConfig `json:"ssh"`
 
-	GitClientId string `json:"git_client,omitempty" rule:"^go_git|cmd_git$" env:"SEMAPHORE_GIT_CLIENT" default:"cmd_git"`
+	GitClientId string `json:"git_client,omitempty" rule:"^go_git|cmd_git$" env:"JEH_GIT_CLIENT" default:"cmd_git"`
 
 	// GitSubmoduleJobs is how many submodules the command-line Git client
 	// fetches in parallel during clone and update operations.
-	GitSubmoduleJobs int `json:"git_submodule_jobs,omitempty" rule:"^[1-9][0-9]*$" env:"SEMAPHORE_GIT_SUBMODULE_JOBS" default:"4"`
+	GitSubmoduleJobs int `json:"git_submodule_jobs,omitempty" rule:"^[1-9][0-9]*$" env:"JEH_GIT_SUBMODULE_JOBS" default:"4"`
 
 	// GitAttempts is how many times a git clone or pull is tried before the task
 	// fails, for git servers which are intermittently unavailable. 1 tries once
@@ -578,19 +578,19 @@ type ConfigType struct {
 	// Attempts rather than retries because a config value of 0 is
 	// indistinguishable from an unset one and would be replaced by the default,
 	// leaving no way to turn retrying off.
-	GitAttempts int `json:"git_attempts,omitempty" env:"SEMAPHORE_GIT_ATTEMPTS" default:"4"`
+	GitAttempts int `json:"git_attempts,omitempty" env:"JEH_GIT_ATTEMPTS" default:"4"`
 
 	// web host
-	WebHost string `json:"web_host,omitempty" env:"SEMAPHORE_WEB_ROOT"`
+	WebHost string `json:"web_host,omitempty" env:"JEH_WEB_ROOT"`
 
 	// cookie hashing & encryption
-	CookieHash       string `json:"cookie_hash,omitempty" env:"SEMAPHORE_COOKIE_HASH,sensitive"`
-	CookieEncryption string `json:"cookie_encryption,omitempty" env:"SEMAPHORE_COOKIE_ENCRYPTION,sensitive"`
+	CookieHash       string `json:"cookie_hash,omitempty" env:"JEH_COOKIE_HASH,sensitive"`
+	CookieEncryption string `json:"cookie_encryption,omitempty" env:"JEH_COOKIE_ENCRYPTION,sensitive"`
 	// AccessKeyEncryption is BASE64 encoded byte array used
 	// for encrypting and decrypting access keys stored in database.
 	// Legacy entry point kept for backward compatibility; the access keyring is
 	// configured via EncryptionKeys.AccessKey (encryption_keys.access_key).
-	AccessKeyEncryption string `json:"access_key_encryption,omitempty" env:"SEMAPHORE_ACCESS_KEY_ENCRYPTION,sensitive"`
+	AccessKeyEncryption string `json:"access_key_encryption,omitempty" env:"JEH_ACCESS_KEY_ENCRYPTION,sensitive"`
 
 	// OptionEncryption is a BASE64 encoded key used to encrypt/decrypt DB options
 	// (the JWT signing key) with the old single-key scheme (no rotation). It is
@@ -598,78 +598,78 @@ type ConfigType struct {
 	// keyring uses this one key; rotation is configured instead via the keys file
 	// (encryption.keys_file → option_key). When unset, options fall back to the
 	// access keyring.
-	OptionEncryption string `json:"option_encryption,omitempty" env:"SEMAPHORE_OPTION_ENCRYPTION,sensitive"`
+	OptionEncryption string `json:"option_encryption,omitempty" env:"JEH_OPTION_ENCRYPTION,sensitive"`
 
 	// EmailAlert enables the e-mail notification channel. The email_* settings
 	// below describe the SMTP server it sends through.
-	EmailAlert         bool   `json:"email_alert,omitempty" env:"SEMAPHORE_EMAIL_ALERT"`
-	EmailSender        string `json:"email_sender,omitempty" env:"SEMAPHORE_EMAIL_SENDER"`
-	EmailHost          string `json:"email_host,omitempty" env:"SEMAPHORE_EMAIL_HOST"`
-	EmailPort          string `json:"email_port,omitempty" rule:"^(|[0-9]{1,5})$" env:"SEMAPHORE_EMAIL_PORT"`
-	EmailUsername      string `json:"email_username,omitempty" env:"SEMAPHORE_EMAIL_USERNAME"`
-	EmailPassword      string `json:"email_password,omitempty" env:"SEMAPHORE_EMAIL_PASSWORD,sensitive"`
-	EmailSecure        bool   `json:"email_secure,omitempty" env:"SEMAPHORE_EMAIL_SECURE"`
-	EmailTls           bool   `json:"email_tls,omitempty" env:"SEMAPHORE_EMAIL_TLS"`
-	EmailTlsMinVersion string `json:"email_tls_min_version,omitempty" default:"1.2" rule:"^(1\\.[0123])$" env:"SEMAPHORE_EMAIL_TLS_MIN_VERSION"`
+	EmailAlert         bool   `json:"email_alert,omitempty" env:"JEH_EMAIL_ALERT"`
+	EmailSender        string `json:"email_sender,omitempty" env:"JEH_EMAIL_SENDER"`
+	EmailHost          string `json:"email_host,omitempty" env:"JEH_EMAIL_HOST"`
+	EmailPort          string `json:"email_port,omitempty" rule:"^(|[0-9]{1,5})$" env:"JEH_EMAIL_PORT"`
+	EmailUsername      string `json:"email_username,omitempty" env:"JEH_EMAIL_USERNAME"`
+	EmailPassword      string `json:"email_password,omitempty" env:"JEH_EMAIL_PASSWORD,sensitive"`
+	EmailSecure        bool   `json:"email_secure,omitempty" env:"JEH_EMAIL_SECURE"`
+	EmailTls           bool   `json:"email_tls,omitempty" env:"JEH_EMAIL_TLS"`
+	EmailTlsMinVersion string `json:"email_tls_min_version,omitempty" default:"1.2" rule:"^(1\\.[0123])$" env:"JEH_EMAIL_TLS_MIN_VERSION"`
 
 	// LdapEnable turns on the legacy single-directory LDAP login configured by
 	// the flat ldap_* settings below. Use ldap_providers instead when more than
 	// one directory is involved.
-	LdapEnable       bool          `json:"ldap_enable,omitempty" env:"SEMAPHORE_LDAP_ENABLE"`
-	LdapBindDN       string        `json:"ldap_binddn,omitempty" env:"SEMAPHORE_LDAP_BIND_DN"`
-	LdapBindPassword string        `json:"ldap_bindpassword,omitempty" env:"SEMAPHORE_LDAP_BIND_PASSWORD,sensitive"`
-	LdapServer       string        `json:"ldap_server,omitempty" env:"SEMAPHORE_LDAP_SERVER"`
-	LdapSearchDN     string        `json:"ldap_searchdn,omitempty" env:"SEMAPHORE_LDAP_SEARCH_DN"`
-	LdapSearchFilter string        `json:"ldap_searchfilter,omitempty" env:"SEMAPHORE_LDAP_SEARCH_FILTER"`
+	LdapEnable       bool          `json:"ldap_enable,omitempty" env:"JEH_LDAP_ENABLE"`
+	LdapBindDN       string        `json:"ldap_binddn,omitempty" env:"JEH_LDAP_BIND_DN"`
+	LdapBindPassword string        `json:"ldap_bindpassword,omitempty" env:"JEH_LDAP_BIND_PASSWORD,sensitive"`
+	LdapServer       string        `json:"ldap_server,omitempty" env:"JEH_LDAP_SERVER"`
+	LdapSearchDN     string        `json:"ldap_searchdn,omitempty" env:"JEH_LDAP_SEARCH_DN"`
+	LdapSearchFilter string        `json:"ldap_searchfilter,omitempty" env:"JEH_LDAP_SEARCH_FILTER"`
 	LdapMappings     *LdapMappings `json:"ldap_mappings,omitempty"`
-	LdapNeedTLS      bool          `json:"ldap_needtls,omitempty" env:"SEMAPHORE_LDAP_NEEDTLS"`
+	LdapNeedTLS      bool          `json:"ldap_needtls,omitempty" env:"JEH_LDAP_NEEDTLS"`
 	// LdapTLSSkipVerify disables verification of the LDAP server's TLS
 	// certificate for the legacy flat ldap_* config. Defaults to false
 	// (certificates are verified). See LdapProvider.TLSSkipVerify.
-	LdapTLSSkipVerify bool `json:"ldap_tls_skip_verify,omitempty" env:"SEMAPHORE_LDAP_TLS_SKIP_VERIFY"`
+	LdapTLSSkipVerify bool `json:"ldap_tls_skip_verify,omitempty" env:"JEH_LDAP_TLS_SKIP_VERIFY"`
 
 	// LdapProviders configures multiple LDAP directories (like OidcProviders
 	// for OIDC). The key is the provider ID shown in identity records; the
 	// ID "ldap" is reserved for the legacy flat ldap_* config above.
-	LdapProviders map[string]LdapProvider `json:"ldap_providers,omitempty" env:"SEMAPHORE_LDAP_PROVIDERS"`
+	LdapProviders map[string]LdapProvider `json:"ldap_providers,omitempty" env:"JEH_LDAP_PROVIDERS"`
 
 	// TelegramAlert enables the Telegram notification channel, which also needs
 	// telegram_token and a default telegram_chat.
-	TelegramAlert       bool   `json:"telegram_alert,omitempty" env:"SEMAPHORE_TELEGRAM_ALERT"`
-	TelegramChat        string `json:"telegram_chat,omitempty" env:"SEMAPHORE_TELEGRAM_CHAT"`
-	TelegramToken       string `json:"telegram_token,omitempty" env:"SEMAPHORE_TELEGRAM_TOKEN,sensitive"`
-	SlackAlert          bool   `json:"slack_alert,omitempty" env:"SEMAPHORE_SLACK_ALERT"`
-	SlackUrl            string `json:"slack_url,omitempty" env:"SEMAPHORE_SLACK_URL"`
-	RocketChatAlert     bool   `json:"rocketchat_alert,omitempty" env:"SEMAPHORE_ROCKETCHAT_ALERT"`
-	RocketChatUrl       string `json:"rocketchat_url,omitempty" env:"SEMAPHORE_ROCKETCHAT_URL"`
-	MicrosoftTeamsAlert bool   `json:"microsoft_teams_alert,omitempty" env:"SEMAPHORE_MICROSOFT_TEAMS_ALERT"`
-	MicrosoftTeamsUrl   string `json:"microsoft_teams_url,omitempty" env:"SEMAPHORE_MICROSOFT_TEAMS_URL"`
-	DingTalkAlert       bool   `json:"dingtalk_alert,omitempty" env:"SEMAPHORE_DINGTALK_ALERT"`
-	DingTalkUrl         string `json:"dingtalk_url,omitempty" env:"SEMAPHORE_DINGTALK_URL"`
-	GotifyAlert         bool   `json:"gotify_alert,omitempty" env:"SEMAPHORE_GOTIFY_ALERT"`
-	GotifyUrl           string `json:"gotify_url,omitempty" env:"SEMAPHORE_GOTIFY_URL"`
-	GotifyToken         string `json:"gotify_token,omitempty" env:"SEMAPHORE_GOTIFY_TOKEN,sensitive"`
+	TelegramAlert       bool   `json:"telegram_alert,omitempty" env:"JEH_TELEGRAM_ALERT"`
+	TelegramChat        string `json:"telegram_chat,omitempty" env:"JEH_TELEGRAM_CHAT"`
+	TelegramToken       string `json:"telegram_token,omitempty" env:"JEH_TELEGRAM_TOKEN,sensitive"`
+	SlackAlert          bool   `json:"slack_alert,omitempty" env:"JEH_SLACK_ALERT"`
+	SlackUrl            string `json:"slack_url,omitempty" env:"JEH_SLACK_URL"`
+	RocketChatAlert     bool   `json:"rocketchat_alert,omitempty" env:"JEH_ROCKETCHAT_ALERT"`
+	RocketChatUrl       string `json:"rocketchat_url,omitempty" env:"JEH_ROCKETCHAT_URL"`
+	MicrosoftTeamsAlert bool   `json:"microsoft_teams_alert,omitempty" env:"JEH_MICROSOFT_TEAMS_ALERT"`
+	MicrosoftTeamsUrl   string `json:"microsoft_teams_url,omitempty" env:"JEH_MICROSOFT_TEAMS_URL"`
+	DingTalkAlert       bool   `json:"dingtalk_alert,omitempty" env:"JEH_DINGTALK_ALERT"`
+	DingTalkUrl         string `json:"dingtalk_url,omitempty" env:"JEH_DINGTALK_URL"`
+	GotifyAlert         bool   `json:"gotify_alert,omitempty" env:"JEH_GOTIFY_ALERT"`
+	GotifyUrl           string `json:"gotify_url,omitempty" env:"JEH_GOTIFY_URL"`
+	GotifyToken         string `json:"gotify_token,omitempty" env:"JEH_GOTIFY_TOKEN,sensitive"`
 
 	// OidcProviders configures OpenID Connect sign-in. The key is the provider ID
 	// that appears in identity records and in the /auth/oidc/<id>/login URL, so it
 	// must stay stable once users have signed in through it.
-	OidcProviders map[string]OidcProvider `json:"oidc_providers,omitempty" env:"SEMAPHORE_OIDC_PROVIDERS"`
+	OidcProviders map[string]OidcProvider `json:"oidc_providers,omitempty" env:"JEH_OIDC_PROVIDERS"`
 
-	MaxTaskDurationSec  int `json:"max_task_duration_sec,omitempty" env:"SEMAPHORE_MAX_TASK_DURATION_SEC"`
-	MaxTasksPerTemplate int `json:"max_tasks_per_template,omitempty" env:"SEMAPHORE_MAX_TASKS_PER_TEMPLATE"`
+	MaxTaskDurationSec  int `json:"max_task_duration_sec,omitempty" env:"JEH_MAX_TASK_DURATION_SEC"`
+	MaxTasksPerTemplate int `json:"max_tasks_per_template,omitempty" env:"JEH_MAX_TASKS_PER_TEMPLATE"`
 
 	// task concurrency
-	MaxParallelTasks int `json:"max_parallel_tasks,omitempty" default:"9999" rule:"^[0-9]{1,10}$" env:"SEMAPHORE_MAX_PARALLEL_TASKS"`
+	MaxParallelTasks int `json:"max_parallel_tasks,omitempty" default:"9999" rule:"^[0-9]{1,10}$" env:"JEH_MAX_PARALLEL_TASKS"`
 
 	// RunnerRegistrationToken is deprecated, use Runners field instead of it.
-	RunnerRegistrationToken string `json:"runner_registration_token,omitempty" env:"SEMAPHORE_RUNNER_REGISTRATION_TOKEN"`
+	RunnerRegistrationToken string `json:"runner_registration_token,omitempty" env:"JEH_RUNNER_REGISTRATION_TOKEN"`
 
 	JWT *JWTConfig `json:"jwt,omitempty"`
 
 	// PasswordLoginDisable rejects the "password" login method, leaving LDAP and
 	// OpenID Connect as the only ways in. Set it once an identity provider is
 	// configured and working, so that local passwords stop being a second door.
-	PasswordLoginDisable bool `json:"password_login_disable,omitempty" env:"SEMAPHORE_PASSWORD_LOGIN_DISABLED"`
+	PasswordLoginDisable bool `json:"password_login_disable,omitempty" env:"JEH_PASSWORD_LOGIN_DISABLED"`
 	// ExternalAuthEmailMatching controls whether an LDAP/OIDC login may be
 	// linked to an existing user by email when no external identity record
 	// exists yet:
@@ -679,15 +679,15 @@ type ConfigType struct {
 	//                      logs in via several providers);
 	//   "never"          - identities are matched strictly by provider ID.
 	// Local (password) accounts are never matched regardless of the mode.
-	ExternalAuthEmailMatching string `json:"external_auth_email_matching,omitempty" env:"SEMAPHORE_EXTERNAL_AUTH_EMAIL_MATCHING" rule:"^(auto|always|never)?$" default:"auto"`
-	NonAdminCanCreateProject  bool   `json:"non_admin_can_create_project,omitempty" env:"SEMAPHORE_NON_ADMIN_CAN_CREATE_PROJECT"`
+	ExternalAuthEmailMatching string `json:"external_auth_email_matching,omitempty" env:"JEH_EXTERNAL_AUTH_EMAIL_MATCHING" rule:"^(auto|always|never)?$" default:"auto"`
+	NonAdminCanCreateProject  bool   `json:"non_admin_can_create_project,omitempty" env:"JEH_NON_ADMIN_CAN_CREATE_PROJECT"`
 
 	// UseRemoteRunner is deprecated. Use Runners field instead of it.
-	UseRemoteRunner bool `json:"use_remote_runner,omitempty" env:"SEMAPHORE_USE_REMOTE_RUNNER"`
+	UseRemoteRunner bool `json:"use_remote_runner,omitempty" env:"JEH_USE_REMOTE_RUNNER"`
 
-	Apps map[string]App `json:"apps,omitempty" env:"SEMAPHORE_APPS"`
+	Apps map[string]App `json:"apps,omitempty" env:"JEH_APPS"`
 
-	EnvVars map[string]string `json:"env_vars,omitempty" env:"SEMAPHORE_ENV_VARS"`
+	EnvVars map[string]string `json:"env_vars,omitempty" env:"JEH_ENV_VARS"`
 
 	// ForwardedEnvVars lists host environment variables copied into task runs and
 	// into the child git processes that clone and update repositories. Proxy
@@ -696,7 +696,7 @@ type ConfigType struct {
 	// a corporate proxy therefore has to list the proxy variables explicitly,
 	// including the bypass list for internal hosts:
 	// ["HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY"].
-	ForwardedEnvVars []string `json:"forwarded_env_vars,omitempty" env:"SEMAPHORE_FORWARDED_ENV_VARS"`
+	ForwardedEnvVars []string `json:"forwarded_env_vars,omitempty" env:"JEH_FORWARDED_ENV_VARS"`
 
 	Teams *TeamsConfig `json:"teams,omitempty"`
 
@@ -755,7 +755,7 @@ const maxRunnerCheckIntervalSec int64 = int64(math.MaxInt64) / int64(time.Second
 // GetSecretsPath returns the secrets path from configuration.
 // Used for backward compatibility with legacy top-level secrets_path.
 func (conf *ConfigType) GetSecretsPath() string {
-	if conf.Dirs.Secrets != "" && conf.Dirs.Secrets != "/tmp/semaphore" {
+	if conf.Dirs.Secrets != "" && conf.Dirs.Secrets != "/tmp/jeh" {
 		return conf.Dirs.Secrets
 	}
 	if conf.SecretsPath != "" {
@@ -764,7 +764,7 @@ func (conf *ConfigType) GetSecretsPath() string {
 	if conf.Dirs.Secrets != "" {
 		return conf.Dirs.Secrets
 	}
-	return "/tmp/semaphore"
+	return "/tmp/jeh"
 }
 
 // GetSshConfigPath return SSH config path from configuration.
@@ -845,9 +845,9 @@ func (conf *ConfigType) RunnersReconcileInterval() time.Duration {
 type SubscriptionConfig struct {
 	// Key is a subscription key or token that can be set via config.
 	// When this is set, subscription activation from the web interface is disabled.
-	Key       string `json:"key,omitempty" db:"-" env:"SEMAPHORE_SUBSCRIPTION_KEY,sensitive"`
-	KeyFile   string `json:"key_file,omitempty" db:"-" env:"SEMAPHORE_SUBSCRIPTION_KEY_FILE"`
-	ServerURL string `json:"server_url,omitempty" env:"SEMAPHORE_SUBSCRIPTION_SERVER_URL" default:"https://portal.semaphoreui.com/billing"`
+	Key       string `json:"key,omitempty" db:"-" env:"JEH_SUBSCRIPTION_KEY,sensitive"`
+	KeyFile   string `json:"key_file,omitempty" db:"-" env:"JEH_SUBSCRIPTION_KEY_FILE"`
+	ServerURL string `json:"server_url,omitempty" env:"JEH_SUBSCRIPTION_SERVER_URL"`
 }
 
 func NewConfigType() *ConfigType {
@@ -963,7 +963,7 @@ func ConfigInit(configPath string, noConfigFile bool) (usedConfigPath *string) {
 	}
 
 	if Config.Runner.Token != "" && Config.Runner.TokenFile != "" {
-		panic("SEMAPHORE_RUNNER_TOKEN and SEMAPHORE_RUNNER_TOKEN_FILE are mutually exclusive")
+		panic("JEH_RUNNER_TOKEN and JEH_RUNNER_TOKEN_FILE are mutually exclusive")
 	}
 
 	if Config.Runner.TokenFile != "" {
@@ -987,7 +987,7 @@ func ConfigInit(configPath string, noConfigFile bool) (usedConfigPath *string) {
 
 func loadConfigFile(configPath string) (usedConfigPath *string) {
 	if configPath == "" {
-		configPath = os.Getenv("SEMAPHORE_CONFIG_PATH")
+		configPath = os.Getenv("JEH_CONFIG_PATH")
 	}
 
 	// If the configPath option has been set try to load and decode it
@@ -1000,12 +1000,12 @@ func loadConfigFile(configPath string) (usedConfigPath *string) {
 			path.Join(cwd, "config.json"),
 			path.Join(cwd, "config.yaml"),
 			path.Join(cwd, "config.yml"),
-			"/usr/local/etc/semaphore/config.json",
-			"/usr/local/etc/semaphore/config.yaml",
-			"/usr/local/etc/semaphore/config.yml",
-			"/etc/semaphore/config.json",
-			"/etc/semaphore/config.yaml",
-			"/etc/semaphore/config.yml",
+			"/usr/local/etc/jeh/config.json",
+			"/usr/local/etc/jeh/config.yaml",
+			"/usr/local/etc/jeh/config.yml",
+			"/etc/jeh/config.json",
+			"/etc/jeh/config.yaml",
+			"/etc/jeh/config.yml",
 		}
 		for _, p := range paths {
 			_, err = os.Stat(p)
@@ -1116,7 +1116,7 @@ func loadConfigDefaults() {
 		panic(err)
 	}
 
-	if legacySecretsPath != "" && (Config.Dirs.Secrets == "/tmp/semaphore" || Config.Dirs.Secrets == "") {
+	if legacySecretsPath != "" && (Config.Dirs.Secrets == "/tmp/jeh" || Config.Dirs.Secrets == "") {
 		Config.Dirs.Secrets = legacySecretsPath
 	}
 }
@@ -1896,7 +1896,7 @@ func validateConfig() {
 	}
 }
 
-// parseEnvTag splits an env tag value like "SEMAPHORE_DB_PASS,sensitive"
+// parseEnvTag splits an env tag value like "JEH_DB_PASS,sensitive"
 // into the environment variable name and whether it is sensitive.
 func parseEnvTag(tag string) (envVar string, sensitive bool) {
 	parts := strings.SplitN(tag, ",", 2)
@@ -2010,7 +2010,7 @@ func exitOnConfigError(msg string) {
 
 func exitOnConfigFileError(err error) {
 	if err != nil {
-		exitOnConfigError("Cannot Find configuration! Use --config parameter to point to a JSON or YAML file generated by `semaphore setup`.")
+		exitOnConfigError("Cannot Find configuration! Use --config parameter to point to a JSON or YAML file generated by `jeh setup`.")
 	}
 }
 
@@ -2060,11 +2060,11 @@ func mapToQueryString(m map[string]string) (str string) {
 	return
 }
 
-// FindSemaphore looks in the PATH for the semaphore variable
+// FindJEH looks in the PATH for the jeh variable
 // if not found it will attempt to find the absolute path of the first
-// os argument, the semaphore command, and return it
-func FindSemaphore() string {
-	cmdPath, _ := exec.LookPath("semaphore") //nolint:gosec
+// os argument, the jeh command, and return it
+func FindJEH() string {
+	cmdPath, _ := exec.LookPath("jeh") //nolint:gosec
 
 	if len(cmdPath) == 0 {
 		cmdPath, _ = filepath.Abs(os.Args[0]) //nolint:gosec
@@ -2081,17 +2081,18 @@ func AnsibleVersion() string {
 	return string(bytes)
 }
 
-// CheckUpdate uses the GitHub client to check for new tags in the semaphore repo
+// CheckUpdate uses the GitHub client to check for new tags in the jeh repo
 func CheckUpdate() (updateAvailable *github.RepositoryRelease, err error) {
 	// fetch releases
 	gh := github.NewClient(nil)
-	releases, _, err := gh.Repositories.ListReleases(context.TODO(), "semaphoreui", "semaphore", nil)
+	releases, _, err := gh.Repositories.ListReleases(context.TODO(), "impishMD", "jeh", nil)
 	if err != nil {
 		return
 	}
 
 	updateAvailable = nil
-	if (*releases[0].TagName)[1:] != Version() {
+	if len(releases) > 0 && releases[0].TagName != nil &&
+		strings.TrimPrefix(*releases[0].TagName, "v") != strings.TrimPrefix(Ver, "v") {
 		updateAvailable = releases[0]
 	}
 
@@ -2107,7 +2108,7 @@ func (d *DbConfig) HasSupportMultipleDatabases() bool {
 }
 
 func (d *DbConfig) GetDbName() string {
-	dbName := os.Getenv("SEMAPHORE_DB_NAME")
+	dbName := os.Getenv("JEH_DB_NAME")
 	if dbName != "" {
 		return dbName
 	}
@@ -2115,7 +2116,7 @@ func (d *DbConfig) GetDbName() string {
 }
 
 func (d *DbConfig) GetUsername() string {
-	username := os.Getenv("SEMAPHORE_DB_USER")
+	username := os.Getenv("JEH_DB_USER")
 	if username != "" {
 		return username
 	}
@@ -2123,7 +2124,7 @@ func (d *DbConfig) GetUsername() string {
 }
 
 func (d *DbConfig) GetPassword() string {
-	password := os.Getenv("SEMAPHORE_DB_PASS")
+	password := os.Getenv("JEH_DB_PASS")
 	if password != "" {
 		return password
 	}
@@ -2131,7 +2132,7 @@ func (d *DbConfig) GetPassword() string {
 }
 
 func (d *DbConfig) GetHostname() string {
-	hostname := os.Getenv("SEMAPHORE_DB_HOST")
+	hostname := os.Getenv("JEH_DB_HOST")
 	if hostname != "" {
 		return hostname
 	}

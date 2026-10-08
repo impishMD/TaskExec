@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 	"github.com/spf13/cobra"
 )
 
@@ -63,7 +63,7 @@ var userChangeByLoginCmd = &cobra.Command{
 		}
 
 		if !ok {
-			fmt.Println("Use command `semaphore user change-by-login --help` for details.")
+			fmt.Println("Use command `jeh user change-by-login --help` for details.")
 			os.Exit(1)
 		}
 
@@ -93,7 +93,7 @@ var userChangeByEmailCmd = &cobra.Command{
 		}
 
 		if !ok {
-			fmt.Println("Use command `semaphore user change-by-email --help` for details.")
+			fmt.Println("Use command `jeh user change-by-email --help` for details.")
 			os.Exit(1)
 		}
 

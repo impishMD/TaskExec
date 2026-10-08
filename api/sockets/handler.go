@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/tz"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/tz"
 
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"

@@ -5,13 +5,13 @@ import (
 	"testing"
 
 	"github.com/gorilla/securecookie"
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/db/sql"
-	"github.com/semaphoreui/semaphore/pkg/tz"
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/services/audit/audittest"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/db/sql"
+	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/services/audit/audittest"
+	"github.com/impishMD/jeh/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -56,9 +56,9 @@ func addSessionCookie(t *testing.T, store db.Store, r *http.Request, user db.Use
 		Verified:           method == db.SessionVerificationNone,
 	})
 	require.NoError(t, err)
-	encoded, err := util.Cookie.Encode("semaphore", map[string]any{"user": user.ID, "session": session.ID})
+	encoded, err := util.Cookie.Encode("jeh", map[string]any{"user": user.ID, "session": session.ID})
 	require.NoError(t, err)
-	r.AddCookie(&http.Cookie{Name: "semaphore", Value: encoded})
+	r.AddCookie(&http.Cookie{Name: "jeh", Value: encoded})
 	return r
 }
 

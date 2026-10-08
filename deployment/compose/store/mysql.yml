@@ -6,12 +6,12 @@ volumes:
 services:
   server:
     environment:
-      SEMAPHORE_DB_DIALECT: mysql
-      SEMAPHORE_DB_HOST: db
-      SEMAPHORE_DB_PORT: 3306
-      SEMAPHORE_DB_USER: ${MYSQL_USERNAME:-semaphore}
-      SEMAPHORE_DB_PASS: ${MYSQL_PASSWORD:-semaphore}
-      SEMAPHORE_DB: ${MYSQL_DATABASE:-semaphore}
+      JEH_DB_DIALECT: mysql
+      JEH_DB_HOST: db
+      JEH_DB_PORT: 3306
+      JEH_DB_USER: ${MYSQL_USERNAME:-jeh}
+      JEH_DB_PASS: ${MYSQL_PASSWORD:-jeh}
+      JEH_DB: ${MYSQL_DATABASE:-jeh}
     depends_on:
       - db
 
@@ -20,8 +20,8 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT:-root}
-      MYSQL_USER: ${MYSQL_USERNAME:-semaphore}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-semaphore}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-semaphore}
+      MYSQL_USER: ${MYSQL_USERNAME:-jeh}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-jeh}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-jeh}
     volumes:
       - mysql:/var/lib/mysql

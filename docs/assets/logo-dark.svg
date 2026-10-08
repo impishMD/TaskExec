@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 112" role="img" aria-label="Job Executor Hub — JEH">
+  <rect width="96" height="96" rx="22" fill="#142536"/>
+  <path d="M24 25v46M24 25h45M24 48h27M24 71h45" fill="none" stroke="#69d2b0" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="24" cy="25" r="7" fill="#69d2b0"/><circle cx="24" cy="71" r="7" fill="#69d2b0"/>
+  <circle cx="70" cy="25" r="6" fill="#69d2b0"/><circle cx="70" cy="71" r="6" fill="#69d2b0"/>
+  <path d="M52 34l23 14-23 14z" fill="#ffba63"/>
+<text x="120" y="62" fill="#edf5fa" font-family="system-ui, sans-serif" font-size="60" font-weight="750" letter-spacing="5">JEH</text><text x="122" y="95" fill="#edf5fa" font-family="system-ui, sans-serif" font-size="23" letter-spacing="2">Job Executor Hub</text></svg>

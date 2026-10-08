@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/semaphoreui/semaphore/db_lib"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
+	"github.com/impishMD/jeh/db_lib"
+	"github.com/impishMD/jeh/pkg/task_logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

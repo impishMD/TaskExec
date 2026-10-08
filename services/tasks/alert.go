@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"text/template"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
-	"github.com/semaphoreui/semaphore/util"
-	"github.com/semaphoreui/semaphore/util/mailer"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/jeh/util/mailer"
 )
 
 //go:embed templates/*.tmpl

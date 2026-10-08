@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/db/sql"
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/services/server"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/db/sql"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/services/server"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

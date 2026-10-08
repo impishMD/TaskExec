@@ -1,15 +1,15 @@
 file:
   /usr/local/bin/runner-wrapper:
     exists: true
-    owner: semaphore
+    owner: jeh
     group: root
     filetype: file
     contains:
-      # Data path must default from SEMAPHORE_DATA_PATH, not tmp (runner token persistence).
-      - 'SEMAPHORE_DATA_PATH="${SEMAPHORE_DATA_PATH:-/var/lib/semaphore}"'
-  /usr/local/bin/semaphore:
+      # Data path must default from JEH_DATA_PATH, not tmp (runner token persistence).
+      - 'JEH_DATA_PATH="${JEH_DATA_PATH:-/var/lib/jeh}"'
+  /usr/local/bin/jeh:
     exists: true
-    owner: semaphore
+    owner: jeh
     group: root
     filetype: file
 
@@ -51,13 +51,13 @@ package:
     installed: true
 
 user:
-  semaphore:
+  jeh:
     exists: true
     uid: 1001
     gid: 0
-    home: /home/semaphore
+    home: /home/jeh
 
 command:
-  semaphore:
+  jeh:
     exit-status: 0
     timeout: 10000

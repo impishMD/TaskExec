@@ -3,8 +3,8 @@ package pkg
 import (
 	"testing"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/git"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/git"
 	"github.com/stretchr/testify/assert"
 )
 

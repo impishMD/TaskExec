@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strconv"
 
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 func QueryParamsForProps(url *url.URL, props db.ObjectProps) (params db.RetrieveQueryParams) {

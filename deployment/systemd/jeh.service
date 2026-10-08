@@ -1,0 +1,18 @@
+[Unit]
+Description=Job Executor Hub (JEH)
+Documentation=https://github.com/impishMD/jeh
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=jeh
+Group=jeh
+StateDirectory=jeh
+WorkingDirectory=/var/lib/jeh
+EnvironmentFile=-/etc/jeh/env
+ExecStart=/usr/bin/jeh server --config /etc/jeh/config.json
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,10 +1,10 @@
 package server
 
 import (
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/metrics"
-	"github.com/semaphoreui/semaphore/pro_interfaces"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/metrics"
+	"github.com/impishMD/jeh/pro_interfaces"
+	"github.com/impishMD/jeh/util"
 )
 
 func NewAuditExporter(_ db.Store, _ *util.AuditConfig, _ pro_interfaces.AuditExportLeaser, _ *metrics.Metrics) pro_interfaces.AuditExporter {

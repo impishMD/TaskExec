@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -137,8 +137,8 @@ func TestIsSecureWebHost(t *testing.T) {
 		webHost  string
 		expected bool
 	}{
-		{"https host is secure", "https://semaphore.example.com", true},
-		{"http host is not secure", "http://semaphore.example.com:3000", false},
+		{"https host is secure", "https://jeh.example.com", true},
+		{"http host is not secure", "http://jeh.example.com:3000", false},
 		{"nil host is not secure", "", false},
 	}
 
@@ -298,7 +298,7 @@ func TestOidcSuccessRedirectURL(t *testing.T) {
 		{"no web host adds the missing leading slash", "", "project/1", "/project/1"},
 		{"no web host with root path", "", "/", "/"},
 		{"web host is prepended", "http://localhost:3000", "/auth/login", "http://localhost:3000/auth/login"},
-		{"web host with sub path", "http://localhost:3000/semaphore", "/project/1", "http://localhost:3000/semaphore/project/1"},
+		{"web host with sub path", "http://localhost:3000/jeh", "/project/1", "http://localhost:3000/jeh/project/1"},
 	}
 
 	for _, tt := range tests {
@@ -314,7 +314,7 @@ func TestOidcSuccessRedirectURL(t *testing.T) {
 
 // The browser must not resolve the redirect against the callback path.
 func TestOidcSuccessRedirectURL_NotRelative(t *testing.T) {
-	callback, err := url.Parse("http://semaphore.example.com/api/auth/oidc/pocketid/redirect")
+	callback, err := url.Parse("http://jeh.example.com/api/auth/oidc/pocketid/redirect")
 	require.NoError(t, err)
 
 	res, err := oidcSuccessRedirectURL("", "/auth/login")
@@ -324,7 +324,7 @@ func TestOidcSuccessRedirectURL_NotRelative(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t,
-		"http://semaphore.example.com/auth/login",
+		"http://jeh.example.com/auth/login",
 		callback.ResolveReference(location).String(),
 		"the browser must not resolve the redirect against the callback path")
 }

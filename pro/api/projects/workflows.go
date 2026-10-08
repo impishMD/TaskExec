@@ -3,9 +3,9 @@ package projects
 import (
 	"net/http"
 
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pro_interfaces"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pro_interfaces"
 )
 
 // workflowController is the open-source stub. Workflows are a Pro feature; the

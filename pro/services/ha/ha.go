@@ -1,14 +1,14 @@
 package ha
 
 import (
-	"github.com/semaphoreui/semaphore/api/sockets"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pro_interfaces"
-	"github.com/semaphoreui/semaphore/services/schedules"
+	"github.com/impishMD/jeh/api/sockets"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pro_interfaces"
+	"github.com/impishMD/jeh/services/schedules"
 )
 
 // NodeRegistry manages node heartbeats and cluster membership tracking
-// in HA mode. In active-active setups every Semaphore instance registers
+// in HA mode. In active-active setups every JEH instance registers
 // itself and periodically refreshes a heartbeat so other nodes can detect
 // liveness.
 type NodeRegistry interface {

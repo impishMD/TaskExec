@@ -6,16 +6,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/semaphoreui/semaphore/pkg/common_errors"
-	"github.com/semaphoreui/semaphore/services/audit"
-	"github.com/semaphoreui/semaphore/services/server"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/pkg/common_errors"
+	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/jeh/services/server"
+	"github.com/impishMD/jeh/util"
 
 	"github.com/robfig/cron/v3"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/db_lib"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
-	"github.com/semaphoreui/semaphore/services/tasks"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/db_lib"
+	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/jeh/services/tasks"
 	log "github.com/sirupsen/logrus"
 )
 

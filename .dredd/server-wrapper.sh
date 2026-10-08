@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-export SEMAPHORE_MAX_TASKS_PER_TEMPLATE=300
-export SEMAPHORE_APPS='{"ansible": {}}'
-export SEMAPHORE_PORT=58427
+export JEH_MAX_TASKS_PER_TEMPLATE=300
+export JEH_APPS='{"ansible": {}}'
+export JEH_PORT=58427
 
-semaphore=./semaphore
-[[ -x "$semaphore" ]] || semaphore=./bin/semaphore
+jeh=./jeh
+[[ -x "$jeh" ]] || jeh=./bin/jeh
 
-exec "$semaphore" server --config .dredd/config.json
+exec "$jeh" server --config .dredd/config.json

@@ -1,5 +1,5 @@
 // Package debuglog implements Node.js-`debug`-style selective debug logging on
-// top of logrus. The value of the SEMAPHORE_DEBUG_FILTER environment variable is
+// top of logrus. The value of the JEH_DEBUG_FILTER environment variable is
 // parsed into a Filter that decides which debug namespaces (the `context` field
 // attached via log.WithFields) may emit output. The filter only narrows
 // DEBUG-level entries and only when the log level is already DEBUG.
@@ -18,7 +18,7 @@ type Filter struct {
 	excludes []*regexp.Regexp
 }
 
-// Parse builds a Filter from a SEMAPHORE_DEBUG_FILTER spec. Tokens are separated
+// Parse builds a Filter from a JEH_DEBUG_FILTER spec. Tokens are separated
 // by commas or whitespace. A token starting with '-' is an exclusion; '*' is a
 // wildcard matching any sequence of characters within a namespace. An empty spec
 // yields a Filter whose Enabled always returns false.

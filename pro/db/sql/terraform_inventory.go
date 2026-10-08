@@ -1,7 +1,7 @@
 package sql
 
 import (
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 type TerraformStoreImpl struct {

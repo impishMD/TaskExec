@@ -11,11 +11,11 @@
 
 A project can use HashiCorp Vault as a secret storage backend. Secrets fetched
 from Vault are surfaced as access keys without being persisted in plaintext in
-the Semaphore database.
+the JEH database.
 
 ## Preconditions
 
-* Vault dev server reachable from Semaphore at `http://vault:8200`.
+* Vault dev server reachable from JEH at `http://vault:8200`.
 * AppRole or token with read access to `secret/data/qa/*`.
 * A secret stored at `secret/data/qa/db_password` with key `password = s3cret`.
 * Project `Infra QA`.

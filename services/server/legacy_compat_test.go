@@ -8,13 +8,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-// legacyEncrypt simulates how the OLD Semaphore stored a secret: AES-GCM with the
+// legacyEncrypt simulates how the OLD JEH stored a secret: AES-GCM with the
 // single flat key and NO key-id prefix.
 func legacyEncrypt(t *testing.T, plaintext []byte, flatKey string) string {
 	t.Helper()
@@ -24,7 +24,7 @@ func legacyEncrypt(t *testing.T, plaintext []byte, flatKey string) string {
 	return ct
 }
 
-// TestLegacyFlatKey_DecryptsAllKeyTypes verifies that data written by old Semaphore
+// TestLegacyFlatKey_DecryptsAllKeyTypes verifies that data written by old JEH
 // (un-prefixed, encrypted with the flat access_key_encryption) still decrypts on an
 // install configured the old way (only the flat field), for every access key type.
 func TestLegacyFlatKey_DecryptsAllKeyTypes(t *testing.T) {

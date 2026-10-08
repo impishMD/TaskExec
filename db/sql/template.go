@@ -5,8 +5,8 @@ import (
 	"errors"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/common_errors"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/common_errors"
 	log "github.com/sirupsen/logrus"
 )
 

@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/tz"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/tz"
 	"github.com/spf13/cobra"
 )
 

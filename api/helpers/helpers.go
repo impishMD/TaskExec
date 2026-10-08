@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 func Store(r *http.Request) db.Store {

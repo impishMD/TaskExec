@@ -3,8 +3,8 @@ package helpers
 import (
 	"net/http"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pro_interfaces"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pro_interfaces"
 	log "github.com/sirupsen/logrus"
 )
 

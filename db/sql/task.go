@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/task_logger"
 )
 
 func (d *SqlDb) CreateTaskStage(stage db.TaskStage) (res db.TaskStage, err error) {

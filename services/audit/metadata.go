@@ -1,6 +1,6 @@
 package audit
 
-import "github.com/semaphoreui/semaphore/db"
+import "github.com/impishMD/jeh/db"
 
 type AuthMethodMetadata struct {
 	Method   string `json:"method"`

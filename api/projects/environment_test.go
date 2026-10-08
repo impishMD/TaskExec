@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 type mockAccessKeyRepo struct {

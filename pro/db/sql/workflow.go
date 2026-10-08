@@ -1,7 +1,7 @@
 package sql
 
 import (
-	"github.com/semaphoreui/semaphore/db"
+	"github.com/impishMD/jeh/db"
 )
 
 // WorkflowStoreImpl is the open-source no-op stub for the Pro workflow store.

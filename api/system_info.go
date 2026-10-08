@@ -4,11 +4,11 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/semaphoreui/semaphore/api/helpers"
-	"github.com/semaphoreui/semaphore/db"
-	proFeatures "github.com/semaphoreui/semaphore/pro/pkg/features"
-	"github.com/semaphoreui/semaphore/pro_interfaces"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/api/helpers"
+	"github.com/impishMD/jeh/db"
+	proFeatures "github.com/impishMD/jeh/pro/pkg/features"
+	"github.com/impishMD/jeh/pro_interfaces"
+	"github.com/impishMD/jeh/util"
 	log "github.com/sirupsen/logrus"
 )
 

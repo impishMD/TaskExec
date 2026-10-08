@@ -9,7 +9,7 @@ type AuthConfig struct {
 	// session is rejected and expired, even if it was active recently, and the
 	// user must log in again. 0 (default) means no absolute limit: sessions
 	// then only expire after SessionInactivityTimeout without activity.
-	MaxSessionLifeHours int `json:"max_session_life_hours,omitempty" rule:"^[0-9]*$" env:"SEMAPHORE_AUTH_MAX_SESSION_LIFE_HOURS"`
+	MaxSessionLifeHours int `json:"max_session_life_hours,omitempty" rule:"^[0-9]*$" env:"JEH_AUTH_MAX_SESSION_LIFE_HOURS"`
 }
 
 // MaxSessionLife returns the absolute session lifetime configured by
@@ -23,16 +23,16 @@ func (c *ConfigType) MaxSessionLife() time.Duration {
 }
 
 type RecaptchaConfig struct {
-	Enabled string `json:"enabled,omitempty" env:"SEMAPHORE_RECAPTCHA_ENABLED"`
-	SiteKey string `json:"site_key,omitempty" env:"SEMAPHORE_RECAPTCHA_SITE_KEY"`
+	Enabled string `json:"enabled,omitempty" env:"JEH_RECAPTCHA_ENABLED"`
+	SiteKey string `json:"site_key,omitempty" env:"JEH_RECAPTCHA_SITE_KEY"`
 }
 
 type EmailAuthConfig struct {
-	Enabled                  bool     `json:"enabled" env:"SEMAPHORE_EMAIL_2TP_ENABLED"`
-	AllowLoginAsExternalUser bool     `json:"allow_login_as_external_user" env:"SEMAPHORE_EMAIL_2TP_ALLOW_LOGIN_AS_EXTERNAL_USER"`
-	AllowCreateExternalUsers bool     `json:"allow_create_external_user" env:"SEMAPHORE_EMAIL_2TP_ALLOW_CREATE_EXTERNAL_USER"`
-	AllowedDomains           []string `json:"allowed_domains" env:"SEMAPHORE_EMAIL_2TP_ALLOWED_DOMAINS"`
-	DisableForOidc           bool     `json:"disable_for_oidc" env:"SEMAPHORE_EMAIL_2TP_DISABLE_FOR_OIDC"`
+	Enabled                  bool     `json:"enabled" env:"JEH_EMAIL_2TP_ENABLED"`
+	AllowLoginAsExternalUser bool     `json:"allow_login_as_external_user" env:"JEH_EMAIL_2TP_ALLOW_LOGIN_AS_EXTERNAL_USER"`
+	AllowCreateExternalUsers bool     `json:"allow_create_external_user" env:"JEH_EMAIL_2TP_ALLOW_CREATE_EXTERNAL_USER"`
+	AllowedDomains           []string `json:"allowed_domains" env:"JEH_EMAIL_2TP_ALLOWED_DOMAINS"`
+	DisableForOidc           bool     `json:"disable_for_oidc" env:"JEH_EMAIL_2TP_DISABLE_FOR_OIDC"`
 }
 
 type MultifactorAuthConfig struct {

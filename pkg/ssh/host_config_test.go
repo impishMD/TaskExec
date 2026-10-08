@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/semaphoreui/semaphore/db"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
-	"github.com/semaphoreui/semaphore/util"
+	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/jeh/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -109,12 +109,12 @@ func TestInstallHostConfigs_URLMappingUsesItsOwnAlias(t *testing.T) {
 	cfg := installation.SSHConfigPath()
 
 	// Both aliases point at the real host, each with its own agent.
-	assert.Equal(t, "github.com", resolveOption(t, cfg, "semaphore-mapping-7", "hostname"))
-	assert.Equal(t, "github.com", resolveOption(t, cfg, "semaphore-mapping-8", "hostname"))
-	assert.Equal(t, "git", resolveOption(t, cfg, "semaphore-mapping-7", "user"))
+	assert.Equal(t, "github.com", resolveOption(t, cfg, "jeh-mapping-7", "hostname"))
+	assert.Equal(t, "github.com", resolveOption(t, cfg, "jeh-mapping-8", "hostname"))
+	assert.Equal(t, "git", resolveOption(t, cfg, "jeh-mapping-7", "user"))
 
-	first := resolveOption(t, cfg, "semaphore-mapping-7", "identityagent")
-	second := resolveOption(t, cfg, "semaphore-mapping-8", "identityagent")
+	first := resolveOption(t, cfg, "jeh-mapping-7", "identityagent")
+	second := resolveOption(t, cfg, "jeh-mapping-8", "identityagent")
 	assert.NotEqual(t, first, second, "two mappings on one host must not share a credential")
 }
 
@@ -181,7 +181,7 @@ func TestInstallHostConfigs_RewritesParsedByGit(t *testing.T) {
 
 	require.NoError(t, err, "git could not parse the rewrite: %s", out)
 	assert.Contains(t, string(out),
-		"url.git@semaphore-mapping-7:acme/private/.insteadof https://github.com/acme/private/")
+		"url.git@jeh-mapping-7:acme/private/.insteadof https://github.com/acme/private/")
 }
 
 // A more specific URL must win over a broader one. git resolves this by longest
@@ -214,7 +214,7 @@ func TestInstallHostConfigs_MoreSpecificURLWins(t *testing.T) {
 	out, err := cmd.CombinedOutput()
 
 	require.NoError(t, err, "%s", out)
-	assert.Equal(t, "git@semaphore-mapping-2:acme/private/repo.git", strings.TrimSpace(string(out)),
+	assert.Equal(t, "git@jeh-mapping-2:acme/private/repo.git", strings.TrimSpace(string(out)),
 		"the mapping of the repository must win over the mapping of the group")
 }
 
@@ -292,7 +292,7 @@ func TestInstallHostConfigs_PrefixMatchesOnStringBoundary(t *testing.T) {
 	t.Run("a trailing slash keeps the mapping inside the group", func(t *testing.T) {
 		installation := install(t, "https://github.com/acme/private/")
 
-		assert.Equal(t, "git@semaphore-mapping-1:acme/private/repo.git",
+		assert.Equal(t, "git@jeh-mapping-1:acme/private/repo.git",
 			rewritten(t, installation, "https://github.com/acme/private/repo.git"))
 
 		// A sibling group must keep its own URL.
@@ -303,7 +303,7 @@ func TestInstallHostConfigs_PrefixMatchesOnStringBoundary(t *testing.T) {
 	t.Run("without a trailing slash a sibling is captured too", func(t *testing.T) {
 		installation := install(t, "https://github.com/acme/private")
 
-		assert.Equal(t, "git@semaphore-mapping-1:acme/private-other.git",
+		assert.Equal(t, "git@jeh-mapping-1:acme/private-other.git",
 			rewritten(t, installation, "https://github.com/acme/private-other.git"),
 			"git matches insteadOf as a plain prefix, so a sibling is captured")
 	})
@@ -400,11 +400,11 @@ func TestInstallHostConfigs_MixedCredentialTypes(t *testing.T) {
 	assert.Equal(t, installation.Agents[0].SocketFile,
 		resolveOption(t, cfg, "github.com", "identityagent"))
 	assert.Equal(t, installation.Agents[1].SocketFile,
-		resolveOption(t, cfg, "semaphore-mapping-3", "identityagent"))
+		resolveOption(t, cfg, "jeh-mapping-3", "identityagent"))
 
 	params := installation.GitConfigParameters()
 	assert.Contains(t, params, "url.https://bob:pw@test.asdf.ru/")
-	assert.Contains(t, params, "url.git@semaphore-mapping-3:acme/")
+	assert.Contains(t, params, "url.git@jeh-mapping-3:acme/")
 }
 
 // The login of an access key is user supplied and nothing else validates it, so
@@ -442,7 +442,7 @@ func TestInstallHostConfigs_AcceptsRealKeyLogins(t *testing.T) {
 			defer installation.Destroy()
 
 			assert.Equal(t, login,
-				resolveOption(t, installation.SSHConfigPath(), "semaphore-mapping-1", "user"))
+				resolveOption(t, installation.SSHConfigPath(), "jeh-mapping-1", "user"))
 		})
 	}
 }

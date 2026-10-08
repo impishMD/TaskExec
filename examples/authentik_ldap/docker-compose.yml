@@ -70,32 +70,32 @@ services:
       AUTHENTIK_INSECURE: "false"
     env_file:
       - .env
-  semaphore:
-    image: semaphoreui/semaphore:latest
+  jeh:
+    image: impishmd/jeh:latest
     environment:
-      SEMAPHORE_DB_DIALECT: "sqlite"
-      SEMAPHORE_ADMIN_PASSWORD: "changeme"
-      SEMAPHORE_ADMIN_NAME: "admin"
-      SEMAPHORE_ADMIN_EMAIL: "admin@example.org"
-      SEMAPHORE_LDAP_ACTIVATED: "yes"
-      SEMAPHORE_LDAP_SERVER: "ldap:3389"
-      SEMAPHORE_LDAP_SEARCH_DN: "ou=users,dc=ldap,dc=goauthentik,dc=io"
-      SEMAPHORE_LDAP_BIND_DN: "cn=ldapservice,ou=users,dc=ldap,dc=goauthentik,dc=io"
-      SEMAPHORE_LDAP_SEARCH_FILTER: "(&(objectClass=inetOrgPerson)(cn=%s))"
-      SEMAPHORE_NON_ADMIN_CAN_CREATE_PROJECT: "yes"
-      SEMAPHORE_LDAP_MAPPING_DN: "dn"
-      SEMAPHORE_LDAP_MAPPING_MAIL: "mail"
-      SEMAPHORE_LDAP_MAPPING_UID: "uid"
-      SEMAPHORE_LDAP_MAPPING_CN: "cn"
+      JEH_DB_DIALECT: "sqlite"
+      JEH_ADMIN_PASSWORD: "changeme"
+      JEH_ADMIN_NAME: "admin"
+      JEH_ADMIN_EMAIL: "admin@example.org"
+      JEH_LDAP_ACTIVATED: "yes"
+      JEH_LDAP_SERVER: "ldap:3389"
+      JEH_LDAP_SEARCH_DN: "ou=users,dc=ldap,dc=goauthentik,dc=io"
+      JEH_LDAP_BIND_DN: "cn=ldapservice,ou=users,dc=ldap,dc=goauthentik,dc=io"
+      JEH_LDAP_SEARCH_FILTER: "(&(objectClass=inetOrgPerson)(cn=%s))"
+      JEH_NON_ADMIN_CAN_CREATE_PROJECT: "yes"
+      JEH_LDAP_MAPPING_DN: "dn"
+      JEH_LDAP_MAPPING_MAIL: "mail"
+      JEH_LDAP_MAPPING_UID: "uid"
+      JEH_LDAP_MAPPING_CN: "cn"
     env_file:
       - .env
     ports:
       - "3000:3000"
     volumes:
-      - semaphore_data:/var/lib/semaphore
+      - jeh_data:/var/lib/jeh
     depends_on:
       - ldap
 volumes:
   database:
   redis:
-  semaphore_data:
+  jeh_data:
