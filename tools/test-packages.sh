@@ -13,7 +13,7 @@ case "$format" in
   *) exit 1 ;;
 esac
 docker run --rm -v "$artifacts:/packages:ro" -v "$repo/tools:/tests:ro" \
-  -e PACKAGE="/packages/$(basename "$package")" -e FORMAT="$format" "$base" bash -euc '
+  -e PACKAGE="/packages/$(basename "$package")" -e FORMAT="$format" -e EXPECTED_VERSION="v$(cat "$repo/VERSION")" "$base" bash -euc '
   if [[ "$FORMAT" == deb ]]; then
     apt-get update -qq
     DEBIAN_FRONTEND=noninteractive apt-get install -y -qq curl python3 openssl "$PACKAGE"
@@ -24,10 +24,7 @@ docker run --rm -v "$artifacts:/packages:ro" -v "$repo/tools:/tests:ro" \
   test -f /usr/share/licenses/jeh/NOTICE
   id jeh
   test "$(stat -c %U /etc/jeh)" = jeh
-  version=$(jeh version)
-  version=${version%-*}
-  version=${version%-*}
-  runuser -u jeh -- bash /tests/test-binary.sh /usr/bin/jeh "$version"
+  runuser -u jeh -- bash /tests/test-binary.sh /usr/bin/jeh "$EXPECTED_VERSION"
   printf retained > /etc/jeh/retention-check
   printf retained > /var/lib/jeh/retention-check
   if [[ "$FORMAT" == deb ]]; then dpkg --remove jeh; else rpm -e jeh; fi

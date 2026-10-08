@@ -9,6 +9,7 @@ v0.0.1 начинает независимую нумерацию JEH. Осно�
 | --- | --- |
 | Бинарник, служба, пользователь `semaphore` | `jeh` |
 | Переменные `SEMAPHORE_*` | `JEH_*` |
+| Ansible `semaphore_vars` | `jeh_vars` |
 | `/etc/semaphore`, `/var/lib/semaphore`, `/tmp/semaphore`, `/opt/semaphore` | Соответствующие пути `/…/jeh` |
 | Метрики `semaphore_*` | `jeh_*` |
 | Образы upstream | `impishmd/jeh` или `ghcr.io/impishmd/jeh` |

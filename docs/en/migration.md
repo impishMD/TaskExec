@@ -9,6 +9,7 @@ JEH v0.0.1 starts an independent version series. It is based on upstream commit
 | --- | --- |
 | `semaphore` executable/service/user | `jeh` |
 | `SEMAPHORE_*` variables | `JEH_*` |
+| Ansible `semaphore_vars` | `jeh_vars` |
 | `/etc/semaphore`, `/var/lib/semaphore`, `/tmp/semaphore`, `/opt/semaphore` | Corresponding `/…/jeh` paths |
 | `semaphore_*` Prometheus metrics | `jeh_*` |
 | Upstream container images | `impishmd/jeh` or `ghcr.io/impishmd/jeh` |
