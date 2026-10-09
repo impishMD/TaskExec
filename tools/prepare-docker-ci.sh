@@ -1,28 +1,26 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# GitHub-hosted runners include shared Docker Hub credentials. If their token
-# service is unavailable, public images can still be pulled anonymously.
-# Never change a developer's local Docker credentials.
+# Only configure the disposable CI daemon, never a developer's local Docker.
 if [[ "${GITHUB_ACTIONS:-}" != true ]]; then
   echo 'This helper is only intended for GitHub Actions runners.' >&2
   exit 1
 fi
 
-image=alpine:3.24
-if timeout 90 docker pull "$image"; then
-  exit 0
-fi
+# Google's public Docker Hub cache also serves pulls when Hub authentication
+# is unavailable or the runner has exhausted its anonymous pull quota.
+# Preserve the runner's existing daemon settings and registry credentials.
+sudo python3 - <<'PYTHON'
+import json
+from pathlib import Path
 
-echo '::warning::Docker Hub pull failed with runner credentials; retrying public images anonymously.'
-docker logout docker.io
-for attempt in 1 2 3; do
-  if timeout 90 docker pull "$image"; then
-    exit 0
-  fi
-  if [[ "$attempt" != 3 ]]; then
-    sleep "$((attempt * 5))"
-  fi
-done
-echo '::error::Docker Hub is unavailable for anonymous pulls too.'
-exit 1
+path = Path('/etc/docker/daemon.json')
+config = json.loads(path.read_text()) if path.exists() else {}
+mirror = 'https://mirror.gcr.io'
+config['registry-mirrors'] = [mirror] + [
+    value for value in config.get('registry-mirrors', []) if value != mirror
+]
+path.parent.mkdir(parents=True, exist_ok=True)
+path.write_text(json.dumps(config) + '\n')
+PYTHON
+sudo systemctl restart docker

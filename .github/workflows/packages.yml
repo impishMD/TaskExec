@@ -72,6 +72,6 @@ jobs:
         with:
           name: release-packages
           path: dist
-      - name: Check Docker Hub access
+      - name: Configure Docker Hub mirror
         run: bash tools/prepare-docker-ci.sh
       - run: bash tools/test-packages.sh "${{ matrix.format }}" dist
