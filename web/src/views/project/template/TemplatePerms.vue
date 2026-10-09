@@ -15,19 +15,19 @@
       @yes="deleteItem(itemId)"
     />
 
-    <v-btn
-      :disabled="!features.custom_roles_management || !can(USER_PERMISSIONS.manageProjectUsers)"
-      color="primary"
-      @click="editItem('new')"
-      style="position: absolute; right: 16px"
-      >{{ $t('uiAddRole') }}
-    </v-btn>
+    <div class="d-flex justify-end mt-4 mb-3">
+      <v-btn
+        :disabled="!features.custom_roles_management || !can(USER_PERMISSIONS.manageProjectUsers)"
+        color="primary"
+        @click="editItem('new')"
+      >{{ $t('uiAddRole') }}</v-btn>
+    </div>
 
     <v-data-table
       :headers="headers"
       :items="items"
       hide-default-footer
-      class="mt-4"
+      class="template-permissions-table"
       :items-per-page="Number.MAX_VALUE"
     >
       <template v-slot:item.role="{ item }">

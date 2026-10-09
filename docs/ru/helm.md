@@ -49,17 +49,17 @@ persistence:
 ```sh
 helm repo add taskexec https://impishmd.github.io/TaskExec
 helm repo update
-helm upgrade --install taskexec taskexec/taskexec --version 1.0.0 \
+helm upgrade --install taskexec taskexec/taskexec --version 1.0.1 \
   --namespace taskexec -f taskexec-values.yaml --wait --timeout 5m
 helm test taskexec -n taskexec --logs
 kubectl -n taskexec port-forward service/taskexec 3000:3000
 ```
 
 Откройте <http://localhost:3000>. Логин — `admin`, пароль — сохранённый выше.
-Для установки из исходников замените `taskexec/taskexec --version 1.0.0` на `./charts/taskexec`.
+Для установки из исходников замените `taskexec/taskexec --version 1.0.1` на `./charts/taskexec`.
 Для собственного образа укажите `image.repository` и `image.tag`.
 
-По умолчанию используется `ghcr.io/impishmd/taskexec:v1.0.0`. Для Docker Hub задайте
+По умолчанию используется `ghcr.io/impishmd/taskexec:v1.0.6`. Для Docker Hub задайте
 `image.repository: impishmd/taskexec`. `image.digest` позволяет закрепить образ по `sha256:…`
 и имеет приоритет над тегом. Для закрытого реестра укажите `image.pullSecrets` в namespace релиза.
 
@@ -226,7 +226,7 @@ kubectl -n taskexec rollout status deployment/taskexec
 резервным копиям. Для повторной установки с сохранённым томом:
 
 ```sh
-helm upgrade --install taskexec taskexec/taskexec --version 1.0.0 -n taskexec \
+helm upgrade --install taskexec taskexec/taskexec --version 1.0.1 -n taskexec \
   -f taskexec-values.yaml --set persistence.existingClaim=taskexec --wait
 ```
 
@@ -253,7 +253,7 @@ spec:
   source:
     repoURL: https://impishmd.github.io/TaskExec
     chart: taskexec
-    targetRevision: 1.0.0
+    targetRevision: 1.0.1
     helm:
       releaseName: taskexec
       valuesObject:

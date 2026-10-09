@@ -5,6 +5,9 @@
 TaskExec runs automation through a web UI and REST API. Create a project, add a repository
 and credentials, define an inventory and variables, then create and run a task template.
 Templates can be scheduled; task pages show execution output and status.
+Click a **Failed** status to read the error from the log, including continuation lines.
+If there is no explicit error, the popup shows the last log entries. Click anywhere
+on the page to dismiss it.
 
 Start with the [repository quick start](../../README.md#quick-start).
 

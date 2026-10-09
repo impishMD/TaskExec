@@ -1,238 +1,160 @@
 <template>
-  <div
-    class="task-log-view"
-    :class="{'task-log-view--with-message': item.message || item.commit_message}"
-  >
-    <div class="px-5 task-log-view__message">
-      <span
-        v-if="item.message"
-        class="mr-3"
-      >
-        <v-icon small>mdi-message-outline</v-icon>
-        {{ item.message }}
-      </span>
-
-      <span
-        class="d-inline-block"
-        v-if="item.commit_message"
-      >
-        <v-icon small>mdi-source-fork</v-icon>
-        {{ item.commit_message }}
+  <div class="task-log-view">
+    <div v-if="item.message || item.commit_message" class="task-log-view__message">
+      <span v-if="item.message"><v-icon small>mdi-message-outline</v-icon> {{ item.message }}</span>
+      <span v-if="item.commit_message">
+        <v-icon small>mdi-source-fork</v-icon> {{ item.commit_message }}
       </span>
     </div>
 
-    <div
-      class="overflow-auto text-no-wrap px-5 task-log-view__status"
-    >
-      <TaskStatus :status="item.status" data-testid="task-status" />
-
-      <span class="ml-3 hidden-xs-only task-log-view__status_part">
-
-        {{ user
-        ? $t('taskStartedByAt', { user: user.name, time: $options.filters.formatDate(item.start) })
-        : $t('taskStartedAt', { time: $options.filters.formatDate(item.start) }) }}
-      </span>
-
-      <span class="ml-3 hidden-sm-and-down task-log-view__status_part">
-        <v-icon
-          small style="transform: translateY(-1px)">mdi-clock-outline</v-icon>
-        {{ [item.start, item.end] | formatMilliseconds }}
-      </span>
+    <div class="task-log-view__toolbar">
+      <div class="task-log-view__status">
+        <TaskStatus :status="item.status" :project-id="projectId" :task-id="itemId"
+          :output="output.concat(outputBuffer)" data-testid="task-status" />
+        <span class="task-log-view__status_part">
+          {{ user
+            ? $t('taskStartedByAt', {
+              user: user.name, time: $options.filters.formatDate(item.start),
+            })
+            : $t('taskStartedAt', { time: $options.filters.formatDate(item.start) }) }}
+        </span>
+        <span class="task-log-view__status_part">
+          <v-icon small>mdi-clock-outline</v-icon>
+          {{ [item.start, item.end] | formatMilliseconds }}
+        </span>
+      </div>
+      <v-tabs class="task-log-view__tabs" v-model="tab" show-arrows>
+        <v-tab>{{ $t('uiLog') }}</v-tab>
+        <v-tab>{{ $t('template_details') }}</v-tab>
+        <v-tab v-if="summaryAvailable" :disabled="!isTaskStopped || !item.end">
+          {{ $t('uiSummary') }}
+        </v-tab>
+      </v-tabs>
     </div>
 
-    <v-tabs class="task-log-view__tabs" right v-model="tab">
-      <v-tab>{{ $t('uiLog') }}</v-tab>
-      <v-tab>{{ $t('template_details') }}</v-tab>
-      <v-tab
-        v-if="summaryAvailable"
-        :disabled="!isTaskStopped || !item.end"
-      >{{ $t('uiSummary') }}</v-tab>
-    </v-tabs>
-
-    <div v-if="tab === 0">
+    <div v-if="tab === 0" class="task-log-view__log">
       <VirtualList
-        class="task-log-records"
-        :data-key="'id'"
+        class="task-log-records taskexec-scrollbar"
+        data-key="id"
         :data-sources="output"
         :data-component="itemComponent"
         :estimate-size="22"
         :keeps="100"
         ref="records"
-      >
-        <div class="task-log-records__record" v-for="record in output" :key="record.id">
-          <div class="task-log-records__time">
-            {{ record.time | formatTime }}
-          </div>
-          <div class="task-log-records__output" v-html="$options.filters.formatLog(record.output)">
-          </div>
-        </div>
-      </VirtualList>
-
-      <v-btn
-        color="success"
-        class="task-log-action-button"
-        style="right: 260px; width: 70px;"
-        v-if="item.status === 'waiting_confirmation'"
-        @click="confirmTask()"
-      >
-        <v-icon>mdi-check</v-icon>
-      </v-btn>
-
-      <v-btn
-        color="warning"
-        class="task-log-action-button"
-        style="right: 180px; width: 70px;"
-        v-if="item.status === 'waiting_confirmation'"
-        @click="rejectTask()"
-      >
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-
-      <v-btn
-        color="error"
-        class="task-log-action-button"
-        style="right: 20px; width: 150px;"
-        v-if="canStop"
-        @click="stopTask(item.status === 'stopping')"
-      >
-        {{ item.status === 'stopping' ? $t('forceStop') : $t('stop') }}
-      </v-btn>
-
-      <v-btn
-        v-if="isTaskStopped"
-        color="blue-grey"
-        :href="rawLogURL"
-        class="task-log-action-button"
-        style="right: 20px; width: 150px;"
-        target="_blank"
-        data-testid="task-rawLog"
-      >{{ $t('raw_log') }}
-      </v-btn>
+      />
+      <div class="task-log-view__actions" v-if="canStop || isTaskStopped">
+        <template v-if="item.status === 'waiting_confirmation'">
+          <v-btn color="success" :aria-label="$t('confirmTask')" @click="confirmTask()">
+            <v-icon>mdi-check</v-icon>
+          </v-btn>
+          <v-btn color="warning" :aria-label="$t('status_rejected')" @click="rejectTask()">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </template>
+        <v-btn v-if="canStop" color="error" @click="stopTask(item.status === 'stopping')">
+          {{ item.status === 'stopping' ? $t('forceStop') : $t('stop') }}
+        </v-btn>
+        <v-btn v-if="isTaskStopped" color="blue-grey" :href="rawLogURL" target="_blank"
+          rel="noopener" data-testid="task-rawLog">{{ $t('raw_log') }}</v-btn>
+      </div>
     </div>
 
-    <div v-else-if="tab === 1">
-      <v-divider style="margin-top: -1px;" />
-
-      <v-container fluid class="py-0 px-5 overflow-auto pt-4">
-        <TaskDetails
-          :item="item"
-          :user="user"
-          :schedule="schedule"
-          :integration="integration"
-          :project-id="projectId"
-        />
+    <div v-else-if="tab === 1" class="task-log-view__panel taskexec-scrollbar">
+      <v-container fluid class="px-5 py-4">
+        <TaskDetails :item="item" :user="user" :schedule="schedule"
+          :integration="integration" :project-id="projectId" />
       </v-container>
     </div>
-
-    <div v-else-if="tab === 2">
-      <v-divider style="margin-top: -1px;" />
-
-      <AnsibleStageView
-        :project-id="projectId"
-        :task-id="itemId"
-      />
+    <div v-else-if="tab === 2" class="task-log-view__panel taskexec-scrollbar">
+      <AnsibleStageView :project-id="projectId" :task-id="itemId" />
     </div>
-
   </div>
 </template>
 
 <style lang="scss">
-
-@import '~vuetify/src/styles/settings/_variables';
-
-$card-title-height: 68px;
-
-$task-log-message-offset: -18px;
-$task-log-message-height: 40px;
-$task-log-message-height-total: $task-log-message-height + $task-log-message-offset;
-
-$task-log-status-height: 32px;
-$task-log-status-offset: -40px;
-$task-log-tabs-height: 48px;
-
-$task-log-status-tab-height:
-  $task-log-tabs-height +
-  $task-log-status-offset +
-  $task-log-status-height;
-
+.task-log-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
 .task-log-view__message {
-  display: none;
-  margin-top: $task-log-message-offset;
-  height: $task-log-message-height;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 0 24px 12px;
+  overflow-wrap: anywhere;
+  flex: 0 0 auto;
 }
-
+.task-log-view__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 0 24px 12px;
+  flex: 0 0 auto;
+  border-bottom: 1px solid var(--taskexec-border);
+}
 .task-log-view__status {
-  height: $task-log-status-height;
-  margin-bottom: $task-log-status-offset;
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
-
 .task-log-view__status_part {
-  padding: 6px 10px;
+  padding: 4px 8px;
   border-radius: 6px;
-  background-color: var(--highlighted-card-bg-color);
+  background: var(--taskexec-soft);
+  overflow-wrap: anywhere;
 }
-
-.task-log-view__tabs {
-  height: $task-log-tabs-height;
+.task-log-view__tabs.v-tabs {
+  flex: 0 1 auto;
+  width: auto;
+  max-width: 100%;
+  margin-left: auto;
 }
-
-.task-log-action-button {
-  position: absolute;
-  bottom: 10px;
+.task-log-view__log {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }
-
+.task-log-view__actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  flex: 0 0 auto;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--taskexec-border);
+}
 .task-log-records {
-  background: black;
-  color: white;
-  height: calc(90dvh - #{$card-title-height + $task-log-status-tab-height});
+  background: #000;
+  color: #fff;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: auto;
   font-family: monospace;
   margin: 0;
-  padding: 5px 10px 50px;
+  padding: 12px 16px;
 }
-
-.task-log-view--with-message .task-log-view__message {
-  display: block;
+.task-log-view__panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
 }
-
-.task-log-view--with-message .task-log-records {
-  height: calc(90dvh -
-    #{$card-title-height + $task-log-message-height-total + $task-log-status-tab-height});
+.task-log-records__record { display: flex; align-items: flex-start; }
+.task-log-records__time { flex: 0 0 100px; user-select: none; }
+.task-log-records__output { flex: 1; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .task-log-view__toolbar { padding-left: 16px; padding-right: 16px; }
+  .task-log-records__time { flex-basis: 72px; }
+  .task-log-view__actions { padding: 12px 16px; }
 }
-
-.v-dialog--fullscreen {
-
-  .task-log-records {
-    height: calc(100dvh - #{$card-title-height + $task-log-status-tab-height});
-  }
-
-  .task-log-view--with-message .task-log-records {
-    height: calc(100dvh -
-      #{$card-title-height + $task-log-message-height-total + $task-log-status-tab-height});
-  }
-}
-
-.task-log-records__record {
-  display: flex;
-  flex-direction: row;
-  justify-content: left;
-}
-
-.task-log-records__time {
-  width: 120px;
-  min-width: 120px;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-.task-log-records__output {
-  width: 100%;
-  white-space: pre-wrap;
-}
-
 </style>
 <script>
 import axios from 'axios';
@@ -406,7 +328,6 @@ export default {
       this.tab = 0;
       this.output = [];
       this.outputBuffer = [];
-      this.outputInterval = null;
       this.user = {};
       this.schedule = null;
       this.integration = null;

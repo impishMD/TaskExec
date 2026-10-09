@@ -4,6 +4,8 @@
     :max-width="1000"
     :hide-buttons="true"
     :expandable="true"
+    content-class="TaskLogDialog"
+    name="TaskLog"
     no-body-paddings
     @close="onClose()"
     test-id="taskLogDialog"
@@ -54,6 +56,21 @@
   </EditDialog>
 </template>
 <style lang="scss">
+.TaskLogDialog.v-dialog {
+  height: calc(100dvh - 48px);
+  max-height: calc(100dvh - 48px);
+  overflow: hidden;
+  > .v-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    > .v-card__title { flex: 0 0 auto; }
+    > .v-card__text { flex: 1 1 auto; min-height: 0 !important; overflow: hidden; }
+  }
+  &.v-dialog--fullscreen { height: 100dvh; max-height: 100dvh; }
+}
+
 .task-log-view__placeholder {
   margin-left: 24px;
   margin-right: 24px;

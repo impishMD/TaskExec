@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.0.6](release-notes/en/v1.0.6.md)
+
+- Task dialog scrolling, footer spacing and responsive metadata/tab layout.
+- Clickable failure statuses with multiline log diagnostics.
+- Aligned template view controls and a dedicated Add role toolbar.
+- Global and project Telegram test notifications without saving form changes.
+- Helm chart 1.0.1 defaults to application v1.0.6.
+
 ## [v1.0.0](release-notes/en/v1.0.0.md)
 
 - TaskExec branding, CLI/service/module, environment prefix and container images.

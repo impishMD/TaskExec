@@ -2,6 +2,17 @@ import i18n from '@/plugins/i18';
 
 // Translate known form errors; preserve arbitrary backend/command diagnostics.
 const formErrors = {
+  'Invalid Telegram bot token': 'alertsInvalidToken',
+  'invalid stored Telegram bot token': 'alertsInvalidToken',
+  'Enter a Telegram chat ID or channel @username': 'alertsInvalidChat',
+  'Telegram chat ID is too long': 'alertsChatTooLong',
+  'Configure a global Telegram token or provide a project token': 'alertsMissingToken',
+  'Telegram request failed (network error or timeout)': 'alertsNetworkFailed',
+  'Telegram did not accept the alert': 'alertsRejected',
+  'could not load Telegram settings': 'alertsSettingsFailed',
+  'could not load global Telegram settings': 'alertsSettingsFailed',
+  'could not decrypt Telegram bot token': 'alertsDecryptFailed',
+
   'invalid project icon': 'projectIconInvalid',
   'invalid key source prefix': 'keySourceInvalid',
   'duplicate key source prefix': 'keySourceDuplicate',
@@ -37,6 +48,8 @@ export function getErrorMessage(err) {
   if (err.response) {
     if (err.response.data && err.response.data.error) {
       const message = err.response.data.error;
+      const telegramStatus = message.match(/^Telegram request failed \(HTTP (\d+)\)$/);
+      if (telegramStatus) return i18n.t('alertsHttpFailed', { status: telegramStatus[1] });
       const vaultStatus = message.match(/^Vault request failed \(HTTP (\d+)\)$/);
       if (vaultStatus) return i18n.t('httpError', { status: vaultStatus[1] });
       const fieldErrors = {

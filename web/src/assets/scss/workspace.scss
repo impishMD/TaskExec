@@ -386,3 +386,17 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+// Shared scroll surfaces, including detached menus and task dialogs.
+.taskexec-scrollbar,
+.taskexec-workspace .v-data-table__wrapper {
+  scrollbar-width: thin;
+  scrollbar-color: var(--taskexec-border) transparent;
+  &::-webkit-scrollbar { width: 6px; height: 6px; }
+  &::-webkit-scrollbar-track, &::-webkit-scrollbar-corner { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: var(--taskexec-border); border-radius: 6px; }
+  &:hover, &:focus-within {
+    scrollbar-color: var(--taskexec-muted) transparent;
+    &::-webkit-scrollbar-thumb { background: var(--taskexec-muted); }
+  }
+}

@@ -53,8 +53,8 @@ Repository and package visibility are managed separately from the workflow.
 
 ## Helm chart releases
 
-Application and chart tags are separate: `v1.0.0` publishes the application and
-`chart-v1.0.0` publishes chart `1.0.0`. Chart-only changes increment `Chart.yaml`'s `version`;
+Application and chart tags are separate: `v1.0.6` publishes the application and
+`chart-v1.0.1` publishes chart `1.0.1`. Chart-only changes increment `Chart.yaml`'s `version`;
 `appVersion` follows `VERSION`. Helm CI validates Helm 3/4 renders and Kubernetes schemas,
 then installs the built server in a disposable kind cluster and tests authentication,
 upgrade/restart persistence, URL subpaths and retained-PVC reuse.
@@ -82,7 +82,7 @@ Local checks (Python requires `PyYAML==6.0.3`):
 
 ```sh
 make version-check helm-check
-python3 tools/check-chart.py --release-tag chart-v1.0.0
+python3 tools/check-chart.py --release-tag chart-v1.0.1
 helm package charts/taskexec --destination /tmp/taskexec-charts
 ```
 

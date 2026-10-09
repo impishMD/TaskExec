@@ -10,6 +10,8 @@ describe('Telegram alert settings', () => {
   let wrapper;
   let originalGet;
   let originalPut;
+  let originalPost;
+  let tested;
   let saved;
   const defaults = {
     channel: 'telegram',
@@ -37,12 +39,16 @@ describe('Telegram alert settings', () => {
   beforeEach(() => {
     originalGet = axios.get;
     originalPut = axios.put;
+    originalPost = axios.post;
+    tested = null;
+    axios.post = async (url, data) => { tested = { url, data }; return { data: { sent: true } }; };
     saved = null;
   });
   afterEach(() => {
     if (wrapper) wrapper.destroy();
     axios.get = originalGet;
     axios.put = originalPut;
+    axios.post = originalPost;
   });
 
   it('starts disabled, then unlocks the chat and optional override', async () => {
@@ -90,6 +96,52 @@ describe('Telegram alert settings', () => {
     await render();
     await wrapper.setData({ enabled: true, chatId: '-100123', useGlobalToken: false });
     await wrapper.vm.save();
+    expect(saved).to.equal(null);
+  });
+
+  it('tests unchanged settings without saving or closing the dialog', async () => {
+    await render({ enabled: true, chat_id: '-100123', has_token: true });
+    expect(wrapper.vm.dirty).to.equal(false);
+    await wrapper.get('[data-testid="alerts-test"]').trigger('click');
+    await tick();
+    expect(tested.url).to.equal('/api/project/1/alerts/telegram/test');
+    expect(tested.data.chat_id).to.equal('-100123');
+    expect(tested.data).not.to.have.property('token');
+    expect(saved).to.equal(null);
+    expect(wrapper.emitted('saved')).to.equal(undefined);
+    expect(wrapper.vm.testResult.ok).to.equal(true);
+    await wrapper.setData({ chatId: '@different' });
+    expect(wrapper.vm.testResult).to.equal(null);
+  });
+
+  it('tests unsaved global values and rejects an empty destination', async () => {
+    await render({}, 0);
+    await wrapper.setData({ token: '123:unsaved-token' });
+    await wrapper.vm.testNotification();
+    expect(tested).to.equal(null);
+    await wrapper.setData({ testChatId: ' @preview ' });
+    await wrapper.vm.testNotification();
+    expect(tested.url).to.equal('/api/alerts/telegram/test');
+    expect(tested.data).to.include({ token: '123:unsaved-token', chat_id: '@preview' });
+    expect(saved).to.equal(null);
+    expect(wrapper.vm.token).to.equal('123:unsaved-token');
+  });
+
+  it('prevents duplicate tests and restores controls after a delivery failure', async () => {
+    await render({ enabled: true, chat_id: '-100123' });
+    let reject;
+    let calls = 0;
+    axios.post = () => { calls += 1; return new Promise((resolve, fail) => { reject = fail; }); };
+    const pending = wrapper.vm.testNotification();
+    await tick();
+    expect(wrapper.vm.testing).to.equal(true);
+    await wrapper.vm.testNotification();
+    expect(calls).to.equal(1);
+    reject({ response: { status: 400, data: { error: 'Telegram request failed (HTTP 403)' } } });
+    await pending;
+    expect(wrapper.vm.testing).to.equal(false);
+    expect(wrapper.vm.testResult.ok).to.equal(false);
+    expect(wrapper.vm.testResult.text).to.contain('403');
     expect(saved).to.equal(null);
   });
 

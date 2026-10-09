@@ -218,6 +218,7 @@ func Route(
 	adminAPI := authenticatedAPI.NewRoute().Subrouter()
 	adminAPI.Use(adminMiddleware)
 	adminAPI.Path("/settings").HandlerFunc(serverSettings).Methods("GET", "HEAD", "PUT")
+	adminAPI.Path("/alerts/telegram/test").HandlerFunc(alertSettings).Methods("POST")
 	adminAPI.Path("/alerts/telegram").HandlerFunc(alertSettings).Methods("GET", "HEAD", "PUT")
 	adminAPI.Path("/options").HandlerFunc(getOptions).Methods("GET", "HEAD")
 	adminAPI.Path("/options").HandlerFunc(setOption).Methods("POST")
@@ -295,6 +296,9 @@ func Route(
 	projectTaskStop.HandleFunc("/tasks/{task_id}/reject", taskController.RejectTask).Methods("POST")
 
 	//
+	projectAlertTestAPI := authenticatedAPI.Path("/project/{project_id}/alerts/telegram/test").Subrouter()
+	projectAlertTestAPI.Use(projects.ProjectMiddleware)
+	projectAlertTestAPI.Methods("POST").HandlerFunc(alertSettings)
 	projectAlertsAPI := authenticatedAPI.Path("/project/{project_id}/alerts/telegram").Subrouter()
 	projectAlertsAPI.Use(projects.ProjectMiddleware)
 	projectAlertsAPI.Methods("GET", "HEAD", "PUT").HandlerFunc(alertSettings)

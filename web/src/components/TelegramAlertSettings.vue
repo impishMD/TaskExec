@@ -6,13 +6,13 @@
     <v-btn v-if="projectId && !settings" text class="ma-4" @click="$emit('cancel')">
       {{ $t('cancel') }}
     </v-btn>
-    <v-form v-if="settings" ref="form" @submit.prevent="save" :disabled="saving">
+    <v-form v-if="settings" ref="form" @submit.prevent="save" :disabled="busy">
       <div class="telegram-alert-fields px-6 pt-5 pb-2">
         <template v-if="projectId">
           <v-switch
             v-model="enabled"
             :label="$t('alertsEnableTelegram')"
-            :disabled="saving"
+            :disabled="busy"
             data-testid="alerts-enable-telegram"
             class="mt-0 mb-4"
             hide-details
@@ -24,7 +24,7 @@
             :label="$t('alertsChatId')"
             :hint="$t('alertsChatHint')"
             persistent-hint
-            :disabled="!enabled || saving"
+            :disabled="!enabled || busy"
             :rules="enabled ? [(v) => !!v.trim() || $t('alertsChatRequired')] : []"
             outlined
             dense
@@ -34,7 +34,7 @@
           <v-checkbox
             v-model="useGlobalToken"
             :label="$t('alertsUseGlobalToken')"
-            :disabled="!enabled || saving"
+            :disabled="!enabled || busy"
             hide-details
             class="mt-0 mb-3"
             data-testid="alerts-use-global-token"
@@ -57,7 +57,7 @@
           :placeholder="settings.has_token && !clearToken ? $t('alertsTokenSaved') : ''"
           :hint="$t('alertsTokenHint')"
           persistent-hint
-          :disabled="saving || (!!projectId && (!enabled || useGlobalToken))"
+          :disabled="busy || (!!projectId && (!enabled || useGlobalToken))"
           :rules="projectId && enabled && !useGlobalToken
             ? [(v) => !!v.trim() || settings.has_token || $t('alertsTokenRequired')] : []"
           outlined
@@ -74,24 +74,35 @@
         <v-btn
           v-if="!projectId && settings.has_token && !clearToken"
           small text color="error" class="mt-3 ml-2"
-          :disabled="saving"
+          :disabled="busy"
           @click="clearToken = true; token = ''"
           data-testid="alerts-remove-token"
         >{{ $t('alertsRemoveToken') }}</v-btn>
         <p v-if="clearToken" class="text-body-2 warning--text mt-3 mb-0">
           {{ $t('alertsTokenWillBeRemoved') }}
         </p>
+        <v-text-field v-if="!projectId" v-model="testChatId" :label="$t('alertsTestChat')"
+          :disabled="busy" outlined dense class="mt-5" data-testid="alerts-test-chat" />
+      </div>
+      <div class="px-6" v-if="testResult">
+        <v-alert :type="testResult.ok ? 'success' : 'error'" text class="mb-0"
+          data-testid="alerts-test-result">{{ testResult.text }}</v-alert>
       </div>
       <v-divider class="mt-4" />
-      <v-card-actions class="px-6 py-4">
-        <v-btn v-if="projectId" text :disabled="saving" @click="$emit('cancel')">
+      <v-card-actions class="px-6 py-4 telegram-alert-actions">
+        <v-btn v-if="projectId" text :disabled="busy" @click="$emit('cancel')">
           {{ $t('cancel') }}
         </v-btn>
         <v-spacer />
+        <v-btn outlined color="primary" type="button" @click="testNotification"
+          :loading="testing" :disabled="saving || loading || (!!projectId && !enabled)"
+          data-testid="alerts-test">
+          <v-icon left small>mdi-send-check-outline</v-icon>{{ $t('alertsTest') }}
+        </v-btn>
         <v-btn
           color="primary"
           :loading="saving"
-          :disabled="!dirty || loading"
+          :disabled="!dirty || loading || testing"
           type="submit"
           data-testid="alerts-save"
         >{{ $t('save') }}</v-btn>
@@ -111,6 +122,9 @@ export default {
     return {
       loading: false,
       saving: false,
+      testing: false,
+      testChatId: '',
+      testResult: null,
       settings: null,
       enabled: false,
       chatId: '',
@@ -121,6 +135,11 @@ export default {
     };
   },
   computed: {
+    busy() { return this.saving || this.testing; },
+    testInput() {
+      return JSON.stringify([this.chatId, this.testChatId, this.token, this.useGlobalToken,
+        this.enabled, this.clearToken]);
+    },
     url() {
       return this.projectId
         ? `/api/project/${this.projectId}/alerts/telegram` : '/api/alerts/telegram';
@@ -133,6 +152,7 @@ export default {
     },
   },
   watch: {
+    testInput() { this.testResult = null; },
     projectId() { this.load(); },
   },
   created() { this.load(); },
@@ -158,14 +178,39 @@ export default {
         this.loading = false;
       }
     },
-    async save() {
-      if (!this.$refs.form.validate()) return;
-      this.error = '';
-      this.saving = true;
+    requestData() {
       const data = { enabled: this.enabled, chat_id: this.chatId };
       if (this.projectId && this.useGlobalToken) data.token = '';
       else if (this.token.trim()) data.token = this.token.trim();
       else if (this.clearToken) data.token = '';
+      return data;
+    },
+    async testNotification() {
+      if (this.busy || !this.$refs.form.validate()) return;
+      const data = this.requestData();
+      data.chat_id = (this.projectId ? this.chatId : this.testChatId).trim();
+      if (!data.chat_id) {
+        this.testResult = { ok: false, text: this.$t('alertsChatRequired') };
+        return;
+      }
+      data.locale = this.$i18n?.locale || 'en';
+      const url = this.url;
+      this.testing = true;
+      this.testResult = null;
+      try {
+        await axios.post(`${url}/test`, data);
+        if (url === this.url) this.testResult = { ok: true, text: this.$t('alertsTestSent') };
+      } catch (err) {
+        if (url === this.url) this.testResult = { ok: false, text: getErrorMessage(err) };
+      } finally {
+        this.testing = false;
+      }
+    },
+    async save() {
+      if (!this.$refs.form.validate()) return;
+      this.error = '';
+      this.saving = true;
+      const data = this.requestData();
       try {
         this.apply((await axios.put(this.url, data)).data);
         EventBus.$emit('i-snackbar', { color: 'success', text: this.$t('alertsSaved') });
@@ -179,3 +224,11 @@ export default {
   },
 };
 </script>
+
+<style lang="scss">
+.telegram-alert-actions {
+  flex-wrap: wrap;
+  gap: 12px;
+  .v-btn { margin: 0 !important; }
+}
+</style>

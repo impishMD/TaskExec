@@ -14,14 +14,14 @@ Then install:
 ```sh
 helm repo add taskexec https://impishmd.github.io/TaskExec
 helm repo update
-helm upgrade --install taskexec taskexec/taskexec --version 1.0.0 \
+helm upgrade --install taskexec taskexec/taskexec --version 1.0.1 \
   --namespace taskexec --create-namespace \
   --set secrets.existingSecret=taskexec-credentials --wait --timeout 5m
 kubectl -n taskexec port-forward service/taskexec 3000:3000
 ```
 
 Open `http://localhost:3000`; the initial username is `admin`. To use a checkout,
-replace `taskexec/taskexec --version 1.0.0` with `./charts/taskexec`.
+replace `taskexec/taskexec --version 1.0.1` with `./charts/taskexec`.
 Full installation guides: [English](https://github.com/impishMD/TaskExec/blob/develop/docs/en/helm.md) ·
 [Русский](https://github.com/impishMD/TaskExec/blob/develop/docs/ru/helm.md).
 
@@ -78,7 +78,7 @@ Provider options also include `returnViaState` (default `true`), `requireVerifie
 | `database.host/port/name/options` | External database connection |
 | `database.existingSecret/usernameKey/passwordKey` | Database credentials; defaults to the main Secret and `TASKEXEC_DB_USER` / `TASKEXEC_DB_PASS` |
 | `oidc.enable/providers` | OIDC providers and Secret mappings |
-| `image.repository/tag/digest` | Server image; default `ghcr.io/impishmd/taskexec:v1.0.0`; digest takes precedence |
+| `image.repository/tag/digest` | Server image; default `ghcr.io/impishmd/taskexec:v1.0.6`; digest takes precedence |
 | `image.pullSecrets` | List of registry Secret names |
 | `service` / `ingress` | HTTP Service, Ingress and TLS |
 | `persistence` | PVC size/class, existing claim and retention |

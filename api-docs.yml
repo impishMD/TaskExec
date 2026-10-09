@@ -151,6 +151,20 @@ definitions:
       token:
         type: string
         description: Write-only bot token. Omit or use null to preserve, use an empty string to remove. Removing a project token falls back to the global token.
+  TelegramAlertTest:
+    type: object
+    required: [chat_id]
+    properties:
+      chat_id:
+        type: string
+        description: Test destination (numeric chat ID or channel @username). Required for both global and project tests; never saved.
+      token:
+        type: string
+        description: Bot token from the current form. Omit or use null for the saved token. An empty string selects the global token for a project. Never saved by this endpoint.
+      locale:
+        type: string
+        description: Test message language; Russian for ru locales, English otherwise.
+        default: en
   App:
     type: object
 
@@ -4243,6 +4257,56 @@ paths:
             $ref: "#/definitions/TelegramAlertSettings"
         400:
           description: Invalid settings or missing chat/token
+        403:
+          description: Permission to update the project required
+
+  /alerts/telegram/test:
+    post:
+      tags: [alerts]
+      summary: Test a Telegram notification with global credentials
+      description: Sends one test message using submitted values and saved credentials. Does not update settings or run a task. Requires the same permissions as changing these settings.
+      parameters:
+        - in: body
+          name: settings
+          required: true
+          schema:
+            $ref: "#/definitions/TelegramAlertTest"
+      responses:
+        200:
+          description: Test notification accepted by Telegram
+          schema:
+            type: object
+            properties:
+              sent:
+                type: boolean
+        400:
+          description: Invalid settings, missing credentials or delivery failure. Error messages do not include credentials.
+        403:
+          description: Administrator access required
+
+  /project/{project_id}/alerts/telegram/test:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    post:
+      tags: [alerts]
+      summary: Test a project Telegram notification
+      description: Sends one test message using submitted values and saved credentials. Does not update settings or run a task. Requires the same permissions as changing these settings.
+      parameters:
+        - in: body
+          name: settings
+          required: true
+          schema:
+            $ref: "#/definitions/TelegramAlertTest"
+      responses:
+        200:
+          description: Test notification accepted by Telegram
+          schema:
+            type: object
+            properties:
+              sent:
+                type: boolean
+        400:
+          description: Invalid settings, missing credentials or delivery failure. Error messages do not include credentials.
         403:
           description: Permission to update the project required
 

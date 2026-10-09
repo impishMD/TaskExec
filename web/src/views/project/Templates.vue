@@ -120,7 +120,8 @@
 
       <v-btn
         icon
-        class="mt-2 ml-4"
+        class="ml-2 flex-shrink-0"
+        :aria-label="$t('editViews')"
         @click="editViewsDialog = true"
         v-if="can(USER_PERMISSIONS.manageProjectResources)"
       >
@@ -186,7 +187,8 @@
 
       <template v-slot:item.status="{ item }">
         <div class="mt-2 mb-2 d-flex" v-if="item.last_task != null">
-          <TaskStatus :status="item.last_task.status"/>
+          <TaskStatus :status="item.last_task.status" :project-id="projectId"
+              :task-id="item.last_task.id" />
         </div>
         <div v-else class="mt-3 mb-2 d-flex" style="color: gray;">{{ $t('notLaunched') }}</div>
       </template>

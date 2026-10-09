@@ -1,4 +1,21 @@
 export default {
+  alertsTest: 'Тестировать оповещение',
+  alertsTestChat: 'ID чата для теста',
+  alertsTestSent: 'Тестовое оповещение отправлено.',
+  alertsInvalidToken: 'Некорректный токен бота Telegram',
+  alertsInvalidChat: 'Укажите ID чата Telegram или @username канала',
+  alertsMissingToken: 'Настройте глобальный токен Telegram или укажите токен проекта',
+  alertsNetworkFailed: 'Не удалось подключиться к Telegram. Проверьте соединение сервера.',
+  alertsRejected: 'Telegram не принял оповещение.',
+  alertsHttpFailed: 'Telegram отклонил запрос (HTTP {status}). Проверьте токен, ID чата и права бота.',
+  alertsSettingsFailed: 'Не удалось прочитать настройки Telegram. Откройте форму заново и повторите попытку.',
+  alertsDecryptFailed: 'Не удалось расшифровать сохранённый токен Telegram. Введите токен заново.',
+  alertsChatTooLong: 'Слишком длинный ID чата Telegram',
+
+  taskErrorDetails: 'Ошибка выполнения',
+  taskErrorLoading: 'Загрузка ошибки…',
+  taskErrorMissing: 'Строки с ERROR не найдены. Последние записи журнала:',
+
   generalSettings: 'Общие настройки',
   serverSettingsHint: 'Настройки сервера хранятся в базе данных и действуют для всех проектов.',
   remoteRunnersDefault: 'Использовать удалённых исполнителей по умолчанию',

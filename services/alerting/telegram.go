@@ -2,13 +2,16 @@ package alerting
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
+	"github.com/impishMD/taskexec/pkg/common_errors"
 	"github.com/impishMD/taskexec/util"
 )
 
@@ -48,7 +51,56 @@ func (s Service) SendTelegram(projectID int, text string, client *http.Client) (
 	if !tokenPattern.Match(token) {
 		return false, errors.New("invalid stored Telegram bot token")
 	}
-	body, err := json.Marshal(map[string]string{"chat_id": config.ChatID, "parse_mode": "HTML", "text": text})
+	return sendTelegram(context.Background(), string(token), config.ChatID, text, client)
+}
+
+// TestTelegram sends using the submitted form without changing saved settings.
+// A nil token uses the saved override; an empty token selects the global token.
+func (s Service) TestTelegram(ctx context.Context, projectID int, update TelegramUpdate, locale string, client *http.Client) error {
+	chatID := strings.TrimSpace(update.ChatID)
+	if len(chatID) > 128 || !chatPattern.MatchString(chatID) {
+		return common_errors.NewValidationError("Enter a Telegram chat ID or channel @username")
+	}
+	channel, err := s.Store.GetAlertChannel(projectID, Telegram)
+	if err != nil {
+		return errors.New("could not load Telegram settings")
+	}
+	token := ""
+	secret := channel.Secret
+	if update.Token != nil {
+		token = strings.TrimSpace(*update.Token)
+		secret = ""
+	}
+	if token == "" && secret == "" && projectID != 0 {
+		global, err := s.Store.GetAlertChannel(0, Telegram)
+		if err != nil {
+			return errors.New("could not load global Telegram settings")
+		}
+		secret = global.Secret
+	}
+	if token == "" && secret != "" {
+		plain, err := util.Config.DecryptAccessSecret(secret)
+		if err != nil {
+			return errors.New("could not decrypt Telegram bot token")
+		}
+		token = string(plain)
+	}
+	if token == "" {
+		return common_errors.NewValidationError("Configure a global Telegram token or provide a project token")
+	}
+	if len(token) > 256 || !tokenPattern.MatchString(token) {
+		return common_errors.NewValidationError("Invalid Telegram bot token")
+	}
+	text := "TaskExec: test notification. Telegram delivery is working."
+	if strings.HasPrefix(locale, "ru") {
+		text = "TaskExec: тестовое оповещение. Отправка в Telegram работает."
+	}
+	_, err = sendTelegram(ctx, token, chatID, text, client)
+	return err
+}
+
+func sendTelegram(ctx context.Context, token, chatID, text string, client *http.Client) (bool, error) {
+	body, err := json.Marshal(map[string]string{"chat_id": chatID, "parse_mode": "HTML", "text": text})
 	if err != nil {
 		return false, errors.New("could not encode Telegram alert")
 	}
@@ -58,7 +110,12 @@ func (s Service) SendTelegram(projectID int, text string, client *http.Client) (
 	// Never forward a credential-bearing path through a redirect.
 	safeClient := *client
 	safeClient.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
-	resp, err := safeClient.Post("https://api.telegram.org/bot"+string(token)+"/sendMessage", "application/json", bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.telegram.org/bot"+token+"/sendMessage", bytes.NewReader(body))
+	if err != nil {
+		return false, errors.New("could not encode Telegram alert")
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := safeClient.Do(req)
 	if err != nil {
 		return false, errors.New("Telegram request failed (network error or timeout)")
 	}

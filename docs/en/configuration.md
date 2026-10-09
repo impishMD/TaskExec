@@ -58,6 +58,11 @@ are never returned by the API or displayed. An empty replacement field keeps an
 existing token. Use **Remove token** to delete the global token explicitly.
 Project alert settings require permission to update the project.
 
+**Test notification** sends a message using the current form values without saving them.
+In global settings, enter a separate test Chat ID; it is not stored. In project settings,
+the test uses the selected global or project bot and the destination shown in the form.
+The result appears below the fields. Sending a test does not run a task.
+
 Channel settings are stored separately in the database, with per-project enablement
 and destinations. Tokens use the server's access-key encryption configuration;
 keep this key with your database backups. `vault check`, `vault rekey`, and rekey

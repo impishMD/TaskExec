@@ -1,4 +1,21 @@
 export default {
+  alertsTest: 'Test notification',
+  alertsTestChat: 'Test chat ID',
+  alertsTestSent: 'Test notification sent.',
+  alertsInvalidToken: 'Invalid Telegram bot token',
+  alertsInvalidChat: 'Enter a Telegram chat ID or channel @username',
+  alertsMissingToken: 'Configure a global Telegram token or provide a project token',
+  alertsNetworkFailed: 'Could not reach Telegram. Check the server connection.',
+  alertsRejected: 'Telegram did not accept the notification.',
+  alertsHttpFailed: 'Telegram rejected the request (HTTP {status}). Check the bot token, chat ID and bot permissions.',
+  alertsSettingsFailed: 'Could not read Telegram settings. Reload the form and try again.',
+  alertsDecryptFailed: 'Could not decrypt the saved Telegram token. Enter the token again.',
+  alertsChatTooLong: 'Telegram chat ID is too long',
+
+  taskErrorDetails: 'Task error',
+  taskErrorLoading: 'Loading error details…',
+  taskErrorMissing: 'No ERROR lines found. Last log entries:',
+
   generalSettings: 'General settings',
   serverSettingsHint: 'Server-wide settings are stored in the database and apply to all projects.',
   remoteRunnersDefault: 'Use remote runners by default',

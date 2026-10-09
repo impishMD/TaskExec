@@ -36,11 +36,23 @@ func alertSettings(w http.ResponseWriter, r *http.Request) {
 		helpers.WriteJSON(w, http.StatusOK, settings)
 		return
 	}
-	var update alerting.TelegramUpdate
+	var update struct {
+		alerting.TelegramUpdate
+		Locale string `json:"locale"`
+	}
 	if !helpers.Bind(w, r, &update) {
 		return
 	}
-	settings, err := service.UpdateTelegram(projectID, update)
+	if r.Method == http.MethodPost {
+		if err := service.TestTelegram(r.Context(), projectID, update.TelegramUpdate, update.Locale, nil); err != nil {
+			// Never return Telegram URLs or response bodies: they may contain credentials.
+			helpers.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+			return
+		}
+		helpers.WriteJSON(w, http.StatusOK, map[string]bool{"sent": true})
+		return
+	}
+	settings, err := service.UpdateTelegram(projectID, update.TelegramUpdate)
 	if err != nil {
 		helpers.WriteError(w, err)
 		return

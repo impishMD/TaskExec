@@ -45,7 +45,7 @@
       </template>
 
       <template v-slot:item.status="{ item }">
-        <TaskStatus :status="item.status"/>
+        <TaskStatus :status="item.status" :project-id="template.project_id" :task-id="item.id" />
       </template>
 
       <template v-slot:item.start="{ item }">

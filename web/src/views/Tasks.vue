@@ -31,7 +31,7 @@
 
       <template v-slot:item.status="{item}">
         <div class="pr-4">
-          <TaskStatus :status="item.status"/>
+          <TaskStatus :status="item.status" :project-id="item.project_id" :task-id="item.task_id" />
         </div>
       </template>
 
