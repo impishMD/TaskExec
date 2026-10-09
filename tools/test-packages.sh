@@ -12,6 +12,7 @@ case "$format" in
   rpm) base=rockylinux:9 ;;
   *) exit 1 ;;
 esac
+base="${TASKEXEC_TEST_REGISTRY:-docker.io}/library/$base"
 docker run --rm -v "$artifacts:/packages:ro" -v "$repo/tools:/tests:ro" \
   -e PACKAGE="/packages/$(basename "$package")" -e FORMAT="$format" -e EXPECTED_VERSION="v$(cat "$repo/VERSION")" "$base" bash -euc '
   if [[ "$FORMAT" == deb ]]; then

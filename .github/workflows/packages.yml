@@ -72,6 +72,6 @@ jobs:
         with:
           name: release-packages
           path: dist
-      - name: Configure Docker Hub mirror
-        run: bash tools/prepare-docker-ci.sh
       - run: bash tools/test-packages.sh "${{ matrix.format }}" dist
+        env:
+          TASKEXEC_TEST_REGISTRY: mirror.gcr.io
