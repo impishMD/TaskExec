@@ -38,115 +38,14 @@
             "IfNotPresent",
             "Never"
           ]
-        }
-      },
-      "additionalProperties": false
-    },
-    "imagePullSecrets": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": {
+        },
+        "pullSecrets": {
+          "type": "array",
+          "items": {
             "type": "string",
             "pattern": "^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$",
             "maxLength": 253
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "name"
-        ]
-      }
-    },
-    "existingSecret": {
-      "type": "string",
-      "pattern": "^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$",
-      "maxLength": 253
-    },
-    "config": {
-      "type": "object",
-      "properties": {
-        "webRoot": {
-          "type": "string",
-          "pattern": "^$|^https?://[^/?#@\\s]+(/[^?#\\s]*)?$"
-        },
-        "admin": {
-          "type": "object",
-          "properties": {
-            "username": {
-              "type": "string",
-              "minLength": 1,
-              "pattern": "^[^\\r\\n]+$"
-            },
-            "name": {
-              "type": "string",
-              "minLength": 1,
-              "pattern": "^[^\\r\\n]+$"
-            },
-            "email": {
-              "type": "string",
-              "minLength": 1,
-              "pattern": "^[^\\r\\n]+$"
-            }
-          },
-          "additionalProperties": false
-        },
-        "database": {
-          "type": "object",
-          "properties": {
-            "dialect": {
-              "type": "string",
-              "enum": [
-                "sqlite",
-                "postgres",
-                "mysql"
-              ]
-            },
-            "host": {
-              "type": "string",
-              "pattern": "^[^:\\s]*$"
-            },
-            "port": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 65535
-            },
-            "name": {
-              "type": "string",
-              "minLength": 1,
-              "pattern": "^[^\\r\\n]+$"
-            },
-            "options": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
-            }
-          },
-          "additionalProperties": false,
-          "allOf": [
-            {
-              "if": {
-                "properties": {
-                  "dialect": {
-                    "enum": [
-                      "postgres",
-                      "mysql"
-                    ]
-                  }
-                }
-              },
-              "then": {
-                "properties": {
-                  "host": {
-                    "type": "string",
-                    "minLength": 1
-                  }
-                }
-              }
-            }
-          ]
         }
       },
       "additionalProperties": false
@@ -437,7 +336,176 @@
     "affinity": {
       "type": "object"
     },
-    "extraEnv": {
+    "extraEnvFrom": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "extraVolumes": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "extraVolumeMounts": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "secrets": {
+      "type": "object",
+      "properties": {
+        "existingSecret": {
+          "type": "string",
+          "pattern": "^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$",
+          "maxLength": 253
+        },
+        "accesskeyEncryptionKey": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+$",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "existingSecret"
+      ]
+    },
+    "admin": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^\\r\\n]+$"
+        },
+        "email": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^\\r\\n]+$"
+        },
+        "fullname": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^\\r\\n]+$"
+        },
+        "existingSecret": {
+          "type": "string",
+          "pattern": "^$|^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$",
+          "maxLength": 253
+        },
+        "passwordKey": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+$",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "database": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "string",
+          "pattern": "^[^:\\s]*$"
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^\\r\\n]+$"
+        },
+        "options": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "sqlite",
+            "postgres",
+            "mysql"
+          ]
+        },
+        "existingSecret": {
+          "type": "string",
+          "pattern": "^$|^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$",
+          "maxLength": 253
+        },
+        "usernameKey": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+$",
+          "minLength": 1
+        },
+        "passwordKey": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+$",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "postgres",
+                  "mysql"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "host": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "general": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "string",
+          "pattern": "^$|^https?://[^/?#@\\s]+(/[^?#\\s]*)?$"
+        },
+        "passwordLoginDisable": {
+          "type": "boolean"
+        },
+        "nonAdminCanCreateProject": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "config": {
+      "type": "object",
+      "properties": {
+        "forwarded_env_vars": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "extraEnvVariables": {
       "type": "object",
       "additionalProperties": {
         "type": "string"
@@ -467,35 +535,456 @@
                 "TASKEXEC_DB_PORT",
                 "TASKEXEC_DB",
                 "TASKEXEC_DB_USER",
-                "TASKEXEC_DB_PASS"
+                "TASKEXEC_DB_PASS",
+                "TASKEXEC_OIDC_PROVIDERS",
+                "TASKEXEC_PASSWORD_LOGIN_DISABLED",
+                "TASKEXEC_NON_ADMIN_CAN_CREATE_PROJECT",
+                "TASKEXEC_FORWARDED_ENV_VARS",
+                "SSL_CERT_FILE",
+                "REQUESTS_CA_BUNDLE",
+                "GIT_SSL_CAINFO"
               ]
             }
           }
         ]
       }
     },
-    "extraEnvFrom": {
+    "extraEnvSecrets": {
+      "type": "object",
+      "propertyNames": {
+        "allOf": [
+          {
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+          },
+          {
+            "not": {
+              "enum": [
+                "TASKEXEC_INTERFACE",
+                "TASKEXEC_PORT",
+                "TASKEXEC_CONFIG_PATH",
+                "TASKEXEC_DB_PATH",
+                "TASKEXEC_TMP_PATH",
+                "TASKEXEC_WEB_ROOT",
+                "TASKEXEC_ADMIN",
+                "TASKEXEC_ADMIN_NAME",
+                "TASKEXEC_ADMIN_EMAIL",
+                "TASKEXEC_ADMIN_PASSWORD",
+                "TASKEXEC_ACCESS_KEY_ENCRYPTION",
+                "TASKEXEC_DB_DIALECT",
+                "TASKEXEC_DB_OPTIONS",
+                "TASKEXEC_DB_HOST",
+                "TASKEXEC_DB_PORT",
+                "TASKEXEC_DB",
+                "TASKEXEC_DB_USER",
+                "TASKEXEC_DB_PASS",
+                "TASKEXEC_OIDC_PROVIDERS",
+                "TASKEXEC_PASSWORD_LOGIN_DISABLED",
+                "TASKEXEC_NON_ADMIN_CAN_CREATE_PROJECT",
+                "TASKEXEC_FORWARDED_ENV_VARS",
+                "SSL_CERT_FILE",
+                "REQUESTS_CA_BUNDLE",
+                "GIT_SSL_CAINFO"
+              ]
+            }
+          }
+        ]
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "secret": {
+            "type": "string",
+            "pattern": "^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$",
+            "maxLength": 253
+          },
+          "key": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]+$",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "secret",
+          "key"
+        ]
+      }
+    },
+    "labels": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "app.kubernetes.io/name",
+            "app.kubernetes.io/instance",
+            "app.kubernetes.io/component",
+            "app.kubernetes.io/version",
+            "app.kubernetes.io/managed-by",
+            "helm.sh/chart"
+          ]
+        }
+      }
+    },
+    "annotations": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "checksum/config"
+          ]
+        }
+      }
+    },
+    "serviceAccount": {
+      "type": "object",
+      "properties": {
+        "create": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^$|^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$",
+          "maxLength": 253
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "dnsConfig": {
+      "type": "object"
+    },
+    "extraInitContainers": {
       "type": "array",
       "items": {
         "type": "object"
       }
     },
-    "extraVolumes": {
+    "extraSidecarContainers": {
       "type": "array",
       "items": {
         "type": "object"
       }
     },
-    "extraVolumeMounts": {
+    "envFromSecrets": {
       "type": "array",
       "items": {
-        "type": "object"
-      }
+        "type": "string",
+        "pattern": "^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$",
+        "maxLength": 253
+      },
+      "uniqueItems": true
+    },
+    "envFromConfigMaps": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$",
+        "maxLength": 253
+      },
+      "uniqueItems": true
+    },
+    "customCertificates": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "existingSecret": {
+          "type": "string",
+          "pattern": "^$|^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$",
+          "maxLength": 253
+        },
+        "existingConfigMap": {
+          "type": "string",
+          "pattern": "^$|^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$",
+          "maxLength": 253
+        },
+        "key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+$",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "enabled": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "oneOf": [
+              {
+                "properties": {
+                  "existingSecret": {
+                    "minLength": 1
+                  },
+                  "existingConfigMap": {
+                    "const": ""
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "existingConfigMap": {
+                    "minLength": 1
+                  },
+                  "existingSecret": {
+                    "const": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "oidc": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean"
+        },
+        "providers": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "maxLength": 48
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "displayName": {
+                "type": "string",
+                "minLength": 1
+              },
+              "providerUrl": {
+                "type": "string",
+                "pattern": "^https?://[^\\s]+$"
+              },
+              "clientId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "existingSecret": {
+                "type": "string",
+                "pattern": "^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$",
+                "maxLength": 253
+              },
+              "clientSecretKey": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9._-]+$",
+                "minLength": 1
+              },
+              "clientIdKey": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9._-]+$",
+                "minLength": 1
+              },
+              "redirectUrl": {
+                "type": "string",
+                "pattern": "^https?://[^\\s]+$"
+              },
+              "scopes": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "contains": {
+                  "const": "openid"
+                },
+                "uniqueItems": true
+              },
+              "order": {
+                "type": "integer"
+              },
+              "returnViaState": {
+                "type": "boolean"
+              },
+              "requireVerifiedEmail": {
+                "type": "boolean"
+              },
+              "usernameClaim": {
+                "type": "string",
+                "minLength": 1
+              },
+              "nameClaim": {
+                "type": "string",
+                "minLength": 1
+              },
+              "emailClaim": {
+                "type": "string",
+                "minLength": 1
+              },
+              "color": {
+                "type": "string",
+                "minLength": 1
+              },
+              "icon": {
+                "type": "string",
+                "minLength": 1
+              },
+              "endpoint": {
+                "type": "object",
+                "properties": {
+                  "issuerUrl": {
+                    "type": "string",
+                    "pattern": "^https?://[^\\s]+$"
+                  },
+                  "authUrl": {
+                    "type": "string",
+                    "pattern": "^https?://[^\\s]+$"
+                  },
+                  "tokenUrl": {
+                    "type": "string",
+                    "pattern": "^https?://[^\\s]+$"
+                  },
+                  "userInfoUrl": {
+                    "type": "string",
+                    "pattern": "^https?://[^\\s]+$"
+                  },
+                  "jwksUrl": {
+                    "type": "string",
+                    "pattern": "^https?://[^\\s]+$"
+                  },
+                  "algorithms": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "issuerUrl",
+                  "authUrl",
+                  "tokenUrl",
+                  "jwksUrl"
+                ]
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "existingSecret"
+            ],
+            "allOf": [
+              {
+                "oneOf": [
+                  {
+                    "required": [
+                      "clientId"
+                    ],
+                    "not": {
+                      "required": [
+                        "clientIdKey"
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "clientIdKey"
+                    ],
+                    "not": {
+                      "required": [
+                        "clientId"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "oneOf": [
+                  {
+                    "required": [
+                      "providerUrl"
+                    ],
+                    "not": {
+                      "required": [
+                        "endpoint"
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "endpoint"
+                    ],
+                    "not": {
+                      "required": [
+                        "providerUrl"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "enable": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "providers": {
+                "minProperties": 1
+              }
+            }
+          }
+        }
+      ]
     }
   },
   "additionalProperties": false,
   "required": [
-    "existingSecret"
+    "secrets"
   ],
-  "$schema": "http://json-schema.org/draft-07/schema#"
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "oidc": {
+            "properties": {
+              "enable": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "general": {
+            "properties": {
+              "host": {
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

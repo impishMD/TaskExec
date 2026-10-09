@@ -1,3 +1,4 @@
+{{/* Adapted for TaskExec from Semaphore UI Charts; see NOTICE and LICENSE. */}}
 apiVersion: v1
 kind: Service
 metadata:

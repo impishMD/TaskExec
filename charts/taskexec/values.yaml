@@ -1,3 +1,4 @@
+# Adapted from semaphoreui/charts (Apache-2.0); see NOTICE.
 # Single-server deployment. TaskExec does not support multiple server replicas.
 replicaCount: 1
 nameOverride: ""
@@ -8,27 +9,66 @@ image:
   tag: ""
   digest: ""
   pullPolicy: IfNotPresent
-imagePullSecrets: []
+  pullSecrets: []
 
-# Required, in the release namespace. Keys:
-# TASKEXEC_ADMIN_PASSWORD, TASKEXEC_ACCESS_KEY_ENCRYPTION (base64-encoded 32 bytes).
-# External databases also need TASKEXEC_DB_USER and TASKEXEC_DB_PASS.
-existingSecret: ""
+# Bootstrap credentials and encryption key in an existing Kubernetes Secret.
+secrets:
+  existingSecret: ""
+  accesskeyEncryptionKey: TASKEXEC_ACCESS_KEY_ENCRYPTION
+admin:
+  username: admin
+  fullname: Administrator
+  email: admin@localhost
+  # Empty uses secrets.existingSecret.
+  existingSecret: ""
+  passwordKey: TASKEXEC_ADMIN_PASSWORD
+general:
+  # Public URL, including a subpath when used.
+  host: ""
+  passwordLoginDisable: false
+  nonAdminCanCreateProject: false
 config:
-  # Public URL, including any subpath, e.g. https://tasks.example.com/taskexec
-  webRoot: ""
-  admin:
-    username: admin
-    name: Administrator
-    email: admin@localhost
-  database:
-    dialect: sqlite
-    # For postgres/mysql: an existing server and an already created database.
-    host: ""
-    # 0 selects 5432 for PostgreSQL or 3306 for MySQL.
-    port: 0
-    name: taskexec
-    options: {}
+  forwarded_env_vars: []
+database:
+  type: sqlite
+  host: ""
+  port: 0
+  name: taskexec
+  options: {}
+  # Empty uses secrets.existingSecret. Required for postgres/mysql.
+  existingSecret: ""
+  usernameKey: TASKEXEC_DB_USER
+  passwordKey: TASKEXEC_DB_PASS
+
+# Provider settings use the same camelCase form as the Semaphore UI chart.
+oidc:
+  enable: false
+  providers: {}
+  # keycloak:
+  #   displayName: Keycloak
+  #   providerUrl: https://sso.example.com/realms/main
+  #   clientId: taskexec
+  #   existingSecret: taskexec-oidc
+  #   clientSecretKey: client-secret
+  #   scopes: [openid, profile, email]
+  #   usernameClaim: preferred_username
+  #   nameClaim: name
+  #   emailClaim: email
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+labels: {}
+annotations: {}
+dnsConfig: {}
+extraInitContainers: []
+extraSidecarContainers: []
+customCertificates:
+  enabled: false
+  existingSecret: ""
+  existingConfigMap: ""
+  key: ca.crt
 
 service:
   type: ClusterIP
@@ -96,8 +136,15 @@ nodeSelector: {}
 tolerations: []
 affinity: {}
 # Additional non-secret environment variables. Built-in chart settings cannot be overridden.
-extraEnv: {}
-# Additional Secrets/ConfigMaps. Prefer existingSecret for bootstrap/database credentials.
+extraEnvVariables: {}
+# Additional Secrets/ConfigMaps. Prefer secrets.existingSecret for bootstrap credentials.
 extraEnvFrom: []
 extraVolumes: []
 extraVolumeMounts: []
+# Environment values from individual Kubernetes Secret keys.
+extraEnvSecrets: {}
+# TOKEN:
+#   secret: application-tokens
+#   key: token
+envFromSecrets: []
+envFromConfigMaps: []

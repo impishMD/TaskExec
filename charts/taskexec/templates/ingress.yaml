@@ -1,3 +1,4 @@
+{{/* Adapted for TaskExec from Semaphore UI Charts; see NOTICE and LICENSE. */}}
 {{- if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress

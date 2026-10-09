@@ -12,6 +12,12 @@ scripts/check_policy.py .licenses-cache/
 scripts/generate_md.py .licenses-cache/ > THIRD-PARTY-LICENSES.md
 ```
 
+## Helm chart
+
+The TaskExec chart is based on [Semaphore UI Charts 16.2.2](https://github.com/semaphoreui/charts/tree/92a563854accec1175a5e0cd48e8cd6219567d65/stable/semaphore),
+licensed under Apache-2.0. The complete license and copyright notice are included
+in the chart package as `LICENSE` and `NOTICE`.
+
 ## Summary
 This document lists **116** third-party components distributed with TaskExec, grouped by ecosystem.
 

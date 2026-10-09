@@ -1,3 +1,4 @@
+{{/* Adapted for TaskExec from Semaphore UI Charts; see NOTICE and LICENSE. */}}
 {{- if not .Values.persistence.existingClaim }}
 apiVersion: v1
 kind: PersistentVolumeClaim

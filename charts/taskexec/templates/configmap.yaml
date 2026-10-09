@@ -1,3 +1,4 @@
+{{/* Adapted for TaskExec from Semaphore UI Charts; see NOTICE and LICENSE. */}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,6 +7,6 @@ metadata:
     {{- include "taskexec.labels" . | nindent 4 }}
 data:
   {{- include "taskexec.environment" . | nindent 2 }}
-  {{- range $key, $value := .Values.extraEnv }}
+  {{- range $key, $value := .Values.extraEnvVariables }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}

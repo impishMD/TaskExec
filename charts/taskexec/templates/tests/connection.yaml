@@ -1,3 +1,4 @@
+{{/* Adapted for TaskExec from Semaphore UI Charts; see NOTICE and LICENSE. */}}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -14,9 +15,11 @@ spec:
   automountServiceAccountToken: false
   securityContext:
     {{- toYaml .Values.podSecurityContext | nindent 4 }}
-  {{- with .Values.imagePullSecrets }}
+  {{- with .Values.image.pullSecrets }}
   imagePullSecrets:
-    {{- toYaml . | nindent 4 }}
+    {{- range . }}
+    - name: {{ . | quote }}
+    {{- end }}
   {{- end }}
   containers:
     - name: ping

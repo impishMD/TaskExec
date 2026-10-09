@@ -1,11 +1,12 @@
-TaskExec
+TaskExec Helm chart
 Copyright (c) 2026 TaskExec contributors
 
-Derived from Semaphore UI (https://github.com/semaphoreui/semaphore),
-upstream commit fc66be94a96cb54c21d28b071382f0cf04554d08.
-Copyright (c) 2021 Denis Gukov
-Copyright (c) 2014-2021 Castaway Labs LLC
+Based on Semaphore UI Charts 16.2.2
+https://github.com/semaphoreui/charts
+Upstream commit: 92a563854accec1175a5e0cd48e8cd6219567d65
+Copyright (c) 2023 Cloudhippie <info@cloudhippie.de>
+Licensed under the Apache License, Version 2.0 (see LICENSE).
 
-The upstream MIT license and copyright notices are preserved in LICENSE.
-Third-party attributions are listed in THIRD-PARTY-LICENSES.md.
-TaskExec is an independent fork and is not affiliated with the upstream project.
+The chart is adapted for TaskExec images, configuration, persistent SQLite
+storage, externally managed credentials, and OIDC Secret file mappings.
+TaskExec is independent of the upstream project.

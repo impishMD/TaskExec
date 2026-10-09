@@ -1,17 +1,24 @@
 TaskExec {{ .Chart.AppVersion }}
 
-{{- if .Values.config.webRoot }}
-URL: {{ .Values.config.webRoot }}
+{{- if .Values.general.host }}
+URL: {{ .Values.general.host }}
 {{- else }}
 To access the server locally:
   kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "taskexec.fullname" . }} 3000:{{ .Values.service.port }}
   Open http://localhost:3000
 {{- end }}
 
-Administrator: {{ .Values.config.admin.username }} (created on first setup).
-Password: TASKEXEC_ADMIN_PASSWORD in Secret {{ .Values.existingSecret }}.
+Administrator: {{ .Values.admin.username }} (created on first setup).
+Password: {{ .Values.admin.passwordKey }} in Secret {{ default .Values.secrets.existingSecret .Values.admin.existingSecret }}.
 
 Back up the database, PVC {{ include "taskexec.claimName" . }} and encryption Secret together.
 {{- if .Values.persistence.retain }}
 The chart-created PVC is retained on uninstall. Set persistence.existingClaim to reuse it.
+{{- end }}
+
+{{- if .Values.oidc.enable }}
+OIDC callback URLs:
+{{- range $id, $provider := .Values.oidc.providers }}
+  {{ $id }}: {{ default (printf "%s/api/auth/oidc/%s/redirect" (trimSuffix "/" $.Values.general.host) $id) $provider.redirectUrl }}
+{{- end }}
 {{- end }}

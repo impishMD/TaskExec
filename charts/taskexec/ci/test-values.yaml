@@ -1,5 +1,16 @@
 fullnameOverride: taskexec-test
-existingSecret: taskexec-test
+secrets:
+  existingSecret: taskexec-test
+general:
+  host: http://taskexec-test:3000
+oidc:
+  enable: true
+  providers:
+    test:
+      displayName: Test SSO
+      providerUrl: http://127.0.0.1:5556
+      clientId: chart-test-client
+      existingSecret: taskexec-oidc
 image:
   repository: taskexec
   tag: helm-ci
