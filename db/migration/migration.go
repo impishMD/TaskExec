@@ -1,8 +1,8 @@
 package migration
 
 import (
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/services/export"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/services/export"
 )
 
 type Migrator struct {

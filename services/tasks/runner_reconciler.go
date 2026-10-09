@@ -4,12 +4,12 @@ import (
 	"errors"
 	"time"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/debuglog"
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/pkg/tz"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/debuglog"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/pkg/tz"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/util"
 	log "github.com/sirupsen/logrus"
 )
 

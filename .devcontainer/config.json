@@ -1,6 +1,6 @@
 {
   "sqlite": {
-    "host": "/workspaces/jeh/database.sqlite"
+    "host": "/workspaces/taskexec/database.sqlite"
    },
   "dialect": "sqlite",
    "cookie_hash": "5WJjXCLpvf3Cn5t+C/IV9F0asZUQLakOhCT+eSdIwP0=",

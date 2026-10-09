@@ -25,29 +25,29 @@ services:
     depends_on:
       - ldap
 
-  jeh:
-    image: impishmd/jeh:latest
-#    container_name: jeh
+  taskexec:
+    image: impishmd/taskexec:latest
+#    container_name: taskexec
     environment:
-      JEH_DB_DIALECT: "sqlite"
-      JEH_ADMIN_PASSWORD: "changeme"
-      JEH_ADMIN_NAME: "admin"
-      JEH_ADMIN_EMAIL: "admin@example.org"
-      JEH_LDAP_ACTIVATED: "yes"
-      JEH_LDAP_SERVER: "ldap:389"
-      JEH_LDAP_SEARCH_DN: "dc=example,dc=org"
-      JEH_LDAP_BIND_DN: "cn=admin,dc=example,dc=org"
-      JEH_LDAP_BIND_PASSWORD: "admin"
-      JEH_LDAP_SEARCH_FILTER: "(&(objectClass=inetOrgPerson)(uid=%s))"
-      JEH_NON_ADMIN_CAN_CREATE_PROJECT: "yes"
+      TASKEXEC_DB_DIALECT: "sqlite"
+      TASKEXEC_ADMIN_PASSWORD: "changeme"
+      TASKEXEC_ADMIN_NAME: "admin"
+      TASKEXEC_ADMIN_EMAIL: "admin@example.org"
+      TASKEXEC_LDAP_ACTIVATED: "yes"
+      TASKEXEC_LDAP_SERVER: "ldap:389"
+      TASKEXEC_LDAP_SEARCH_DN: "dc=example,dc=org"
+      TASKEXEC_LDAP_BIND_DN: "cn=admin,dc=example,dc=org"
+      TASKEXEC_LDAP_BIND_PASSWORD: "admin"
+      TASKEXEC_LDAP_SEARCH_FILTER: "(&(objectClass=inetOrgPerson)(uid=%s))"
+      TASKEXEC_NON_ADMIN_CAN_CREATE_PROJECT: "yes"
     ports:
       - "3000:3000"
     volumes:
-      - jeh_data:/var/lib/jeh
+      - taskexec_data:/var/lib/taskexec
     depends_on:
       - ldap
 
 volumes:
   ldap_data:
   ldap_config:
-  jeh_data:
+  taskexec_data:

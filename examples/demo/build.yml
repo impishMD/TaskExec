@@ -5,4 +5,4 @@
   tasks:
     - name: Report the build version
       ansible.builtin.debug:
-        msg: "JEH demo build {{ jeh_vars.task_details.version | default('local') }}"
+        msg: "TaskExec demo build {{ taskexec_vars.task_details.version | default('local') }}"

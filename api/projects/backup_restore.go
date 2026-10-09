@@ -5,17 +5,17 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/util"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/services/audit"
-	projectService "github.com/impishMD/jeh/services/project"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/services/audit"
+	projectService "github.com/impishMD/taskexec/services/project"
 	log "github.com/sirupsen/logrus"
 )
 
 // BackupController serves project backup/restore. Workflows live outside
-// db.Store (Pro feature, see db.WorkflowManager), so the workflow store is
+// db.Store (see db.WorkflowManager), so the workflow store is
 // injected and threaded into the backup/restore routines.
 type BackupController struct {
 	workflowStore db.WorkflowManager

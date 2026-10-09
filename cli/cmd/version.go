@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/util"
 	"github.com/spf13/cobra"
 )
 
@@ -13,7 +13,7 @@ func init() {
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print the version of JEH",
+	Short: "Print the version of TaskExec",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(util.Version())
 	},

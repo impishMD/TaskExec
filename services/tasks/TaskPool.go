@@ -5,31 +5,30 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
-	"github.com/impishMD/jeh/pkg/debuglog"
-	"github.com/impishMD/jeh/pkg/jwt"
-	"github.com/impishMD/jeh/pkg/metrics"
-	"github.com/impishMD/jeh/pkg/random"
-	"github.com/impishMD/jeh/pkg/tz"
-	"github.com/impishMD/jeh/pro/pkg/stage_parsers"
-	"github.com/impishMD/jeh/pro_interfaces"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/services/server"
+	"github.com/impishMD/taskexec/pkg/debuglog"
+	"github.com/impishMD/taskexec/pkg/jwt"
+	"github.com/impishMD/taskexec/pkg/metrics"
+	"github.com/impishMD/taskexec/pkg/random"
+	"github.com/impishMD/taskexec/pkg/tz"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/services/server"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/db_lib"
-	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/db_lib"
+	"github.com/impishMD/taskexec/pkg/task_logger"
 
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/util"
 	log "github.com/sirupsen/logrus"
 )
 
 type logRecord struct {
-	task         *TaskRunner
-	output       string
-	time         time.Time
-	currentStage *db.TaskStage
+	task     *TaskRunner
+	output   string
+	time     time.Time
+	finished chan struct{}
 }
 
 type EventType uint
@@ -57,11 +56,12 @@ type TaskPool struct {
 	register chan *TaskRunner
 
 	// logger channel used to putting log records to database.
-	logger chan logRecord
+	logger    chan logRecord
+	logsReady chan struct{}
+	logsDone  chan struct{}
 
 	store                  db.Store
 	ansibleTaskRepo        db.AnsibleTaskRepository
-	logWriteService        pro_interfaces.LogWriteService
 	inventoryService       server.InventoryService
 	encryptionService      server.AccessKeyEncryptionService
 	keyInstallationService server.AccessKeyInstallationService
@@ -80,13 +80,13 @@ type TaskPool struct {
 	// state provides pluggable storage for Queue, active projects, running tasks and aliases
 	state TaskStateStore
 
-	// workflowService orchestrates workflow runs (a Pro feature). It is injected
+	// workflowService orchestrates workflow runs. It is injected
 	// after construction via SetWorkflowService; the pool only calls back into it
 	// when a workflow task finishes. nil in tests / before wiring.
-	workflowService pro_interfaces.WorkflowService
+	workflowService server.WorkflowService
 	// workflowRepo resolves the workflow run a task belongs to, so the task can
-	// be told which workflow it runs in (JEH_WORKFLOW_* env). Injected via
-	// SetWorkflowRepo; nil means tasks never belong to a workflow (CE / tests).
+	// be told which workflow it runs in (TASKEXEC_WORKFLOW_* env). Injected via
+	// SetWorkflowRepo; nil means tasks never belong to a workflow (tests).
 	workflowRepo db.WorkflowManager
 	// auditRecorder is injected after construction, nil means no audit.
 	auditRecorder audit.Recorder
@@ -111,20 +111,20 @@ func CreateTaskPool(
 	inventoryService server.InventoryService,
 	encryptionService server.AccessKeyEncryptionService,
 	keyInstallationService server.AccessKeyInstallationService,
-	logWriteService pro_interfaces.LogWriteService,
 	signer jwt.Signer,
 	appMetrics *metrics.Metrics,
 ) TaskPool {
 	p := TaskPool{
 		register:               make(chan *TaskRunner),      // add TaskRunner to queue
 		logger:                 make(chan logRecord, 10000), // store log records to database
+		logsReady:              make(chan struct{}),
+		logsDone:               make(chan struct{}),
 		store:                  store,
 		state:                  state,
 		queueEvents:            make(chan PoolEvent),
 		inventoryService:       inventoryService,
 		ansibleTaskRepo:        ansibleTaskRepo,
 		encryptionService:      encryptionService,
-		logWriteService:        logWriteService,
 		keyInstallationService: keyInstallationService,
 		signer:                 signer,
 		metrics:                appMetrics,
@@ -137,8 +137,7 @@ func CreateTaskPool(
 	return p
 }
 
-// StateStore returns the pluggable task state backend. Used by the Cluster
-// Dashboard to reach an optional TaskStateInspector implementation.
+// StateStore returns the task pool state store.
 func (p *TaskPool) StateStore() TaskStateStore {
 	return p.state
 }
@@ -146,7 +145,7 @@ func (p *TaskPool) StateStore() TaskStateStore {
 // SetWorkflowService injects the workflow orchestration service. It is wired
 // after the pool is created (the service needs the pool as its task enqueuer,
 // and the pool needs the service to progress runs as tasks finish).
-func (p *TaskPool) SetWorkflowService(svc pro_interfaces.WorkflowService) {
+func (p *TaskPool) SetWorkflowService(svc server.WorkflowService) {
 	p.workflowService = svc
 }
 
@@ -169,7 +168,7 @@ func (p *TaskPool) recorder() audit.Recorder {
 // HandleWorkflowTaskCompletion notifies the workflow service that a task that
 // belongs to a workflow run has finished, so it can progress the run. It is a
 // thin delegator so the open task lifecycle (TaskRunner) need not know about the
-// Pro workflow service; a no-op when no service is wired.
+// workflow service; a no-op when no service is wired.
 func (p *TaskPool) HandleWorkflowTaskCompletion(task db.Task) error {
 	if p.workflowService == nil {
 		return nil
@@ -336,6 +335,7 @@ func (p *TaskPool) Run() {
 func (p *TaskPool) Stop() {
 	close(p.stop)
 	<-p.reconcileDone
+	<-p.logsDone
 }
 
 func getTaskName(t *TaskRunner) string {
@@ -404,6 +404,8 @@ func (p *TaskPool) handleQueue() {
 }
 
 func (p *TaskPool) handleLogs() {
+	close(p.logsReady)
+	defer close(p.logsDone)
 	logTicker := time.NewTicker(TaskOutputInsertIntervalMs * time.Millisecond)
 
 	defer logTicker.Stop()
@@ -414,14 +416,47 @@ func (p *TaskPool) handleLogs() {
 
 		select {
 		case record := <-p.logger:
+			if record.finished != nil {
+				p.flushLogs(&logs)
+				if record.task.ansibleOutput != nil {
+					if err := record.task.ansibleOutput.finish(record.time); err != nil {
+						log.WithError(err).WithField("task_id", record.task.Task.ID).Error("Failed to finalize Ansible summary")
+					}
+				}
+				close(record.finished)
+				continue
+			}
 			logs = append(logs, record)
 
 			if len(logs) >= TaskOutputBatchSize {
 				p.flushLogs(&logs)
 			}
+		case <-p.stop:
+			p.flushLogs(&logs)
+			return
 		case <-logTicker.C:
 			p.flushLogs(&logs)
 		}
+	}
+}
+
+// finishTaskLogs is an ordered barrier in the same channel as local and remote
+// output. Persist summaries before publishing the task's end timestamp.
+func (p *TaskPool) finishTaskLogs(task *TaskRunner, at time.Time) {
+	select {
+	case <-p.logsReady:
+	default:
+		return // A pool constructed without Run (e.g. a unit test) has no consumer.
+	}
+	done := make(chan struct{})
+	select {
+	case p.logger <- logRecord{task: task, time: at, finished: done}:
+	case <-p.logsDone:
+		return
+	}
+	select {
+	case <-done:
+	case <-p.logsDone:
 	}
 }
 
@@ -443,35 +478,37 @@ func (p *TaskPool) writeLogs(logs []logRecord) {
 			Time:   record.time,
 		}
 
-		currentOutput := record.task.currentOutput
-		record.task.currentOutput = &newOutput
-
-		newStage, newState, err := stage_parsers.MoveToNextStage(
-			p.store,
-			p.ansibleTaskRepo,
-			p.logWriteService,
-			record.task.Template.App,
-			record.task.Task.ProjectID,
-			record.task.currentState,
-			record.task.currentStage,
-			currentOutput,
-			newOutput)
-
-		if err != nil {
-			log.Error(err)
-			return
+		if record.task.Template.App == db.AppAnsible && p.ansibleTaskRepo != nil {
+			if record.task.ansibleOutput == nil {
+				record.task.ansibleOutput = &ansibleOutput{
+					store: p.store, repo: p.ansibleTaskRepo,
+					projectID: record.task.Task.ProjectID, taskID: record.task.Task.ID,
+				}
+			}
+			parser := record.task.ansibleOutput
+			if err := parser.consume(newOutput); err != nil {
+				// Summary failures must never discard this task's log or the rest
+				// of a batch, which can contain other tasks' output.
+				log.WithError(err).WithField("task_id", newOutput.TaskID).Error("Failed to process Ansible output")
+			}
+			if parser.stage != nil {
+				stageID := parser.stage.ID
+				newOutput.StageID = &stageID
+			}
 		}
 
-		record.task.currentState = newState
-
-		if newStage != nil {
-			record.task.currentStage = newStage
+		if record.task.Task.WorkflowRunID != nil && record.task.Template.App == db.AppAnsible {
+			for _, line := range strings.Split(record.output, "\n") {
+				if payload, ok := strings.CutPrefix(line, db.WorkflowArtifactsMarker); ok {
+					var values map[string]any
+					if len(payload) <= db.MaxWorkflowArtifactsBytes && json.Unmarshal([]byte(payload), &values) == nil && values != nil {
+						if err := p.store.UpdateTaskArtifacts(record.task.Task.ProjectID, record.task.Task.ID, &payload); err != nil {
+							log.WithError(err).WithField("task_id", record.task.Task.ID).Error("cannot save workflow artifacts")
+						}
+					}
+				}
+			}
 		}
-
-		if record.task.currentStage != nil {
-			newOutput.StageID = &record.task.currentStage.ID
-		}
-
 		taskOutput = append(taskOutput, newOutput)
 	}
 
@@ -635,7 +672,11 @@ func (p *TaskPool) hydrateTaskRunner(taskID int, projectID int) (*TaskRunner, er
 
 	// set the appropriate job handler for consistency (not run)
 	var job Job
-	if util.Config.IsUseRemoteRunner() || tr.Template.RunnerTag != nil || tr.Inventory.RunnerTag != nil {
+	useRemote, err := p.useRemoteRunner(tr.Task, tr.Template, tr.Inventory)
+	if err != nil {
+		return nil, err
+	}
+	if useRemote {
 		tag := tr.Template.RunnerTag
 		if tag == nil {
 			tag = tr.Inventory.RunnerTag
@@ -1097,7 +1138,7 @@ func (p *TaskPool) taskSecretSweepLoop() {
 	}
 }
 
-// AddTask serves the Pro workflow service, which starts nodes in the background for the run's user.
+// AddTask serves the workflow service, which starts nodes in the background for the run's user.
 func (p *TaskPool) AddTask(taskObj db.Task, userID *int, username string, projectID int, needAlias bool) (db.Task, error) {
 	actor := audit.SystemActor(audit.ComponentTaskRunner)
 	if userID != nil {
@@ -1137,6 +1178,10 @@ func (p *TaskPool) AddTaskFrom(
 	projectID int,
 	needAlias bool,
 ) (newTask db.Task, err error) {
+	// Only the workflow engine may associate a task with a saved graph node.
+	if trigger != audit.TriggerWorkflow {
+		taskObj.WorkflowRunID, taskObj.WorkflowNodeID, taskObj.WorkflowTemplateID = nil, nil, nil
+	}
 	taskObj.Created = tz.Now()
 	taskObj.Status = task_logger.TaskWaitingStatus
 	taskObj.UserID = userID
@@ -1163,7 +1208,7 @@ func (p *TaskPool) AddTaskFrom(
 		taskObj.CommitHash = nil
 	}
 
-	if tpl.Type == db.TemplateBuild { // get next version for TaskRunner if it is a Build
+	if tpl.Type == db.TemplateBuild && (taskObj.WorkflowRunID == nil || taskObj.Version == nil) {
 		var builds []db.TaskWithTpl
 		builds, err = p.store.GetTemplateTasks(tpl.ProjectID, tpl.ID, db.RetrieveQueryParams{Count: 1})
 		if err != nil {
@@ -1203,6 +1248,15 @@ func (p *TaskPool) AddTaskFrom(
 		return
 	}
 
+	useRemote, routingErr := p.useRemoteRunner(taskRunner.Task, taskRunner.Template, taskRunner.Inventory)
+	if routingErr != nil {
+		err = routingErr
+		taskRunner.Log("Error: failed to read server execution settings")
+		taskRunner.SetStatus(task_logger.TaskFailStatus)
+		taskRunner.recordComplete(audit.SystemActor(audit.ComponentTaskRunner))
+		return
+	}
+
 	// Persist survey secret variables as a task-bound, expiring access key so
 	// any HA node can decrypt them at dispatch time (local or remote runner).
 	// The plaintext never reaches the task row, API payloads, or events.
@@ -1219,9 +1273,7 @@ func (p *TaskPool) AddTaskFrom(
 
 	var job Job
 
-	if util.Config.IsUseRemoteRunner() ||
-		taskRunner.Template.RunnerTag != nil ||
-		taskRunner.Inventory.RunnerTag != nil {
+	if useRemote {
 
 		tag := taskRunner.Template.RunnerTag
 		if tag == nil {

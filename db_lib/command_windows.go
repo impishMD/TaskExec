@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/taskexec/pkg/task_logger"
 )
 
 // waitCommand takes ownership of waiting for and terminating an already-started

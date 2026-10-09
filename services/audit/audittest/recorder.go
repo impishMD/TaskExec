@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/taskexec/services/audit"
 )
 
 type Recorded struct {

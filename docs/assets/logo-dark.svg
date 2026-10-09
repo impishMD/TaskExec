@@ -1,7 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 112" role="img" aria-label="Job Executor Hub — JEH">
-  <rect width="96" height="96" rx="22" fill="#142536"/>
-  <path d="M24 25v46M24 25h45M24 48h27M24 71h45" fill="none" stroke="#69d2b0" stroke-width="5" stroke-linecap="round"/>
-  <circle cx="24" cy="25" r="7" fill="#69d2b0"/><circle cx="24" cy="71" r="7" fill="#69d2b0"/>
-  <circle cx="70" cy="25" r="6" fill="#69d2b0"/><circle cx="70" cy="71" r="6" fill="#69d2b0"/>
-  <path d="M52 34l23 14-23 14z" fill="#ffba63"/>
-<text x="120" y="62" fill="#edf5fa" font-family="system-ui, sans-serif" font-size="60" font-weight="750" letter-spacing="5">JEH</text><text x="122" y="95" fill="#edf5fa" font-family="system-ui, sans-serif" font-size="23" letter-spacing="2">Job Executor Hub</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 570 112" role="img" aria-label="TaskExec — Task automation and orchestration">
+  <g transform="translate(0 8)">
+    <rect width="96" height="96" rx="25" fill="#132833"/>
+    <rect x="17" y="19" width="62" height="58" rx="20" transform="rotate(-17 48 48)" fill="none" stroke="#83d9bb" stroke-width="4"/>
+    <path d="M26 35h23v8h-7v21h-9V43h-7zM54 35h17v7h-9v4h8v7h-8v4h10v7H54z" fill="#83d9bb"/>
+    <path d="M69 15 84 24 69 33Z" fill="#ffbf78"/>
+  </g>
+  <text x="120" y="63" fill="#eaf6f2" font-family="system-ui, sans-serif" font-size="54" font-weight="400" letter-spacing="-1.7">Task<tspan fill="#83d9bb" font-weight="650">Exec</tspan></text>
+  <text x="122" y="94" fill="#a6bec7" font-family="system-ui, sans-serif" font-size="19">Task automation &amp; orchestration</text>
+</svg>

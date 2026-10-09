@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 // Task survey secrets are stored in the access_key table as keys with owner

@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/util"
 )
 
 func TestApiPing(t *testing.T) {
@@ -17,7 +17,6 @@ func TestApiPing(t *testing.T) {
 	rr := httptest.NewRecorder()
 
 	r := Route(
-		nil,
 		nil,
 		nil,
 		nil,

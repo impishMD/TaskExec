@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/random"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/random"
 )
 
 func findNameBySlug[T db.BackupSluggedEntity](slug string, items []T) (*string, error) {
@@ -351,7 +351,23 @@ func (b *BackupDB) format() (*BackupFormat, error) {
 	environments := make([]BackupEnvironment, len(b.environments))
 	for i, o := range b.environments {
 		environments[i] = BackupEnvironment{
-			o,
+			Environment: o,
+		}
+		for _, binding := range o.KeyBindings {
+			name, err := findNameByID(binding.KeyID, b.keys)
+			if err != nil {
+				return nil, err
+			}
+			environments[i].Bindings = append(environments[i].Bindings, BackupKeyBinding{
+				Name: binding.Name, Type: binding.Type, Key: *name, Field: binding.Field,
+			})
+		}
+		for _, source := range o.KeySources {
+			name, err := findNameByID(source.KeyID, b.keys)
+			if err != nil {
+				return nil, err
+			}
+			environments[i].Sources = append(environments[i].Sources, BackupKeySource{Prefix: source.Prefix, Key: *name})
 		}
 	}
 

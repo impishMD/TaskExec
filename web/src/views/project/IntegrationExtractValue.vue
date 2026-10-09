@@ -2,8 +2,8 @@
   <div v-if="items != null">
     <EditDialog
       v-model="editDialog"
-      :save-button-text="itemId === 'new' ? 'Create' : 'Save'"
-      :title="`${itemId === 'new' ? 'New' : 'Edit'} Extract Value`"
+      :save-button-text="itemId === 'new' ? $t('create') : $t('save')"
+      :title="itemId === 'new' ? $t('newExtractedValue') : $t('editExtractedValue')"
       :max-width="450"
       :transition="false"
       @save="loadItems"
@@ -23,37 +23,37 @@
     </EditDialog>
 
     <ObjectRefsDialog
-      object-title="extractvalue"
+      :object-title="$t('uiExtractValue')"
       :object-refs="itemRefs"
       :integration-id="integrationId"
       v-model="itemRefsDialog"
     />
 
     <YesNoDialog
-      title="Delete Integration ExtractValue"
-      text="Are you sure you want to delete this Integration ExtractValue?"
+      :title="$t('uiDeleteIntegrationExtractValue')"
+      :text="$t('askDeleteExtractedValue')"
       v-model="deleteItemDialog"
       @yes="deleteItem(itemId)"
     />
 
     <v-toolbar flat>
       <v-app-bar-nav-icon @click="showDrawer()"></v-app-bar-nav-icon>
-      <v-toolbar-title>ExtractValue</v-toolbar-title>
+      <v-toolbar-title>{{ $t('uiExtractValue') }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn
         v-if="can(USER_PERMISSIONS.manageProjectResources)"
         color="primary"
         @click="editItem('new')"
-        >New Extracted Value</v-btn
+        >{{ $t('newExtractedValue') }}</v-btn
       >
     </v-toolbar>
     <v-data-table :headers="headers" :items="items" class="mt-4" :items-per-page="Number.MAX_VALUE">
       <template v-slot:item.name="{ item }"> {{ item.name }} {{ item.extractorId }} </template>
       <template v-slot:item.value_source="{ item }">
-        <code>{{ item.value_source }}</code>
+        {{ integrationValueTitle(item.value_source) }}
       </template>
       <template v-slot:item.body_data_type="{ item }">
-        <code>{{ item.body_data_type }}</code>
+        {{ integrationValueTitle(item.body_data_type) }}
       </template>
       <template v-slot:item.key="{ item }">
         <code>{{ item.key }}</code>
@@ -62,7 +62,7 @@
         <code>{{ item.variable }}</code>
       </template>
       <template v-slot:item.variable_type="{ item }">
-        <code>{{ item.variable_type }}</code>
+        {{ integrationValueTitle(item.variable_type) }}
       </template>
       <template v-slot:item.actions="{ item }">
         <div style="white-space: nowrap">
@@ -79,12 +79,13 @@
   </div>
 </template>
 <script>
+import DisplayLabelsMixin from '@/components/DisplayLabelsMixin';
 import ItemListPageBase from '@/components/ItemListPageBase';
 
 import IntegrationExtractValueForm from '@/components/IntegrationExtractValueForm.vue';
 
 export default {
-  mixins: [ItemListPageBase],
+  mixins: [DisplayLabelsMixin, ItemListPageBase],
   components: { IntegrationExtractValueForm },
 
   computed: {
@@ -104,12 +105,12 @@ export default {
     getHeaders() {
       return [
         {
-          text: 'Name',
+          text: this.$t('name'),
           value: 'name',
           sortable: true,
         },
         {
-          text: 'Value Source',
+          text: this.$t('extractedValueSource'),
           value: 'value_source',
           sortable: false,
         },
@@ -119,22 +120,22 @@ export default {
         //   sortable: false,
         // },
         {
-          text: 'Key',
+          text: this.$t('matchKey'),
           value: 'key',
           sortable: false,
         },
         {
-          text: 'Variable',
+          text: this.$t('uiVariableLabel'),
           value: 'variable',
           sortable: false,
         },
         {
-          text: 'Variable Type',
+          text: this.$t('uiVariableType'),
           value: 'variable_type',
           sortable: false,
         },
         {
-          text: 'Actions',
+          text: this.$t('actions'),
           value: 'actions',
           sortable: false,
         },

@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/tz"
 
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"

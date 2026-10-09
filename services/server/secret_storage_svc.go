@@ -1,12 +1,12 @@
 package server
 
 import (
+	"context"
 	"errors"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/common_errors"
-	"github.com/impishMD/jeh/pkg/random"
-	pro "github.com/impishMD/jeh/pro/services/server"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/common_errors"
+	"github.com/impishMD/taskexec/pkg/random"
 )
 
 type SecretStorageService interface {
@@ -15,7 +15,9 @@ type SecretStorageService interface {
 	Delete(projectID int, storageID int) error
 	GetSecretStorages(projectID int) ([]db.SecretStorage, error)
 	Create(storage db.SecretStorage) (res db.SecretStorage, err error)
-	SyncSecrets(sync db.SecretSync) error
+	TestVaultAuthentication(context.Context, db.SecretStorage) error
+	DescribeVaultSecret(context.Context, int, int, string) ([]VaultField, error)
+	ListVaultSecrets(context.Context, int, int, string) ([]string, error)
 }
 
 func NewSecretStorageService(
@@ -39,29 +41,31 @@ type SecretStorageServiceImpl struct {
 	encryptionService AccessKeyEncryptionService
 }
 
-func (s *SecretStorageServiceImpl) SyncSecrets(sync db.SecretSync) error {
-	return pro.SyncSecrets(sync, s.secretStorageRepo, s.accessKeyRepo, s.encryptionService)
-}
-
 func (s *SecretStorageServiceImpl) Delete(projectID int, storageID int) (err error) {
-	storage, err := s.secretStorageRepo.GetSecretStorage(projectID, storageID)
+	_, err = s.secretStorageRepo.GetSecretStorage(projectID, storageID)
 	if err != nil {
 		return
 	}
 
-	if storage.SyncEnabled {
-		var syncedKeys []db.AccessKey
-		syncedKeys, err = s.accessKeyRepo.GetAccessKeys(projectID, db.GetAccessKeyOptions{
-			IgnoreOwner:     true,
-			SourceStorageID: &storageID,
-		}, db.RetrieveQueryParams{})
-		if err != nil {
-			return
+	// Detaching a storage must never remove credentials that other resources
+	// still use, nor delete data in the external provider.
+	if s.accessKeyRepo != nil {
+		keys, e := s.accessKeyRepo.GetAccessKeys(projectID, db.GetAccessKeyOptions{IgnoreOwner: true, SourceStorageID: &storageID}, db.RetrieveQueryParams{})
+		if e != nil {
+			return e
 		}
-
-		for _, key := range syncedKeys {
-			if err = s.accessKeyRepo.DeleteAccessKey(projectID, key.ID); err != nil && !errors.Is(err, db.ErrNotFound) {
-				return
+		if len(keys) > 0 {
+			return common_errors.NewUserErrorS("remove the keys referencing this storage first")
+		}
+	}
+	if environments, ok := s.secretStorageRepo.(db.EnvironmentManager); ok {
+		envs, e := environments.GetEnvironments(projectID, db.RetrieveQueryParams{})
+		if e != nil {
+			return e
+		}
+		for _, env := range envs {
+			if env.SecretStorageID != nil && *env.SecretStorageID == storageID {
+				return common_errors.NewUserErrorS("remove the variable groups referencing this storage first")
 			}
 		}
 	}
@@ -85,18 +89,35 @@ func (s *SecretStorageServiceImpl) Delete(projectID int, storageID int) (err err
 }
 
 func (s *SecretStorageServiceImpl) GetSecretStorage(projectID int, storageID int) (res db.SecretStorage, err error) {
-	return s.secretStorageRepo.GetSecretStorage(projectID, storageID)
+	res, err = s.secretStorageRepo.GetSecretStorage(projectID, storageID)
+	if err != nil || (res.Type != db.SecretStorageTypeVault) {
+		return
+	}
+	key, e := s.credentialKey(res)
+	if e != nil {
+		return res, e
+	}
+	credentials, e := storedVaultCredentials(key, s.encryptionService)
+	if e != nil {
+		return res, e
+	}
+	res.Credentials = publicVaultCredentials(credentials)
+	if key.SourceStorageType != nil && key.SourceStorageKey != nil {
+		res.Secret, res.SourceStorageType = *key.SourceStorageKey, key.SourceStorageType
+	}
+	return
 }
 
 func (s *SecretStorageServiceImpl) Create(storage db.SecretStorage) (res db.SecretStorage, err error) {
+	storage.ID = 0
+	if storage.Credentials != nil || (storage.Params["auth_method"] != nil && storage.Params["auth_method"] != "token") {
+		return s.saveVaultStorage(storage)
+	}
+	if err = validateSecretStorage(storage); err != nil {
+		return
+	}
 	sourceStorageType := storage.SourceStorageType
 	sourceStorageKey := ""
-
-	if !pro.StorageRequiresSecret(storage) {
-		// The storage authenticates without credentials stored in JEH
-		// (for example an AWS IAM role), so no access key is created.
-		return s.secretStorageRepo.CreateSecretStorage(storage)
-	}
 
 	if storage.Secret == "" {
 		err = common_errors.NewUserErrorS("secret must be set")
@@ -137,16 +158,34 @@ func (s *SecretStorageServiceImpl) Create(storage db.SecretStorage) (res db.Secr
 	}
 
 	_, err = s.accessKeyService.Create(key)
-
+	if err != nil {
+		err = errors.Join(err, s.secretStorageRepo.DeleteSecretStorage(storage.ProjectID, res.ID))
+	}
+	res.Secret = ""
 	return
 }
 
 func (s *SecretStorageServiceImpl) Update(storage db.SecretStorage) (err error) {
+	if storage.SourceStorageType != nil && *storage.SourceStorageType != db.AccessKeySourceStorageEnv && *storage.SourceStorageType != db.AccessKeySourceStorageFile {
+		return common_errors.NewValidationError("unsupported source storage type")
+	}
+	if storage.Credentials != nil || (storage.Params["auth_method"] != nil && storage.Params["auth_method"] != "token") {
+		_, err = s.saveVaultStorage(storage)
+		return
+	}
+	// Preserve structured credentials when a legacy client edits only metadata.
+	if s.accessKeyService != nil {
+		key, e := s.credentialKey(storage)
+		if e == nil && isVaultAuthKey(key) {
+			_, err = s.saveVaultStorage(storage)
+			return
+		}
+	}
 	sourceStorageType := storage.SourceStorageType
 	sourceStorageKey := ""
 
 	// Checked before the write, so a refused source leaves the storage unchanged.
-	if pro.StorageRequiresSecret(storage) && sourceStorageType != nil {
+	if sourceStorageType != nil {
 		switch *sourceStorageType {
 		case db.AccessKeySourceStorageEnv, db.AccessKeySourceStorageFile:
 			sourceStorageKey = storage.Secret
@@ -156,11 +195,16 @@ func (s *SecretStorageServiceImpl) Update(storage db.SecretStorage) (err error) 
 		}
 	}
 
-	err = s.secretStorageRepo.UpdateSecretStorage(storage)
+	if err = validateSecretStorage(storage); err != nil {
+		return
+	}
+	old, err := s.secretStorageRepo.GetSecretStorage(storage.ProjectID, storage.ID)
 	if err != nil {
 		return
 	}
-
+	if old.Type != storage.Type {
+		return common_errors.NewValidationError("cannot change a secret storage provider")
+	}
 	keys, err := s.accessKeyService.GetAll(storage.ProjectID, db.GetAccessKeyOptions{
 		Owner:     db.AccessKeySecretStorage,
 		StorageID: &storage.ID,
@@ -169,25 +213,20 @@ func (s *SecretStorageServiceImpl) Update(storage db.SecretStorage) (err error) 
 	if err != nil {
 		return
 	}
-
-	if !pro.StorageRequiresSecret(storage) {
-		// The storage switched to ambient credentials (for example an AWS IAM
-		// role), so previously stored credentials are removed.
-		for _, key := range keys {
-			if err = s.accessKeyService.Delete(storage.ProjectID, key.ID); err != nil {
-				return
-			}
+	if storage.Secret == "" {
+		if len(keys) != 1 {
+			return common_errors.NewValidationError("a token or token source is required")
 		}
+		previousSource := keys[0].SourceStorageType
+		if (previousSource == nil) != (sourceStorageType == nil) || (previousSource != nil && sourceStorageType != nil && *previousSource != *sourceStorageType) {
+			return common_errors.NewValidationError("a new token or reference is required when changing its source")
+		}
+	}
+	if err = s.secretStorageRepo.UpdateSecretStorage(storage); err != nil {
 		return
 	}
 
 	if len(keys) == 0 {
-		if storage.Secret == "" {
-			// empty vault token means the user didn't set a new token,
-			// so we don't create a new access key.
-			return
-		}
-
 		newKey := db.AccessKey{
 			Name:              random.String(10),
 			Type:              db.AccessKeyString,
@@ -208,10 +247,7 @@ func (s *SecretStorageServiceImpl) Update(storage db.SecretStorage) (err error) 
 	} else {
 		vault := keys[0]
 		if storage.Secret == "" {
-			// Do nothing if the vault token is empty,
-			// as it means the user haven't set a new token.
-
-			//err = s.keyRepo.DeleteAccessKey(storage.ProjectID, vault.ID)
+			// A blank field preserves the saved token or reference.
 			return
 		}
 
@@ -234,5 +270,5 @@ func (s *SecretStorageServiceImpl) Update(storage db.SecretStorage) (err error) 
 }
 
 func (s *SecretStorageServiceImpl) GetSecretStorages(projectID int) (storages []db.SecretStorage, err error) {
-	return pro.GetSecretStorages(s.secretStorageRepo, projectID)
+	return s.secretStorageRepo.GetSecretStorages(projectID)
 }

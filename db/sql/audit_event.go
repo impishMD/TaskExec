@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/go-gorp/gorp/v3"
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 // The counter row stays locked until commit, so committed seq has no gaps.

@@ -31,7 +31,7 @@
     ></EditTemplateDialog>
 
     <ObjectRefsDialog
-      object-title="template"
+      :object-title="$t('template')"
       :object-refs="itemRefs"
       :project-id="projectId"
       v-model="itemRefsDialog"
@@ -150,10 +150,10 @@
         }/templates/${item.id}/details`">{{ $t('template_details') }}
       </v-tab>
       <v-tab
-        v-if="isPro && can(USER_PERMISSIONS.manageProjectResources)"
+        v-if="features.custom_roles_management && can(USER_PERMISSIONS.manageProjectUsers)"
         :to="`/project/${item.project_id}${
           $route.params.viewId ? `/views/${$route.params.viewId}` : ''
-        }/templates/${item.id}/perms`">{{ $t('Permissions') }}
+        }/templates/${item.id}/perms`">{{ $t('permissions') }}
       </v-tab>
       <v-tab
         v-if="['terraform', 'tofu'].includes(item.app)"
@@ -175,6 +175,8 @@
       :repositories="repositories"
       :features="features"
       :is-admin="isAdmin"
+      :user-permissions="item.permissions == null ? userPermissions : item.permissions"
+      :project-permissions="userPermissions"
       @update-template="loadData"
       :need-update="needLoadData"
     ></router-view>
@@ -291,9 +293,6 @@ export default {
       return this.item && this.inventory && this.environment && this.repositories;
     },
 
-    isPro() {
-      return (process.env.VUE_APP_BUILD_TYPE || '').startsWith('pro_');
-    },
   },
 
   watch: {
@@ -331,7 +330,7 @@ export default {
 
         EventBus.$emit('i-snackbar', {
           color: 'success',
-          text: 'All running tasks have been requested to stop',
+          text: this.$t('uiAllRunningTasksHaveBeenRequestedToStop'),
         });
 
         this.needLoadData = true;
@@ -378,7 +377,7 @@ export default {
 
         EventBus.$emit('i-snackbar', {
           color: 'success',
-          text: `Template "${this.item.name}" deleted`,
+          text: this.$t('templateDeleted', { name: this.item.name }),
         });
 
         await this.$router.push({

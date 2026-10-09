@@ -62,7 +62,7 @@ describe('AppFieldsMixin', () => {
     });
 
     it('uses the app-specific label override', () => {
-      expect(mountFor('terraform').fieldLabel('playbook')).to.equal('t:Subdirectory path (Optional)');
+      expect(mountFor('terraform').fieldLabel('playbook')).to.equal('t:subdirectoryPathOptional');
     });
 
     it('falls back to the field name for unknown fields', () => {

@@ -13,7 +13,7 @@
 
     <v-text-field
       v-model="item.inventory"
-      label="Workspace name"
+      :label="$t('uiWorkspaceName')"
       :rules="[v => !!v || $t('path_required')]"
       required
       :disabled="formSaving"
@@ -21,8 +21,8 @@
 
     <v-select
       v-model="item.ssh_key_id"
-      label="SSH key for private modules *"
-      :rules="[v => !!v || 'Key is required']"
+      :label="$t('uiSSHKeyForPrivateModules')"
+      :rules="[v => !!v || $t('key_required')]"
       dense
       required
       :items="keys"

@@ -19,10 +19,10 @@
         group
       >
         <v-btn value="email" small class="mr-0" style="border-radius: 4px;">
-          Email
+          {{ $t('email') }}
         </v-btn>
         <v-btn value="username" small class="mr-0" style="border-radius: 4px;">
-          Username
+          {{ $t('username') }}
         </v-btn>
       </v-btn-toggle>
     </div>
@@ -80,7 +80,10 @@ export default {
 
   computed: {
     userRoles() {
-      return [...USER_ROLES, ...(this.roles || [])];
+      return [
+        ...USER_ROLES.map((role) => ({ ...role, name: this.$t(role.titleKey) })),
+        ...(this.roles || []),
+      ];
     },
   },
 

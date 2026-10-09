@@ -7,14 +7,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/db/sql"
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/services/audit/audittest"
-	"github.com/impishMD/jeh/services/server"
-	"github.com/impishMD/jeh/services/tasks"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/db/sql"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/services/audit/audittest"
+	"github.com/impishMD/taskexec/services/server"
+	"github.com/impishMD/taskexec/services/tasks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -41,7 +41,7 @@ func newTaskControlFixture(t *testing.T) taskControlFixture {
 	require.NoError(t, err)
 	encryption := server.NewAccessKeyEncryptionService(store, store, store, store)
 	inventories := server.NewInventoryService(store, store, store, encryption)
-	pool := tasks.CreateTaskPool(store, tasks.NewMemoryTaskStateStore(), nil, inventories, encryption, nil, nopLogWriter{}, nil, nil)
+	pool := tasks.CreateTaskPool(store, tasks.NewMemoryTaskStateStore(), nil, inventories, encryption, nil, nil, nil)
 	return taskControlFixture{store: store, pool: &pool, project: project, template: template}
 }
 

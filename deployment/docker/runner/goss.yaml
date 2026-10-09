@@ -1,15 +1,15 @@
 file:
   /usr/local/bin/runner-wrapper:
     exists: true
-    owner: jeh
+    owner: taskexec
     group: root
     filetype: file
     contains:
-      # Data path must default from JEH_DATA_PATH, not tmp (runner token persistence).
-      - 'JEH_DATA_PATH="${JEH_DATA_PATH:-/var/lib/jeh}"'
-  /usr/local/bin/jeh:
+      # Data path must default from TASKEXEC_DATA_PATH, not tmp (runner token persistence).
+      - 'TASKEXEC_DATA_PATH="${TASKEXEC_DATA_PATH:-/var/lib/taskexec}"'
+  /usr/local/bin/taskexec:
     exists: true
-    owner: jeh
+    owner: taskexec
     group: root
     filetype: file
 
@@ -51,13 +51,13 @@ package:
     installed: true
 
 user:
-  jeh:
+  taskexec:
     exists: true
     uid: 1001
     gid: 0
-    home: /home/jeh
+    home: /home/taskexec
 
 command:
-  jeh:
+  taskexec:
     exit-status: 0
     timeout: 10000

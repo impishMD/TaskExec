@@ -3,7 +3,7 @@ package export
 import (
 	"strconv"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 type EnvironmentExporter struct {
@@ -36,13 +36,11 @@ func (e *EnvironmentExporter) restore(store db.Store, exporter DataExporter, pro
 
 func (e *EnvironmentExporter) restoreValue(val EntityObject[db.Environment], store db.Store, exporter DataExporter) (err error) {
 	old := val.value
+	old.KeySources = nil
+	old.SecretExpressions = nil
+	old.KeyBindings = nil // Restored after access keys, which can themselves belong to a group.
 
 	old.ProjectID, err = exporter.getNewKeyInt(Project, GlobalScope, old.ProjectID)
-	if err != nil {
-		return err
-	}
-
-	old.SecretStorageID, err = exporter.getNewKeyIntRef(SecretStorage, val.scope, old.SecretStorageID, e)
 	if err != nil {
 		return err
 	}
@@ -64,5 +62,5 @@ func (e *EnvironmentExporter) exportDependsOn() []string {
 }
 
 func (e *EnvironmentExporter) importDependsOn() []string {
-	return []string{Project, SecretStorage}
+	return []string{Project}
 }

@@ -30,7 +30,6 @@ type Entry struct {
 	// Reasons allowed on a success whose follow-up step failed.
 	Partial  []Reason
 	Metadata any
-	Pro      bool
 }
 
 func Catalog() []Entry {
@@ -40,7 +39,7 @@ func Catalog() []Entry {
 		}},
 		{Kind: AuthLogout, Type: TypeEnd},
 		{Kind: AuthMFAVerifyTOTP, Type: TypeInfo, Reasons: []Reason{ReasonInvalidPasscode}},
-		{Kind: AuthMFAVerifyEmail, Type: TypeInfo, Reasons: []Reason{ReasonInvalidPasscode, ReasonCodeExpired, ReasonTooManyAttempts}, Pro: true},
+		{Kind: AuthMFAVerifyEmail, Type: TypeInfo, Reasons: []Reason{ReasonInvalidPasscode, ReasonCodeExpired, ReasonTooManyAttempts}},
 		{Kind: AuthMFARecover, Type: TypeInfo, Reasons: []Reason{ReasonInvalidRecoveryCode}},
 		{Kind: AuthAPITokenReject, Type: TypeDenied, Reasons: []Reason{ReasonTokenUnknown, ReasonTokenExpired}},
 		{Kind: AuthAuthorizationDeny, Type: TypeDenied, Metadata: DenyMetadata{}, Reasons: []Reason{ReasonForbidden}},
@@ -62,12 +61,12 @@ func Catalog() []Entry {
 		{Kind: IAMMembershipAdd, Type: TypeChange, Metadata: MembershipMetadata{}},
 		{Kind: IAMMembershipRemove, Type: TypeChange, Metadata: MembershipMetadata{}, Reasons: []Reason{ReasonOwnerSelfChange}},
 		{Kind: IAMProjectRoleChange, Type: TypeChange, Metadata: ProjectRoleMetadata{}, Reasons: []Reason{ReasonOwnerSelfChange}},
-		{Kind: IAMRoleCreate, Type: TypeCreation, Metadata: RoleMetadata{}, Pro: true},
-		{Kind: IAMRoleUpdate, Type: TypeChange, Metadata: RoleMetadata{}, Pro: true},
-		{Kind: IAMRoleDelete, Type: TypeDeletion, Pro: true},
-		{Kind: IAMProjectRoleDefinitionCreate, Type: TypeCreation, Metadata: RoleMetadata{}, Pro: true},
-		{Kind: IAMProjectRoleDefinitionUpdate, Type: TypeChange, Metadata: RoleMetadata{}, Pro: true},
-		{Kind: IAMProjectRoleDefinitionDelete, Type: TypeDeletion, Pro: true},
+		{Kind: IAMRoleCreate, Type: TypeCreation, Metadata: RoleMetadata{}},
+		{Kind: IAMRoleUpdate, Type: TypeChange, Metadata: RoleMetadata{}},
+		{Kind: IAMRoleDelete, Type: TypeDeletion},
+		{Kind: IAMProjectRoleDefinitionCreate, Type: TypeCreation, Metadata: RoleMetadata{}},
+		{Kind: IAMProjectRoleDefinitionUpdate, Type: TypeChange, Metadata: RoleMetadata{}},
+		{Kind: IAMProjectRoleDefinitionDelete, Type: TypeDeletion},
 		{Kind: IAMTemplatePermissionCreate, Type: TypeCreation, Metadata: TemplatePermissionMetadata{}},
 		{Kind: IAMTemplatePermissionUpdate, Type: TypeChange, Metadata: TemplatePermissionMetadata{}},
 		{Kind: IAMTemplatePermissionDelete, Type: TypeDeletion, Metadata: TemplatePermissionMetadata{}},
@@ -80,6 +79,14 @@ func Catalog() []Entry {
 		{Kind: ResourceInventoryCreate, Type: TypeCreation},
 		{Kind: ResourceInventoryUpdate, Type: TypeChange},
 		{Kind: ResourceInventoryDelete, Type: TypeDeletion},
+		{Kind: TerraformAliasCreate, Type: TypeCreation, Metadata: TerraformMetadata{}},
+		{Kind: TerraformAliasUpdate, Type: TypeChange, Metadata: TerraformMetadata{}},
+		{Kind: TerraformAliasDelete, Type: TypeDeletion, Metadata: TerraformMetadata{}},
+		{Kind: TerraformStateWrite, Type: TypeChange, Metadata: TerraformMetadata{}},
+		{Kind: TerraformStateReset, Type: TypeDeletion, Metadata: TerraformMetadata{}},
+		{Kind: TerraformStateDelete, Type: TypeDeletion, Metadata: TerraformMetadata{}},
+		{Kind: TerraformStateLock, Type: TypeChange, Metadata: TerraformMetadata{}},
+		{Kind: TerraformStateUnlock, Type: TypeChange, Metadata: TerraformMetadata{}},
 		{Kind: ResourceRepositoryCreate, Type: TypeCreation},
 		{Kind: ResourceRepositoryUpdate, Type: TypeChange},
 		{Kind: ResourceRepositoryDelete, Type: TypeDeletion},
@@ -108,13 +115,19 @@ func Catalog() []Entry {
 		{Kind: ResourceHostConfigCreate, Type: TypeCreation, Metadata: HostConfigMetadata{}},
 		{Kind: ResourceHostConfigUpdate, Type: TypeChange, Metadata: HostConfigMetadata{}},
 		{Kind: ResourceHostConfigDelete, Type: TypeDeletion},
-		{Kind: ResourceWorkflowCreate, Type: TypeCreation, Pro: true},
-		{Kind: ResourceWorkflowUpdate, Type: TypeChange, Pro: true},
-		{Kind: ResourceWorkflowDelete, Type: TypeDeletion, Pro: true},
+		{Kind: ResourceWorkflowCreate, Type: TypeCreation, Metadata: WorkflowMetadata{}},
+		{Kind: ResourceWorkflowUpdate, Type: TypeChange, Metadata: WorkflowMetadata{}},
+		{Kind: ResourceWorkflowDelete, Type: TypeDeletion, Metadata: WorkflowMetadata{}},
+		{Kind: WorkflowStart, Type: TypeStart, Metadata: WorkflowMetadata{}},
+		{Kind: WorkflowStop, Type: TypeEnd, Metadata: WorkflowMetadata{}},
+		{Kind: WorkflowComplete, Type: TypeEnd, Metadata: WorkflowMetadata{}},
+		{Kind: WorkflowApprovalApprove, Type: TypeChange, Metadata: WorkflowMetadata{}},
+		{Kind: WorkflowApprovalReject, Type: TypeChange, Metadata: WorkflowMetadata{}},
+		{Kind: WorkflowApprovalTimeout, Type: TypeChange, Metadata: WorkflowMetadata{}},
 		{Kind: ResourceEnvironmentCreate, Type: TypeCreation, Metadata: EnvironmentMetadata{}, Partial: []Reason{ReasonSecretFailed}},
 		{Kind: ResourceEnvironmentUpdate, Type: TypeChange, Metadata: EnvironmentMetadata{}, Partial: []Reason{ReasonSecretFailed}},
 		{Kind: ResourceEnvironmentDelete, Type: TypeDeletion, Metadata: DeleteMetadata{}, Partial: []Reason{ReasonSecretFailed}},
-		{Kind: ResourceEnvironmentSync, Type: TypeChange, Pro: true},
+		{Kind: ResourceEnvironmentSync, Type: TypeChange},
 
 		{Kind: SecretCredentialCreate, Type: TypeCreation, Metadata: CredentialMetadata{}},
 		{Kind: SecretCredentialUpdate, Type: TypeChange, Metadata: CredentialMetadata{}},
@@ -122,7 +135,7 @@ func Catalog() []Entry {
 		{Kind: SecretStorageCreate, Type: TypeCreation, Metadata: SecretStorageMetadata{}},
 		{Kind: SecretStorageUpdate, Type: TypeChange, Metadata: SecretStorageMetadata{}},
 		{Kind: SecretStorageDelete, Type: TypeDeletion, Metadata: DeleteMetadata{}},
-		{Kind: SecretStorageSync, Type: TypeChange, Pro: true},
+		{Kind: SecretStorageSync, Type: TypeChange},
 
 		{Kind: TaskExecutionCreate, Type: TypeCreation, Metadata: TaskCreateMetadata{}},
 		{Kind: TaskExecutionComplete, Type: TypeEnd, Metadata: TaskCompleteMetadata{}},
@@ -146,7 +159,6 @@ func Catalog() []Entry {
 		{Kind: RunnerProgressReject, Type: TypeDenied, Reasons: []Reason{ReasonInvalidStatus}},
 
 		{Kind: SystemSettingsUpdate, Type: TypeChange, Metadata: SettingsMetadata{}},
-		{Kind: SystemLicenseActivate, Type: TypeChange, Reasons: []Reason{ReasonActivationFailed}, Pro: true},
 
 		{Kind: AuditLifecycleStart, Type: TypeStart, Metadata: LifecycleMetadata{}},
 		{Kind: AuditRetentionDelete, Type: TypeDeletion, Metadata: RetentionMetadata{}},

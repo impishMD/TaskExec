@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import {
+  parseExtraVars,
   isPlainObject,
   isJsonSafeValue,
   inferVarType,
@@ -180,5 +181,31 @@ describe('lib/extraVars', () => {
       };
       expect(extraVarsToObject(objectToExtraVars(source))).to.deep.equal(source);
     });
+  });
+});
+
+describe('extra variable documents', () => {
+  ['json', 'yaml'].forEach((format) => {
+    ['', '  \n', '{}'].forEach((text) => {
+      it(`accepts an empty ${format} editor (${JSON.stringify(text)})`, () => {
+        expect(parseExtraVars(text, format)).to.deep.equal({});
+      });
+    });
+    ['null', 'false', '[1]'].forEach((text) => {
+      it(`rejects a non-object ${format} root ${text}`, () => {
+        expect(() => parseExtraVars(text, format)).to.throw('extraVarsObjectRequired');
+      });
+    });
+    it(`reports a localized syntax error for broken ${format}`, () => {
+      expect(() => parseExtraVars('{broken', format)).to.throw('extraVarsSyntaxError');
+    });
+  });
+  it('accepts comment-only YAML and rejects multiple documents', () => {
+    expect(parseExtraVars('# comment\n', 'yaml')).to.deep.equal({});
+    expect(() => parseExtraVars('a: 1\n---\nb: 2', 'yaml')).to.throw('extraVarsSyntaxError');
+  });
+  it('preserves nested values and date strings', () => {
+    expect(parseExtraVars('a: [1, false]\nb: {c: test}\nd: 2026-10-09', 'yaml'))
+      .to.deep.equal({ a: [1, false], b: { c: 'test' }, d: '2026-10-09' });
   });
 });

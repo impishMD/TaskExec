@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/gorilla/securecookie"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/tz"
 )
 
 // runnerRegistrationTokenTTL is how long a one-time registration token issued for

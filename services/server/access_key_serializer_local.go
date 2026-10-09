@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/common_errors"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/common_errors"
+	"github.com/impishMD/taskexec/util"
 )
 
 type LocalAccessKeyDeserializer struct {
@@ -29,6 +29,14 @@ func (d *LocalAccessKeyDeserializer) SerializeSecret(key *db.AccessKey) error {
 	var err error
 
 	switch key.Type {
+	case db.AccessKeyObject:
+		if key.Object == nil {
+			return fmt.Errorf("key value must be an object")
+		}
+		plaintext, err = json.Marshal(key.Object)
+		if err != nil {
+			return err
+		}
 	case db.AccessKeyString:
 		if key.String == "" {
 			key.Secret = nil

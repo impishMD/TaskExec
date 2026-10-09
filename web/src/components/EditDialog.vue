@@ -18,29 +18,19 @@ Can use used in tandem with ItemFormBase.js. See KeyForm.vue for example.
   >
     <v-card :data-testid="testId">
       <v-card-title>
-        <slot name="title">
-          <v-icon v-if="icon" :color="iconColor" class="mr-3">{{ icon }}</v-icon>
-          {{ title }}
-        </slot>
-
-        <v-spacer></v-spacer>
-
+        <div class="item-dialog__title-text">
+          <slot name="title">
+            <v-icon v-if="icon" :color="iconColor" class="mr-3">{{ icon }}</v-icon>
+            {{ title }}
+          </slot>
+        </div>
         <div class="item-dialog__title-actions">
-          <v-btn
-            icon
-            @click="toggleHelp()"
-            class="mr-3"
-            :style="{opacity: needHelp ? 1 : 0.3}"
-            v-if="helpButton"
-          >
-            <v-icon>mdi-help-box</v-icon>
-          </v-btn>
-
-          <v-btn icon @click="toggleFullscreen()" class="mr-3" v-if="expandable">
+          <HelpToggle v-if="helpButton" />
+          <v-btn icon @click="toggleFullscreen()" v-if="expandable"
+            :aria-label="$t(fullscreen ? 'dialogCollapse' : 'dialogExpand')">
             <v-icon>mdi-arrow-{{ fullscreen ? 'collapse' : 'expand' }}</v-icon>
           </v-btn>
-
-          <v-btn icon @click="close()" data-testid="editDialog-close">
+          <v-btn icon @click="close()" data-testid="editDialog-close" :aria-label="$t('close')">
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </div>
@@ -70,7 +60,7 @@ Can use used in tandem with ItemFormBase.js. See KeyForm.vue for example.
         <v-spacer></v-spacer>
 
         <v-btn
-          color="blue darken-1"
+          color="primary"
           text
           @click="close()"
         >
@@ -78,8 +68,8 @@ Can use used in tandem with ItemFormBase.js. See KeyForm.vue for example.
         </v-btn>
 
         <v-btn
-          color="blue darken-1"
-          text
+          color="primary"
+          depressed
           @click="needSave = true"
           v-if="saveButtonText != null"
           data-testid="editDialog-save"
@@ -95,37 +85,65 @@ Can use used in tandem with ItemFormBase.js. See KeyForm.vue for example.
     align-self: flex-start;
   }
 
+  .item-dialog > .v-card > .v-card__title {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    gap: 12px;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.4;
+    padding-bottom: 20px !important;
+  }
+  .item-dialog__title-text { flex: 1; min-width: 0; }
   .item-dialog__title-actions {
-    position: absolute;
-    right: 12px;
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    margin: -4px -8px 0 0;
   }
 
-  .item-dialog {
-    .v-card__title {
-      white-space: nowrap;
-      overflow: hidden;
-      margin-right: 12px;
-      padding-bottom: 20px !important;
+.KeyDialog.v-dialog,
+.VariableGroupDialog.v-dialog {
+  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
+  overflow: hidden;
+  > .v-card {
+    display: flex;
+    flex-direction: column;
+    max-height: inherit;
+    > .v-card__text {
+      overflow-y: auto;
+      min-height: 0 !important;
+      scrollbar-width: thin;
+      scrollbar-color: var(--taskexec-border) transparent;
+      &::-webkit-scrollbar { width: 6px; }
+      &::-webkit-scrollbar-track { background: transparent; }
+      &::-webkit-scrollbar-thumb {
+        background: var(--taskexec-border);
+        border-radius: 6px;
+      }
+      &:hover, &:focus-within {
+        scrollbar-color: var(--taskexec-muted) transparent;
+        &::-webkit-scrollbar-thumb { background: var(--taskexec-muted); }
+      }
     }
+    > .v-card__title, > .v-card__actions { flex-shrink: 0; }
   }
-
-  .theme--dark {
-    .item-dialog__title-actions {
-        background: #1E1E1E;
-    }
-  }
-
-  .theme--light {
-    .item-dialog__title-actions {
-      background: white;
-    }
-  }
+}
 </style>
 <script>
 
 import EventBus from '@/event-bus';
+import HelpToggle from '@/components/HelpToggle.vue';
+import HelpContext from '@/components/HelpContext';
 
 export default {
+  components: { HelpToggle },
+  mixins: [HelpContext],
   props: {
     testId: String,
     contentClass: String,
@@ -157,7 +175,6 @@ export default {
       needSave: false,
       needReset: false,
       fullscreen: null,
-      needHelp: false,
     };
   },
 
@@ -168,6 +185,7 @@ export default {
       if (val) {
         window.addEventListener('keydown', this.handleEscape);
       } else {
+        this.needHelp = false;
         window.removeEventListener('keydown', this.handleEscape);
       }
     },
@@ -190,10 +208,6 @@ export default {
   },
 
   methods: {
-    toggleHelp() {
-      this.needHelp = !this.needHelp;
-    },
-
     onSave(e) {
       if (this.dontCloseOnSave) {
         this.clearFlags();

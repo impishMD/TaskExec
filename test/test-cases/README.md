@@ -1,6 +1,6 @@
-# Job Executor Hub — Manual QA Test Cases
+# TaskExec — Manual QA Test Cases
 
-This directory contains 30 real-world manual test cases for Job Executor Hub, covering
+This directory contains 30 real-world manual test cases for TaskExec, covering
 end-to-end behavior of the web UI and API across the major feature areas:
 authentication, projects, repositories, inventory, key store, variable groups,
 task templates, tasks, schedules, runners, integrations / webhooks, RBAC, and
@@ -10,12 +10,12 @@ notifications.
 
 * Each test case is self-contained: preconditions, data, steps, expected results.
 * Priority is one of `Critical`, `High`, `Medium`, `Low`.
-* Run a clean JEH instance (Docker recommended) before executing the full
+* Run a clean TaskExec instance (Docker recommended) before executing the full
   suite. A single admin user and one project are assumed unless noted otherwise.
 
 ## Reference environment
 
-* Job Executor Hub deployed via Docker (`impishmd/jeh:latest`).
+* TaskExec deployed via Docker (`impishmd/taskexec:latest`).
 * Database: SQLite (default) — re-run on Postgres/MySQL when DB compatibility is
   in scope.
 * At least one remote host reachable over SSH for inventory-related cases.

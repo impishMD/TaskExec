@@ -43,7 +43,7 @@
           <p>
             {{ $t('forMoreInformationAboutBuildingSeeThe') }}
             <a
-              href="https://github.com/impishMD/jeh/tree/develop/docs/en"
+              href="https://github.com/impishMD/TaskExec/tree/develop/docs/en"
               target="_blank"
             >{{ $t('taskTemplateReference') }}</a
             >.
@@ -56,7 +56,7 @@
           <p>
             {{ $t('forMoreInformationAboutDeployingSeeThe') }}
             <a
-              href="https://github.com/impishMD/jeh/tree/develop/docs/en"
+              href="https://github.com/impishMD/TaskExec/tree/develop/docs/en"
               target="_blank"
             >{{ $t('taskTemplateReference2') }}</a
             >.
@@ -82,19 +82,24 @@
       <v-col>
         <h2 class="mb-4">{{ $t('template_common_options') }}</h2>
 
-        <v-card
-          class="mb-6"
-          :color="$vuetify.theme.dark ? '#212121' : 'white'"
-          style="background: #8585850f"
-        >
-          <v-tabs fixed-tabs v-model="itemTypeIndex">
-            <v-tab style="padding: 0" v-for="key in Object.keys(TEMPLATE_TYPE_ICONS)" :key="key">
-              <v-icon small class="mr-2">{{ TEMPLATE_TYPE_ICONS[key] }}</v-icon>
-              {{ $t(TEMPLATE_TYPE_TITLES[key]) }}
+        <v-card class="template-type-panel mb-6" flat>
+          <v-tabs
+            class="template-type-tabs"
+            hide-slider
+            :show-arrows="false"
+            v-model="itemTypeIndex"
+          >
+            <v-tab
+              v-for="key in Object.keys(TEMPLATE_TYPE_ICONS)"
+              :key="key"
+              :data-template-type="key || 'task'"
+            >
+              <v-icon small>{{ TEMPLATE_TYPE_ICONS[key] }}</v-icon>
+              <span class="template-type-label">{{ $t(TEMPLATE_TYPE_TITLES[key]) }}</span>
             </v-tab>
           </v-tabs>
 
-          <div class="ml-4 mr-4 mt-6" v-if="item.type">
+          <div class="template-type-options" v-if="item.type">
             <v-text-field
               v-if="item.type === 'build'"
               v-model="item.start_version"
@@ -305,7 +310,7 @@
           clearable
           :items="views"
           item-value="id"
-          item-text="title"
+          :item-text="viewTitle"
           :disabled="formSaving"
           outlined
           dense
@@ -334,26 +339,15 @@
             <v-text-field
               v-model="item.executor_image"
               :label="$t('executor_image')"
+              :hint="isExecutorImageAvailable ? $t('executorImageHint') : ''"
               persistent-hint
-              placeholder="impishmd/jeh:latest-job"
+              placeholder="impishmd/taskexec:latest-job"
               outlined
               dense
               clearable
               class="mb-4"
               :disabled="formSaving || !isExecutorImageAvailable"
             ></v-text-field>
-
-            <v-chip
-              v-if="!isExecutorImageAvailable"
-              color="hsl(348deg, 86%, 61%)"
-              text-color="white"
-              small
-              label
-              style="position: absolute; top: -10px; right: 15px"
-              @click="upgradeToPro('docker_executor')"
-            >
-              Upgrade to PRO
-            </v-chip>
           </div>
 
           <SurveyVars :vars="surveyVars" @change="setSurveyVars" />
@@ -368,7 +362,7 @@
             <v-checkbox class="mt-0" v-model="item.jwt_params.enabled">
               <template v-slot:label>
                 {{ $t('jwt_enabled') }}
-                <v-chip class="ml-2" small color="error">New</v-chip>
+                <v-chip class="ml-2" small color="error">{{ $t('nnew') }}</v-chip>
               </template>
             </v-checkbox>
 
@@ -449,7 +443,7 @@
           />
 
           <div style="position: relative">
-            <ArgsPicker :vars="args" @change="setArgs" title="CLI args" />
+            <ArgsPicker :vars="args" @change="setArgs" :title="$t('allowCliArgsInTask')" />
 
             <RichEditor
               v-model="argsJson"
@@ -654,7 +648,60 @@
   color: #a4a4a4 !important;
 }
 </style>
+<style scoped>
+.template-type-panel { padding: 6px; border-radius: 16px; }
+.template-type-tabs ::v-deep .v-tabs-bar {
+  height: auto;
+  background: transparent;
+}
+.template-type-tabs ::v-deep .v-slide-group__content {
+  display: grid;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.template-type-tabs ::v-deep .v-tab {
+  min-width: 0;
+  max-width: none;
+  min-height: 80px;
+  height: auto;
+  padding: 10px 4px;
+  border-radius: 11px;
+  flex-direction: column;
+  gap: 6px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--taskexec-muted);
+  white-space: normal;
+  line-height: 1.3;
+}
+.template-type-tabs ::v-deep .v-tab--active {
+  background: var(--taskexec-accent-soft);
+  color: var(--taskexec-accent);
+}
+.template-type-tabs ::v-deep .v-tab::before { border-radius: inherit; }
+.template-type-tabs ::v-deep .v-tab:focus-visible {
+  outline: 2px solid var(--taskexec-accent);
+  outline-offset: -2px;
+}
+.template-type-tabs ::v-deep .v-icon {
+  flex-shrink: 0;
+  color: inherit;
+}
+.template-type-label { max-width: 100%; flex-shrink: 0; overflow-wrap: anywhere; }
+.template-type-options {
+  margin: 6px 10px 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--taskexec-border);
+}
+</style>
+
 <script>
+import DisplayLabelsMixin from '@/components/DisplayLabelsMixin';
 /* eslint-disable import/no-extraneous-dependencies,import/extensions */
 
 import axios from 'axios';
@@ -675,7 +722,7 @@ import CollapsibleSection from '@/components/CollapsibleSection.vue';
 import SurveyVars from './SurveyVars';
 
 export default {
-  mixins: [ItemFormBase, AppFieldsMixin, AppsMixin],
+  mixins: [DisplayLabelsMixin, ItemFormBase, AppFieldsMixin, AppsMixin],
 
   components: {
     DropdownCard,
@@ -698,23 +745,23 @@ export default {
       cronFormats: [
         {
           cron: '* * * * *',
-          title: '1 minute',
+          title: this.$t('ui1Minute'),
         },
         {
           cron: '*/5 * * * *',
-          title: '5 minutes',
+          title: this.$t('ui5Minutes'),
         },
         {
           cron: '*/10 * * * *',
-          title: '10 minutes',
+          title: this.$t('ui10Minutes'),
         },
         {
           cron: '@hourly',
-          title: '1 hour',
+          title: this.$t('ui1Hour'),
         },
         {
           cron: '@daily',
-          title: '24 hours',
+          title: this.$t('ui24Hours'),
         },
       ],
       itemTypeIndex: 0,
@@ -837,8 +884,7 @@ export default {
       },
     },
 
-    // The image override is only honoured by the container-based executors, which
-    // are themselves paid features: Docker in PRO, Kubernetes in Enterprise.
+    // The image override is only honoured by container-based executors.
     isExecutorImageAvailable() {
       return !!(this.features?.docker_executor || this.features?.k8s_executor);
     },
@@ -933,7 +979,7 @@ export default {
       switch (this.app) {
         case '':
         case 'ansible':
-          return this.$t('ansible_playbook_options');
+          return this.$t('uiAnsiblePlaybookOptions');
         default:
           return this.app;
       }
@@ -1059,7 +1105,7 @@ export default {
       }
 
       if (!v.endsWith('.tf')) {
-        return 'File must have extension .tf';
+        return this.$t('terraformExtensionRequired');
       }
 
       return /^[a-zA-Z0-9_\-.]+\.tf$/.test(v);
@@ -1144,13 +1190,13 @@ export default {
         switch (t.type) {
           case 'build':
             if (builds.length === 0) {
-              builds.push({ header: 'Build Templates' });
+              builds.push({ header: this.$t('buildTemplates') });
             }
             builds.push(t);
             break;
           case 'deploy':
             if (deploys.length === 0) {
-              deploys.push({ header: 'Deploy Templates' });
+              deploys.push({ header: this.$t('deployTemplates') });
             }
             deploys.push(t);
             break;

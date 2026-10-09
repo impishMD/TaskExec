@@ -10,7 +10,6 @@ RUN npm run build
 FROM --platform=$BUILDPLATFORM golang:1.26-alpine3.24 AS builder
 WORKDIR /src
 COPY go.mod go.sum ./
-COPY pro/ ./pro/
 RUN --mount=type=cache,target=/go/pkg/mod go mod download
 COPY . .
 COPY --from=frontend /src/api/public ./api/public
@@ -21,8 +20,8 @@ ARG COMMIT=unknown
 ARG BUILD_DATE=unknown
 RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build \
     CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -tags netgo \
-    -ldflags "-s -w -X github.com/impishMD/jeh/util.Ver=$VERSION -X github.com/impishMD/jeh/util.Commit=$COMMIT -X github.com/impishMD/jeh/util.Date=$BUILD_DATE" \
-    -o /out/jeh ./cli
+    -ldflags "-s -w -X github.com/impishMD/taskexec/util.Ver=$VERSION -X github.com/impishMD/taskexec/util.Commit=$COMMIT -X github.com/impishMD/taskexec/util.Date=$BUILD_DATE" \
+    -o /out/taskexec ./cli
 
 FROM --platform=$BUILDPLATFORM alpine:3.24 AS tools
 RUN apk add --no-cache curl unzip
@@ -53,37 +52,37 @@ ARG TARGETARCH="amd64"
 # renovate: datasource=pypi depName=ansible
 ARG ANSIBLE_VERSION=13.5.0
 ENV ANSIBLE_VERSION=${ANSIBLE_VERSION}
-ARG ANSIBLE_VENV_PATH=/opt/jeh/apps/ansible/${ANSIBLE_VERSION}/venv
+ARG ANSIBLE_VENV_PATH=/opt/taskexec/apps/ansible/${ANSIBLE_VERSION}/venv
 
 RUN apk add --no-cache -U \
     bash curl git gnupg mysql-client openssh-client-default python3 py3-pip rsync sshpass tar tini tzdata unzip wget zip jq && \
     rm -rf /var/cache/apk/* && \
-    adduser -D -u 1001 -G root jeh && \
-    mkdir -p /tmp/jeh && \
-    mkdir -p /etc/jeh && \
-    mkdir -p /var/lib/jeh && \
-    mkdir -p /opt/jeh && \
-    chown -R jeh:0 /tmp/jeh && \
-    chown -R jeh:0 /etc/jeh && \
-    chown -R jeh:0 /var/lib/jeh && \
-    chown -R jeh:0 /opt/jeh && \
+    adduser -D -u 1001 -G root taskexec && \
+    mkdir -p /tmp/taskexec && \
+    mkdir -p /etc/taskexec && \
+    mkdir -p /var/lib/taskexec && \
+    mkdir -p /opt/taskexec && \
+    chown -R taskexec:0 /tmp/taskexec && \
+    chown -R taskexec:0 /etc/taskexec && \
+    chown -R taskexec:0 /var/lib/taskexec && \
+    chown -R taskexec:0 /opt/taskexec && \
     find /usr/lib/python* -iname __pycache__ | xargs rm -rf
 
-RUN echo $'Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile /dev/null' > /etc/ssh/ssh_config.d/jeh.conf
+RUN echo $'Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile /dev/null' > /etc/ssh/ssh_config.d/taskexec.conf
 
 COPY --chown=1001:0 ./deployment/docker/server/ansible.cfg /etc/ansible/ansible.cfg
 COPY deployment/docker/server/server-wrapper /usr/local/bin/
-COPY --from=builder /out/jeh /usr/local/bin/
+COPY --from=builder /out/taskexec /usr/local/bin/
 COPY --from=tools /tmp/tofu /usr/local/bin/
 COPY --from=tools /tmp/terraform /usr/local/bin/
 COPY --from=tools /tmp/terragrunt /usr/local/bin/
 
-RUN chown -R jeh:0 /usr/local/bin/server-wrapper && \
+RUN chown -R taskexec:0 /usr/local/bin/server-wrapper && \
     chmod +x /usr/local/bin/server-wrapper && \
-    chown -R jeh:0 /usr/local/bin/jeh && \
-    chmod +x /usr/local/bin/jeh
+    chown -R taskexec:0 /usr/local/bin/taskexec && \
+    chmod +x /usr/local/bin/taskexec
 
-WORKDIR /home/jeh
+WORKDIR /home/taskexec
 
 RUN apk add --no-cache -U python3-dev build-base openssl-dev libffi-dev cargo && \
      mkdir -p ${ANSIBLE_VENV_PATH} && \
@@ -93,7 +92,7 @@ RUN apk add --no-cache -U python3-dev build-base openssl-dev libffi-dev cargo &&
      apk del python3-dev build-base openssl-dev libffi-dev cargo && \
      rm -rf /var/cache/apk/* && \
      find ${ANSIBLE_VENV_PATH} -iname __pycache__ | xargs rm -rf && \
-     chown -R jeh:0 /opt/jeh
+     chown -R taskexec:0 /opt/taskexec
 
 USER 1001
 EXPOSE 3000
@@ -104,12 +103,15 @@ ENV PATH="$ANSIBLE_VENV_PATH/bin:$PATH"
 # Preventing ansible zombie processes. Tini kills zombies.
 ENTRYPOINT ["/sbin/tini", "--"]
 
-LABEL org.opencontainers.image.title="Job Executor Hub" \
-      org.opencontainers.image.description="JEH — job automation for Ansible, Terraform, OpenTofu and scripts" \
-      org.opencontainers.image.source="https://github.com/impishMD/jeh" \
+LABEL org.opencontainers.image.title="TaskExec" \
+      org.opencontainers.image.description="TaskExec — task automation for Ansible, Terraform, OpenTofu and scripts" \
+      org.opencontainers.image.source="https://github.com/impishMD/TaskExec" \
       org.opencontainers.image.licenses="MIT"
-COPY LICENSE NOTICE THIRD-PARTY-LICENSES.md /usr/share/licenses/jeh/
+COPY LICENSE NOTICE THIRD-PARTY-LICENSES.md /usr/share/licenses/taskexec/
 COPY --chown=1001:0 --chmod=755 deployment/docker/runner/runner-wrapper /usr/local/bin/
+
+FROM runtime AS job
+CMD ["/usr/local/bin/taskexec", "task-worker"]
 
 FROM runtime AS runner
 CMD ["/usr/local/bin/runner-wrapper"]

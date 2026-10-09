@@ -7,10 +7,10 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/db/sql"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/db/sql"
+	"github.com/impishMD/taskexec/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -35,7 +35,7 @@ func TestGetAndDeleteUserIdentities(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	usersController := NewUsersController(nil)
+	usersController := NewUsersController()
 
 	// GET list
 	r := httptest.NewRequest(http.MethodGet, "/api/users/2/identities", nil)
@@ -97,7 +97,7 @@ func TestDeleteUserIdentity_AllowsUnlinkWhenMultipleIdentities(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	usersController := NewUsersController(nil)
+	usersController := NewUsersController()
 
 	r := httptest.NewRequest(http.MethodDelete, "/api/users/2/identities/ldap/ldap", nil)
 	r = helpers.SetContextValue(r, "store", store)
@@ -129,7 +129,7 @@ func TestDeleteUserIdentity_AllowsLocalUserToUnlinkLastIdentity(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	usersController := NewUsersController(nil)
+	usersController := NewUsersController()
 
 	r := httptest.NewRequest(http.MethodDelete, "/api/users/1/identities/oidc/keycloak", nil)
 	r = helpers.SetContextValue(r, "store", store)
@@ -145,25 +145,25 @@ func TestDeleteUserIdentity_AllowsLocalUserToUnlinkLastIdentity(t *testing.T) {
 	assert.Empty(t, ids)
 }
 
-func TestLdapProfileMatchesJEHUser(t *testing.T) {
-	jehUser := db.User{Username: "jdoe", Email: "jdoe@example.com"}
+func TestLdapProfileMatchesTaskExecUser(t *testing.T) {
+	taskexecUser := db.User{Username: "jdoe", Email: "jdoe@example.com"}
 
-	assert.True(t, ldapProfileMatchesJEHUser(
+	assert.True(t, ldapProfileMatchesTaskExecUser(
 		db.User{Username: "jdoe", Email: "jdoe@example.com"},
-		jehUser,
+		taskexecUser,
 	))
-	assert.True(t, ldapProfileMatchesJEHUser(
+	assert.True(t, ldapProfileMatchesTaskExecUser(
 		db.User{Username: "JDOE", Email: "other@example.com"},
-		jehUser,
+		taskexecUser,
 	))
-	assert.True(t, ldapProfileMatchesJEHUser(
+	assert.True(t, ldapProfileMatchesTaskExecUser(
 		db.User{Username: "other", Email: "JDOE@example.com"},
-		jehUser,
+		taskexecUser,
 	))
 
-	assert.False(t, ldapProfileMatchesJEHUser(
+	assert.False(t, ldapProfileMatchesTaskExecUser(
 		db.User{Username: "alice", Email: "alice@example.com"},
-		jehUser,
+		taskexecUser,
 	))
 }
 

@@ -18,7 +18,7 @@
 
     <v-toolbar flat>
       <v-app-bar-nav-icon @click="showDrawer()"></v-app-bar-nav-icon>
-      <v-toolbar-title>{{ $t('Invites') }}</v-toolbar-title>
+      <v-toolbar-title>{{ $t('uiInvites') }}</v-toolbar-title>
 
       <v-spacer></v-spacer>
 
@@ -47,7 +47,7 @@
       </template>
 
       <template v-slot:item.role="{ item }">
-        {{ USER_ROLES.find(r => r.slug === item.role).name }}
+        {{ $t(USER_ROLES.find(r => r.slug === item.role)?.titleKey || 'roleGuest') }}
       </template>
 
       <template v-slot:item.actions="{ item }">

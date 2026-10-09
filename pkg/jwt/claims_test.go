@@ -15,7 +15,7 @@ func TestAudience_MarshalJSON(t *testing.T) {
 	}{
 		{"empty", Audience{}, "null"},
 		{"nil", nil, "null"},
-		{"single", Audience{"jeh"}, `"jeh"`},
+		{"single", Audience{"taskexec"}, `"taskexec"`},
 		{"multiple", Audience{"a", "b"}, `["a","b"]`},
 	}
 	for _, tt := range tests {

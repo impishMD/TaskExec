@@ -1,13 +1,7 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
   <div v-if="items != null">
     <v-toolbar flat>
-      <v-btn
-        icon
-        class="mr-4"
-        @click="returnToProjects()"
-      >
-        <v-icon>mdi-arrow-left</v-icon>
-      </v-btn>
+      <v-app-bar-nav-icon @click="showDrawer()" />
       <v-toolbar-title>{{ $t('activeTasks') }}</v-toolbar-title>
     </v-toolbar>
 
@@ -42,11 +36,11 @@
       </template>
 
       <template v-slot:item.location="{item}">
-        <div v-if="item.location === 'queue'">Queue</div>
+        <div v-if="item.location === 'queue'">{{ $t('queue') }}</div>
         <div v-else-if="item.runner_id">
-          Runner #{{ item.runner_id }}
+          {{ $t('uiRunner') }} #{{ item.runner_id }}
         </div>
-        <div v-else>Local Running</div>
+        <div v-else>{{ $t('uiLocalRunning') }}</div>
       </template>
 
       <template v-slot:item.actions="{ item }">
@@ -76,9 +70,6 @@ export default {
   },
 
   props: {
-  },
-
-  computed: {
   },
 
   data() {
@@ -115,7 +106,7 @@ export default {
         text: this.$i18n.t('status'),
         value: 'status',
       }, {
-        text: this.$i18n.t('location'),
+        text: this.$i18n.t('taskLocation'),
         value: 'location',
       }, {
         text: this.$i18n.t('actions'),

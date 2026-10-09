@@ -8,10 +8,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/random"
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/random"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/util"
 )
 
 // HostConfigInstallation is the ssh config and git rewrites generated from the

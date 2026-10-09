@@ -1,0 +1,94 @@
+name: Helm CI
+on:
+  push:
+    branches: [develop, main]
+    paths:
+      - 'charts/**'
+      - 'tools/*chart*'
+      - 'tools/check-version.py'
+      - '.github/workflows/helm-*.yml'
+      - '.github/chart-releaser.yaml'
+      - 'deployment/helm/**'
+      - 'Dockerfile'
+      - 'deployment/docker/server/**'
+      - 'VERSION'
+  pull_request:
+    paths:
+      - 'charts/**'
+      - 'tools/*chart*'
+      - 'tools/check-version.py'
+      - '.github/workflows/helm-*.yml'
+      - '.github/chart-releaser.yaml'
+      - 'deployment/helm/**'
+      - 'Dockerfile'
+      - 'deployment/docker/server/**'
+      - 'VERSION'
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref to validate
+        required: false
+        type: string
+        default: ''
+permissions:
+  contents: read
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        helm: [v3.22.0, v4.3.0]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          persist-credentials: false
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: ${{ matrix.helm }}
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.13'
+      - run: python -m pip install PyYAML==6.0.3
+      - run: python tools/check-version.py
+      - run: helm lint charts/taskexec --strict -f charts/taskexec/ci/test-values.yaml
+      - run: python tools/check-chart.py --output /tmp/chart-fixtures
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Validate Kubernetes schemas and package
+        run: |
+          go install github.com/yannh/kubeconform/cmd/kubeconform@v0.7.0
+          kubeconform -strict -summary -kubernetes-version 1.26.0 /tmp/chart-fixtures
+          helm package charts/taskexec --destination "$RUNNER_TEMP"
+  install:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          persist-credentials: false
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310
+        with:
+          version: v3.22.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
+        with:
+          context: .
+          target: server
+          load: true
+          tags: taskexec:helm-ci
+          cache-from: |
+            type=gha,scope=helm-ci
+            type=gha,scope=ci-${{ runner.arch }}
+          cache-to: type=gha,scope=helm-ci,mode=max
+      - uses: helm/kind-action@06c1ae10762d3b9c1644e7fe69596ae519e015a2 # v1.15.0
+        with:
+          cluster_name: taskexec-chart
+          version: v0.33.0
+      - run: kind load docker-image taskexec:helm-ci --name taskexec-chart
+      - run: bash tools/test-chart-install.sh

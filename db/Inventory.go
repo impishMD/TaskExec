@@ -1,6 +1,6 @@
 package db
 
-import "github.com/impishMD/jeh/pkg/common_errors"
+import "github.com/impishMD/taskexec/pkg/common_errors"
 
 type InventoryType string
 
@@ -16,6 +16,10 @@ const (
 
 func (i InventoryType) IsStatic() bool {
 	return i == InventoryStatic || i == InventoryStaticYaml
+}
+
+func (i InventoryType) IsTerraform() bool {
+	return i == InventoryTerraformWorkspace || i == InventoryTofuWorkspace || i == InventoryTerragruntWorkspace
 }
 
 // Inventory is the model of an ansible inventory file

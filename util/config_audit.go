@@ -10,13 +10,13 @@ import (
 
 type AuditConfig struct {
 	// Enabled turns on the audit log.
-	Enabled bool `json:"enabled,omitempty" env:"JEH_AUDIT_ENABLED"`
+	Enabled bool `json:"enabled,omitempty" env:"TASKEXEC_AUDIT_ENABLED"`
 	// InstanceID is the installation name added to every event. Required when enabled.
-	InstanceID string `json:"instance_id,omitempty" env:"JEH_AUDIT_INSTANCE_ID"`
+	InstanceID string `json:"instance_id,omitempty" env:"TASKEXEC_AUDIT_INSTANCE_ID"`
 	// TrustedProxyCIDRs lists the proxy networks allowed to pass the client address.
-	TrustedProxyCIDRs []string `json:"trusted_proxy_cidrs,omitempty" env:"JEH_AUDIT_TRUSTED_PROXY_CIDRS"`
+	TrustedProxyCIDRs []string `json:"trusted_proxy_cidrs,omitempty" env:"TASKEXEC_AUDIT_TRUSTED_PROXY_CIDRS"`
 	// RetentionDays deletes audit events older than this many days. 0 keeps everything.
-	RetentionDays int `json:"retention_days,omitempty" env:"JEH_AUDIT_RETENTION_DAYS"`
+	RetentionDays int `json:"retention_days,omitempty" env:"TASKEXEC_AUDIT_RETENTION_DAYS"`
 	// Syslog sends audit events to a Syslog receiver over TLS.
 	Syslog *AuditSyslogConfig `json:"syslog,omitempty"`
 	// SplunkHEC exports audit events over the Splunk HTTP Event Collector protocol.
@@ -25,15 +25,15 @@ type AuditConfig struct {
 
 type AuditSyslogConfig struct {
 	// ID names the destination. Keep it when the address changes.
-	ID string `json:"id,omitempty" env:"JEH_AUDIT_SYSLOG_ID"`
+	ID string `json:"id,omitempty" env:"TASKEXEC_AUDIT_SYSLOG_ID"`
 	// Address is the receiver host and port.
-	Address string `json:"address,omitempty" env:"JEH_AUDIT_SYSLOG_ADDRESS"`
+	Address string `json:"address,omitempty" env:"TASKEXEC_AUDIT_SYSLOG_ADDRESS"`
 	// Timeout limits connecting to the receiver and sending events.
-	Timeout string `json:"timeout,omitempty" default:"10s" env:"JEH_AUDIT_SYSLOG_TIMEOUT"`
+	Timeout string `json:"timeout,omitempty" default:"10s" env:"TASKEXEC_AUDIT_SYSLOG_TIMEOUT"`
 	// CAFile is a PEM file with extra CA certificates to trust.
-	CAFile string `json:"ca_file,omitempty" env:"JEH_AUDIT_SYSLOG_CA_FILE"`
+	CAFile string `json:"ca_file,omitempty" env:"TASKEXEC_AUDIT_SYSLOG_CA_FILE"`
 	// ServerName is the name to check in the receiver certificate.
-	ServerName string `json:"server_name,omitempty" env:"JEH_AUDIT_SYSLOG_SERVER_NAME"`
+	ServerName string `json:"server_name,omitempty" env:"TASKEXEC_AUDIT_SYSLOG_SERVER_NAME"`
 }
 
 func (c *AuditConfig) IsEnabled() bool {
@@ -83,23 +83,23 @@ func (c *AuditSyslogConfig) IsConfigured() bool {
 
 type AuditSplunkHECConfig struct {
 	// ID names the destination. Keep it when the URL changes. A new ID starts with new events.
-	ID string `json:"id,omitempty" env:"JEH_AUDIT_SPLUNK_HEC_ID"`
+	ID string `json:"id,omitempty" env:"TASKEXEC_AUDIT_SPLUNK_HEC_ID"`
 	// URL is the full HEC endpoint, for example https://hec.example:8088/services/collector/event.
-	URL string `json:"url,omitempty" env:"JEH_AUDIT_SPLUNK_HEC_URL"`
+	URL string `json:"url,omitempty" env:"TASKEXEC_AUDIT_SPLUNK_HEC_URL"`
 	// Token is the HEC token sent as "Authorization: Splunk <token>".
-	Token string `json:"token,omitempty" env:"JEH_AUDIT_SPLUNK_HEC_TOKEN,sensitive"`
+	Token string `json:"token,omitempty" env:"TASKEXEC_AUDIT_SPLUNK_HEC_TOKEN,sensitive"`
 	// Index is the target index. Empty uses the default index of the token.
-	Index string `json:"index,omitempty" env:"JEH_AUDIT_SPLUNK_HEC_INDEX"`
+	Index string `json:"index,omitempty" env:"TASKEXEC_AUDIT_SPLUNK_HEC_INDEX"`
 	// Source is the HEC source of every event.
-	Source string `json:"source,omitempty" default:"jeh" env:"JEH_AUDIT_SPLUNK_HEC_SOURCE"`
+	Source string `json:"source,omitempty" default:"taskexec" env:"TASKEXEC_AUDIT_SPLUNK_HEC_SOURCE"`
 	// Sourcetype is the HEC sourcetype of every event.
-	Sourcetype string `json:"sourcetype,omitempty" default:"jeh:audit" env:"JEH_AUDIT_SPLUNK_HEC_SOURCETYPE"`
+	Sourcetype string `json:"sourcetype,omitempty" default:"taskexec:audit" env:"TASKEXEC_AUDIT_SPLUNK_HEC_SOURCETYPE"`
 	// Timeout bounds one HTTP request with one batch of events.
-	Timeout string `json:"timeout,omitempty" default:"10s" env:"JEH_AUDIT_SPLUNK_HEC_TIMEOUT"`
+	Timeout string `json:"timeout,omitempty" default:"10s" env:"TASKEXEC_AUDIT_SPLUNK_HEC_TIMEOUT"`
 	// CAFile is a PEM bundle added to the system roots.
-	CAFile string `json:"ca_file,omitempty" env:"JEH_AUDIT_SPLUNK_HEC_CA_FILE"`
+	CAFile string `json:"ca_file,omitempty" env:"TASKEXEC_AUDIT_SPLUNK_HEC_CA_FILE"`
 	// ServerName overrides the name checked in the receiver certificate.
-	ServerName string `json:"server_name,omitempty" env:"JEH_AUDIT_SPLUNK_HEC_SERVER_NAME"`
+	ServerName string `json:"server_name,omitempty" env:"TASKEXEC_AUDIT_SPLUNK_HEC_SERVER_NAME"`
 }
 
 func (c *AuditSplunkHECConfig) IsConfigured() bool {

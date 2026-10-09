@@ -1,6 +1,6 @@
 package db_lib
 
-import "github.com/impishMD/jeh/util"
+import "github.com/impishMD/taskexec/util"
 
 func CreateDefaultGitClient(keyInstaller AccessKeyInstaller) GitClient {
 	switch util.Config.GitClientId {

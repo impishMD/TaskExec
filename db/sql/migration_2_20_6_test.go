@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/go-gorp/gorp/v3"
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -6,9 +6,9 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/services/audit"
 )
 
 func IntegrationMiddleware(next http.Handler) http.Handler {

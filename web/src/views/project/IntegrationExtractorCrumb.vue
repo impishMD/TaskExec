@@ -7,9 +7,7 @@
         <router-link
           class="breadcrumbs__item breadcrumbs__item--link"
           :to="`/project/${projectId}/integrations/`"
-        >
-          Integrations
-        </router-link>
+        >{{ $t('integrations') }}</router-link>
         <v-icon>mdi-chevron-right</v-icon>
         <span class="breadcrumbs__item">{{ integration.name }}</span>
       </v-toolbar-title>

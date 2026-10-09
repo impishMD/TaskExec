@@ -4,10 +4,11 @@ import (
 	"time"
 )
 
-// Project is the top level structure in JEH
+// Project is the top level structure in TaskExec
 type Project struct {
 	ID                     int       `db:"id" json:"id" backup:"-"`
 	Name                   string    `db:"name" json:"name" binding:"required"`
+	Icon                   *string   `db:"icon" json:"icon,omitempty"`
 	Created                time.Time `db:"created" json:"created" backup:"-"`
 	Alert                  bool      `db:"alert" json:"alert,omitempty"`
 	AlertChat              *string   `db:"alert_chat" json:"alert_chat,omitempty"`

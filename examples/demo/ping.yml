@@ -1,5 +1,5 @@
 ---
-- name: Check the JEH execution environment
+- name: Check the TaskExec execution environment
   hosts: all
   gather_facts: false
   tasks:

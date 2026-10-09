@@ -3,10 +3,10 @@
     ref="form"
     lazy-validation
     v-model="formValid"
-    v-if="item != null && (!supportStorages || secretStorages != null)"
+    v-if="item != null"
     class="pb-3"
   >
-    <v-alert :value="formError" color="error" data-testid="varGroup-error"
+    <v-alert :value="!!formError" color="error" data-testid="varGroup-error"
       >{{ formError }}
     </v-alert>
 
@@ -20,34 +20,13 @@
       dense
     ></v-text-field>
 
-    <v-row v-if="supportStorages && isNew">
-      <v-col>
-        <v-autocomplete
-          v-model="item.secret_storage_id"
-          :label="$t('Secret storage (optional)')"
-          :items="secretStorages"
-          :disabled="formSaving || !isNew"
-          item-value="id"
-          item-text="name"
-          outlined
-          dense
-          clearable
-        />
-      </v-col>
-      <v-col>
-        <v-text-field
-          v-model="item.secret_storage_key_prefix"
-          :label="$t('Secret key prefix')"
-          :disabled="formSaving || !item.secret_storage_id || !isNew"
-          outlined
-          dense
-        />
-      </v-col>
-    </v-row>
+    <KeySourcesForm v-model="item.key_sources" :project-id="projectId"
+      :disabled="formSaving" @options="expressionOptions = $event" />
 
     <v-tabs grow v-model="tab">
-      <v-tab key="variables">Variables</v-tab>
-      <v-tab key="secrets">Secrets</v-tab>
+      <v-tab key="variables">{{ $t('uiVariables') }}</v-tab>
+      <v-tab key="secrets">{{ $t('uiSecrets') }}</v-tab>
+      <v-tab key="key-bindings">{{ $t('keyBindings') }}</v-tab>
     </v-tabs>
 
     <v-divider style="margin-top: -1px" class="mb-7" />
@@ -57,20 +36,19 @@
         <v-subheader class="px-0">
           {{ $t('extraVariables') }}
 
-          <v-tooltip v-if="needHelp" bottom color="black" open-delay="300" max-width="400">
-            <template v-slot:activator="{ on, attrs }">
-              <v-icon class="ml-1" v-bind="attrs" v-on="on">mdi-help-box </v-icon>
-            </template>
+          <HelpHint :visible="needHelp" class="ml-1">
             <div>
-              <div><code>--extra-vars</code> for Ansible</div>
-              <div><code>-var</code> for Terraform/OpenTofu</div>
+              <div><code>--extra-vars</code> {{ $t('forApp', { app: 'Ansible' }) }}</div>
+              <div><code>-var</code> {{ $t('forApp', { app: 'Terraform/OpenTofu' }) }}</div>
             </div>
-          </v-tooltip>
+          </HelpHint>
 
           <v-spacer />
 
-          <v-btn-toggle v-model="extraVarsEditMode" tile group>
-            <v-btn value="table" small class="mr-0" style="border-radius: 4px"> Table </v-btn>
+          <v-btn-toggle :key="modeRevision" v-model="extraVarsEditMode" tile group mandatory>
+            <v-btn value="table" small class="mr-0" style="border-radius: 4px">
+              {{ $t('uiTable') }}
+            </v-btn>
             <v-btn value="json" small class="mr-0" style="border-radius: 4px"> JSON </v-btn>
             <v-btn value="yaml" small class="mr-0" style="border-radius: 4px"> YAML </v-btn>
           </v-btn-toggle>
@@ -80,7 +58,7 @@
           </v-btn>
         </v-subheader>
 
-        <div v-if="extraVarsEditMode === 'json'" style="position: relative">
+        <div key="json" v-if="extraVarsEditMode === 'json'" style="position: relative">
           <codemirror
             :class="{
               EnvironmentEditor: true,
@@ -98,7 +76,7 @@
             style="position: absolute; right: 10px; top: 0; margin: 10px"
           />
         </div>
-        <div v-else-if="extraVarsEditMode === 'yaml'" style="position: relative">
+        <div key="yaml" v-else-if="extraVarsEditMode === 'yaml'" style="position: relative">
           <codemirror
             :class="{
               EnvironmentEditor: true,
@@ -151,14 +129,14 @@
                 </td>
                 <td class="pa-1">
                   <div class="d-flex align-center">
-                    <v-text-field
+                    <KeyExpressionInput
                       solo-inverted
                       flat
                       hide-details
                       v-model="props.item.value"
                       class="v-text-field--solo--no-min-height"
                       :placeholder="extraVarValuePlaceholder(props.item.type)"
-                    ></v-text-field>
+                     :options="expressionOptions" />
                     <RichEditor
                       v-if="props.item.type === 'list' || props.item.type === 'dict'"
                       v-model="props.item.value"
@@ -177,7 +155,7 @@
           </v-data-table>
 
           <v-alert color="warning" v-else>
-            Oops! This JSON structure is a little too complex to display as a table.
+            {{ $t('uiOopsThisJSONStructureIsALittleTooComplexToDisplayAsATable') }}
           </v-alert>
         </div>
 
@@ -212,14 +190,14 @@
                   ></v-text-field>
                 </td>
                 <td class="pa-1">
-                  <v-text-field
+                  <KeyExpressionInput
                     solo-inverted
                     flat
                     hide-details
                     v-model="props.item.value"
                     class="v-text-field--solo--no-min-height"
-                    :placeholder="$t('Value')"
-                  ></v-text-field>
+                    :placeholder="$t('matchValue')"
+                   :options="expressionOptions" />
                 </td>
                 <td style="width: 38px">
                   <v-icon small class="pa-1" @click="removeEnvVar(props.item)"> mdi-delete </v-icon>
@@ -231,94 +209,16 @@
       </v-tab-item>
 
       <v-tab-item key="secrets">
-        <div
-          v-if="!isNew && secretStorage"
-          class="px-4 py-3"
-          style="
-            background: rgba(133, 133, 133, 0.06);
-            border-color: rgb(33, 33, 33);
-            border-radius: 6px;
-          "
-        >
-          <div style="font-weight: bold; font-size: 20px">
-            <v-icon small class="mr-1">{{ getIcon(secretStorage.type) }}</v-icon>
-            {{ secretStorage.name }}
-          </div>
-          <pre>Source path pattern: <b>{{ item.secret_storage_key_prefix }}*</b></pre>
-
-          <div class="d-flex items-center justify-space-between mt-2">
-            <v-checkbox
-              class="mt-0 mb-2"
-              v-model="item.sync_enabled"
-              :label="$t('Sync keys enabled')"
-              :disabled="formSaving"
-              hide-details
-            />
-
-            <div class="d-flex align-center">
-              <v-btn
-                style="margin-right: -10px"
-                text
-                color="primary"
-                @click="syncSettingsDialog = true"
-                :disabled="formSaving"
-                v-if="item.sync_enabled"
-              >
-                <v-icon left>mdi-cog-sync</v-icon>
-                Sync paths
-                <v-chip
-                  class="ml-2"
-                  outlined
-                  style="transform: translateY(-1px)"
-                  color="primary"
-                  small
-                >
-                  {{ (item.sync_paths || []).length }}
-                </v-chip>
-              </v-btn>
-            </div>
-          </div>
-        </div>
-
-        <v-dialog v-model="syncSettingsDialog" max-width="500" persistent>
-          <v-card>
-            <v-card-title>Sync paths</v-card-title>
-            <v-card-text class="pt-4 pb-0">
-              <v-text-field
-                style="width: 140px"
-                v-model.number="item.sync_interval"
-                min="0"
-                :label="$t('Auto-sync interval')"
-                persistent-hint
-                :disabled="formSaving"
-                suffix="minutes"
-                outlined
-                dense
-              ></v-text-field>
-
-              <SecretStorageSyncOptionsForm v-model="item.sync_paths" />
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer />
-              <v-btn text color="blue darken-1" @click="syncSettingsDialog = false">
-                {{ $t('close') }}
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
 
         <div>
           <v-subheader class="px-0">
             {{ $t('extraVariables') }}
-            <v-tooltip v-if="needHelp" bottom color="black" open-delay="300" max-width="400">
-              <template v-slot:activator="{ on, attrs }">
-                <v-icon class="ml-1" v-bind="attrs" v-on="on">mdi-help-box </v-icon>
-              </template>
+            <HelpHint :visible="needHelp" class="ml-1">
               <div>
-                <div><code>--extra-vars</code> for Ansible</div>
-                <div><code>-var</code> for Terraform/OpenTofu</div>
+                <div><code>--extra-vars</code> {{ $t('forApp', { app: 'Ansible' }) }}</div>
+                <div><code>-var</code> {{ $t('forApp', { app: 'Terraform/OpenTofu' }) }}</div>
               </div>
-            </v-tooltip>
+            </HelpHint>
 
             <v-spacer />
             <v-btn icon @click="addSecret('var')" data-testid="varGroup-addSecretVar">
@@ -330,9 +230,7 @@
             color="warning"
             text
             v-if="secrets.filter((s) => !s.remove && s.type === 'var').length > 0"
-          >
-            Secrets passed this way may appear in plain text in Ansible logs.
-          </v-alert>
+          >{{ $t('uiSecretsPassedThisWayMayAppearInPlainTextInAnsibleLogs') }}</v-alert>
 
           <v-data-table
             :items="secrets.filter((s) => !s.remove && s.type === 'var')"
@@ -356,14 +254,14 @@
                 </td>
 
                 <td class="pa-1">
-                  <v-text-field
+                  <KeyExpressionInput
                     solo-inverted
                     flat
                     hide-details
                     v-model="props.item.value"
                     placeholder="*******"
                     class="v-text-field--solo--no-min-height"
-                  ></v-text-field>
+                   :options="expressionOptions" />
                 </td>
 
                 <td style="width: 38px">
@@ -407,14 +305,14 @@
                 </td>
 
                 <td class="pa-1">
-                  <v-text-field
+                  <KeyExpressionInput
                     solo-inverted
                     flat
                     hide-details
                     v-model="props.item.value"
                     placeholder="*******"
                     class="v-text-field--solo--no-min-height"
-                  ></v-text-field>
+                   :options="expressionOptions" />
                 </td>
 
                 <td style="width: 38px">
@@ -424,6 +322,10 @@
             </template>
           </v-data-table>
         </div>
+      </v-tab-item>
+      <v-tab-item key="key-bindings" eager>
+        <KeyBindingsForm v-model="item.key_bindings"
+          :project-id="projectId" :disabled="formSaving" />
       </v-tab-item>
     </v-tabs-items>
   </v-form>
@@ -453,10 +355,11 @@
 /* eslint-disable import/no-extraneous-dependencies,import/extensions */
 
 import ItemFormBase from '@/components/ItemFormBase';
+import HelpHint from '@/components/HelpHint.vue';
 
 import { codemirror } from 'vue-codemirror';
 import {
-  load as loadYaml, dump as dumpYaml, JSON_SCHEMA,
+  dump as dumpYaml,
 } from 'js-yaml';
 import {
   isPlainObject,
@@ -466,6 +369,7 @@ import {
   extraVarsToObject,
   extraVarsToObjectLenient,
   objectToExtraVars,
+  parseExtraVars,
 } from '@/lib/extraVars';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/vue/vue.js';
@@ -473,188 +377,37 @@ import 'codemirror/mode/yaml/yaml.js';
 import 'codemirror/addon/display/placeholder.js';
 import { getErrorMessage } from '@/lib/error';
 import RichEditor from '@/components/RichEditor.vue';
-import SecretStorageSyncOptionsForm from '@/components/SecretStorageSyncOptionsForm.vue';
+import KeyBindingsForm from '@/components/KeyBindingsForm.vue';
+import KeySourcesForm from '@/components/KeySourcesForm.vue';
+import KeyExpressionInput from '@/components/KeyExpressionInput.vue';
 
 export default {
   mixins: [ItemFormBase],
 
   props: {
     needHelp: Boolean,
-    supportStorages: Boolean,
   },
 
   components: {
+    HelpHint,
     RichEditor,
+    KeyBindingsForm,
     codemirror,
-    SecretStorageSyncOptionsForm,
+    KeySourcesForm,
+    KeyExpressionInput,
   },
 
   computed: {
-    secretStorage() {
-      if (this.item && this.item.secret_storage_id && this.secretStorages) {
-        return this.secretStorages.find((s) => s.id === this.item.secret_storage_id);
-      }
-      return null;
+    extraVarsEditMode: {
+      get() { return this.editorMode; },
+      set(mode) { this.switchExtraVarsMode(mode); },
     },
-  },
 
-  watch: {
-    // Handles Table/JSON/YAML toggling. The mode being left determines which
-    // field is authoritative (extraVars for table, json for JSON, yaml for YAML);
-    // it's parsed into a plain object which is then rendered into the mode being
-    // entered.
-    extraVarsEditMode(val, oldVal) {
-      // A reverted switch (see catch blocks below) re-fires this watcher;
-      // skip re-processing it so the revert doesn't trigger another
-      // conversion and clobber the text the user is still fixing.
-      if (this.suppressExtraVarsConversion) {
-        this.suppressExtraVarsConversion = false;
-        return;
-      }
-
-      let source;
-      switch (oldVal) {
-        case 'json': {
-          try {
-            source = JSON.parse(this.json);
-            this.formError = null;
-          } catch (err) {
-            this.revertExtraVarsMode(oldVal, getErrorMessage(err));
-            return;
-          }
-          break;
-        }
-        case 'yaml': {
-          try {
-            // JSON_SCHEMA restricts resolved types to what JSON itself can
-            // represent (null/bool/number/string/array/object), so e.g. an
-            // unquoted date like 2024-01-01 stays a string instead of
-            // js-yaml's default auto-conversion to a Date -- at any nesting
-            // depth, not just the root -- which would otherwise silently
-            // mangle the value (Date -> ISO string on save) or misclassify
-            // it as a dict in Table mode (Date is typeof 'object').
-            //
-            // Only an empty document (loadYaml returns undefined) defaults to
-            // {}. Valid falsy YAML values (false, 0, null) must be preserved
-            // as-is rather than silently coerced.
-            const loaded = loadYaml(this.yaml, { schema: JSON_SCHEMA });
-            source = loaded === undefined ? {} : loaded;
-            this.formError = null;
-          } catch (err) {
-            this.revertExtraVarsMode(oldVal, getErrorMessage(err));
-            return;
-          }
-          break;
-        }
-        default: {
-          // Coming from the table (or initial load): extraVars is authoritative.
-          // Serialize leniently: a row whose list/dict value is not valid JSON yet
-          // keeps its raw text (as a string) instead of throwing. This prevents the
-          // toggle from blanking the target editor or dropping rows while the user
-          // is still typing. Strict validation happens on save (see beforeSave).
-          if (this.extraVars == null) {
-            return;
-          }
-          source = this.extraVarsToObjectLenient(this.extraVars);
-        }
-      }
-
-      // Every mode (Table/JSON/YAML) can only represent a plain object (name
-      // -> value map). A YAML/JSON root of null, a scalar, an array, or a
-      // YAML-parsed Date would otherwise: crash in objectToExtraVars's
-      // Object.keys (Table), or reach beforeSave/the API where the backend
-      // silently accepts a JSON "null" body and discards the user's input.
-      // Checking here -- before dispatching on the target mode -- closes
-      // that off for every transition, not just entering Table.
-      if (!this.isPlainObject(source)) {
-        this.revertExtraVarsMode(oldVal, 'Extra variables must be an object, e.g. { "key": "value" }.');
-        return;
-      }
-
-      // JSON_SCHEMA still resolves .inf/-.inf/.nan to real Infinity/NaN
-      // numbers (JSON itself has no such literals -- there was nothing more
-      // restrictive to parse them as). JSON.stringify doesn't throw for
-      // these; it silently writes "null", discarding the value the same way
-      // an unguarded Date would have. Object.values / Array.prototype.every
-      // walk arbitrarily-nested values; seen guards against infinite
-      // recursion on a circular value (left for the try/catch below, via
-      // the thrown "circular structure" error, to report instead).
-      if (!this.isJsonSafeValue(source, new Set())) {
-        this.revertExtraVarsMode(
-          oldVal,
-          'Extra variables contain a number that is not finite (Infinity/NaN). Use a finite number or a quoted string instead.',
-        );
-        return;
-      }
-
-      // Wrapping the whole dispatch in one try/catch -- rather than adding a
-      // try/catch per case -- means every current and future use of
-      // JSON.stringify/dumpYaml on source (or on values nested inside it,
-      // e.g. inside objectToExtraVars) is covered, including a YAML
-      // anchor/alias cycle that made source a circular object: isPlainObject
-      // above doesn't (and can't cheaply) detect that, since circularity is
-      // a graph property, not a type property.
-      try {
-        switch (val) {
-          case 'json':
-            this.json = JSON.stringify(source, null, 2);
-            break;
-          case 'yaml': {
-            const dumped = dumpYaml(source);
-            this.yaml = dumped === '{}\n' ? '' : dumped;
-            break;
-          }
-          case 'table': {
-            // If the source still matches what the current table represents,
-            // the user only switched tabs without editing it — keep the
-            // existing rows so their chosen types (e.g. Dict) and
-            // in-progress values are preserved instead of being re-inferred
-            // (and possibly downgraded to String).
-            if (
-              this.extraVars != null
-              && JSON.stringify(source)
-                === JSON.stringify(this.extraVarsToObjectLenient(this.extraVars))
-            ) {
-              return;
-            }
-
-            this.extraVars = this.objectToExtraVars(source);
-            break;
-          }
-          default:
-            throw new Error(`Invalid extra variables edit mode: ${val}`);
-        }
-      } catch (err) {
-        this.revertExtraVarsMode(oldVal, getErrorMessage(err));
-      }
-    },
   },
 
   data() {
     return {
-      // PREDEFINED_ENV_VARS,
-      images: [
-        'dind-runner:v2.0.0',
-        'dind-runner:v2.0.2',
-        'dind-runner:v2.0.3',
-        'dind-runner:v2.0.4',
-        'dind-runner:v2.0.5',
-        'dind-runner:v2.0.6',
-        'dind-runner:v2.0.7',
-        'dind-runner:v2.0.8',
-        'dind-runner:v2.0.9',
-        'dind-runner:v2.0.10',
-        'nodejs-runner:v2.0.0',
-        'nodejs-runner:v2.0.3',
-        'nodejs-runner:v2.0.4',
-        'nodejs-runner:v2.0.5',
-        'nodejs-runner:v2.0.6',
-        'nodejs-runner:v2.0.7',
-        'nodejs-runner:v2.0.8',
-        'nodejs-runner:v2.0.9',
-        'nodejs-runner:v2.0.10',
-      ],
-
+      expressionOptions: [],
       json: '{}',
       yaml: '',
       extraVars: [],
@@ -680,46 +433,37 @@ export default {
         indentWithTabs: false,
       },
 
-      extraVarsEditMode: 'json',
-      suppressExtraVarsConversion: false,
+      editorMode: 'table',
+      modeRevision: 0,
 
       extraVarTypes: [
-        { text: 'String', value: 'string' },
-        { text: 'Number', value: 'number' },
-        { text: 'List', value: 'list' },
-        { text: 'Dict', value: 'dict' },
+        { text: this.$t('uiString'), value: 'string' },
+        { text: this.$t('uiNumber'), value: 'number' },
+        { text: this.$t('uiList'), value: 'list' },
+        { text: this.$t('uiDict'), value: 'dict' },
       ],
 
-      secretStorages: null,
-
-      syncSettingsDialog: false,
-      syncing: false,
     };
   },
 
   methods: {
-    getNewItem() {
-      return {
-        sync_enabled: false,
-        sync_interval: 0,
-        sync_paths: [],
-      };
+    afterReset() {
+      this.editorMode = 'table';
+      this.modeRevision += 1;
+      this.json = '{}';
+      this.yaml = '';
+      this.extraVars = [];
+      this.env = [];
+      this.secrets = [];
+      this.tab = 'variables';
+      this.expressionOptions = [];
     },
-    getIcon(type) {
-      switch (type) {
-        case 'aws_sm':
-          return '$vuetify.icons.aws_sm';
-        case 'vault':
-          return '$vuetify.icons.hashicorp_vault';
-        case 'openbao':
-          return '$vuetify.icons.openbao';
-        case 'dvls':
-          return '$vuetify.icons.dvls';
-        case 'azure_kv':
-          return '$vuetify.icons.azure_kv';
-        default:
-          return '';
-      }
+    getNewItem() { return { key_sources: [], key_bindings: [], secret_expressions: [] }; },
+    isExpression(value) {
+      if (typeof value !== 'string') return false;
+      return [...value.matchAll(/\{\{\s*([A-Za-z_][A-Za-z0-9_]*)/g)]
+        .some((match) => (this.item.key_sources || [])
+          .some((source) => source.prefix === match[1]));
     },
 
     addExtraVar(name = '', value = '', type = 'string') {
@@ -742,7 +486,7 @@ export default {
         case 'dict':
           return '{"key": "value"}';
         default:
-          return this.$t('Value');
+          return this.$t('matchValue');
       }
     },
 
@@ -756,16 +500,30 @@ export default {
       return isJsonSafeValue(value, seen);
     },
 
-    // revertExtraVarsMode undoes a Table/JSON/YAML switch that failed to
-    // convert (parse error, non-object root, or a serialization failure such
-    // as a circular YAML alias), restoring the mode being left. Reassigning
-    // extraVarsEditMode re-fires this watcher, so suppressExtraVarsConversion
-    // is set to skip that re-entry instead of reconverting (and clobbering)
-    // whatever the user was still fixing.
-    revertExtraVarsMode(oldVal, message) {
-      this.formError = message;
-      this.suppressExtraVarsConversion = true;
-      this.extraVarsEditMode = oldVal;
+    readExtraVars() {
+      return this.editorMode === 'table'
+        ? this.extraVarsToObjectLenient(this.extraVars)
+        : parseExtraVars(this[this.editorMode], this.editorMode);
+    },
+
+    switchExtraVarsMode(mode) {
+      if (!['table', 'json', 'yaml'].includes(mode) || mode === this.editorMode) return;
+      try {
+        const source = this.readExtraVars();
+        if (!this.isJsonSafeValue(source)) throw new Error(this.$t('extraVarsFiniteRequired'));
+        if (mode === 'json') this.json = JSON.stringify(source, null, 2);
+        if (mode === 'yaml') this.yaml = dumpYaml(source);
+        if (mode === 'table'
+          && JSON.stringify(source)
+          !== JSON.stringify(this.extraVarsToObjectLenient(this.extraVars))) {
+          this.extraVars = this.objectToExtraVars(source);
+        }
+        this.editorMode = mode;
+        this.formError = null;
+      } catch (err) {
+        this.formError = getErrorMessage(err);
+        this.modeRevision += 1;
+      }
     },
 
     inferVarType(value) {
@@ -793,7 +551,7 @@ export default {
     },
 
     removeEnvVar(val) {
-      const i = this.env.findIndex((v) => v.name === val.name);
+      const i = this.env.indexOf(val);
       if (i > -1) {
         this.env.splice(i, 1);
       }
@@ -809,7 +567,7 @@ export default {
     },
 
     removeSecret(val) {
-      const i = this.secrets.findIndex((v) => v.name === val.name);
+      const i = this.secrets.indexOf(val);
       if (i > -1) {
         const s = this.secrets[i];
         this.secrets.splice(i, 1);
@@ -824,44 +582,9 @@ export default {
     },
 
     beforeSave() {
-      switch (this.extraVarsEditMode) {
-        case 'json':
-          this.item.json = this.json;
-          break;
-        case 'yaml':
-          try {
-            // See the matching loadYaml call in the watcher above for why
-            // JSON_SCHEMA is used (keeps timestamps as plain strings).
-            const loaded = loadYaml(this.yaml, { schema: JSON_SCHEMA });
-            const value = loaded === undefined ? {} : loaded;
-            // Same constraint as the table-mode guard in the watcher above:
-            // extra variables must be a plain object. A null/scalar/array
-            // root would otherwise be sent to the API as-is; the backend
-            // treats a JSON "null" body as an empty (and validly saved) set
-            // of extra variables, silently discarding whatever the user typed.
-            if (!this.isPlainObject(value)) {
-              throw new Error('must be an object, e.g. { "key": "value" }');
-            }
-            // See isJsonSafeValue in the watcher: JSON.stringify silently
-            // turns Infinity/-Infinity/NaN into null instead of throwing.
-            if (!this.isJsonSafeValue(value, new Set())) {
-              throw new Error('contains a number that is not finite (Infinity/NaN)');
-            }
-            this.item.json = JSON.stringify(value);
-          } catch (err) {
-            throw new Error(`Extra variables: ${getErrorMessage(err)}`);
-          }
-          break;
-        case 'table':
-          if (this.extraVars == null) {
-            this.item.json = this.json;
-          } else {
-            this.item.json = JSON.stringify(this.extraVarsToObject(this.extraVars));
-          }
-          break;
-        default:
-          throw new Error(`Invalid extra variables edit mode: ${this.extraVarsEditMode}`);
-      }
+      this.item.json = JSON.stringify(this.editorMode === 'table'
+        ? this.extraVarsToObject(this.extraVars)
+        : parseExtraVars(this[this.editorMode], this.editorMode));
 
       const env = (this.env || []).reduce(
         (prev, curr) => ({
@@ -871,52 +594,46 @@ export default {
         {},
       );
 
-      const secrets = (this.secrets || [])
-        .map((s) => {
-          let operation;
-          if (s.new) {
-            operation = 'create';
-          } else if (s.remove) {
-            operation = 'delete';
-          } else {
-            operation = 'update';
-          }
-          return {
-            id: s.id,
-            name: s.name,
-            secret: s.value,
-            type: s.type,
-            operation,
-          };
-        })
-        .filter((s) => s.operation != null);
-
+      const secrets = [];
+      const expressions = [];
+      (this.secrets || []).forEach((secret) => {
+        const mapped = this.isExpression(secret.value);
+        if (secret.id && (secret.remove || mapped)) {
+          secrets.push({
+            id: secret.id, name: secret.name, type: secret.type, operation: 'delete',
+          });
+        }
+        if (secret.remove) return;
+        if (mapped) {
+          expressions.push({ name: secret.name, type: secret.type, expression: secret.value });
+          return;
+        }
+        if (secret.expression && /\{\{/.test(secret.value)) {
+          const error = new Error(this.$t('keyExpressionInvalid'));
+          throw error;
+        }
+        secrets.push({
+          id: secret.id,
+          name: secret.name,
+          secret: secret.value,
+          type: secret.type,
+          operation: secret.id ? 'update' : 'create',
+        });
+      });
+      this.item.secret_expressions = expressions;
+      this.item.key_sources = (this.item.key_sources || []).map((source) => ({
+        prefix: source.prefix, key_id: source.key_id,
+      }));
+      this.item.key_bindings = (this.item.key_bindings || []).map((b) => ({
+        key_id: b.key_id, name: b.name, type: b.type, field: b.field == null ? null : b.field,
+      }));
       this.item.env = JSON.stringify(env);
       this.item.secrets = secrets;
     },
 
     async afterLoadData() {
-      if (this.itemId === 'new') {
-        [this.secretStorages] = await Promise.all([this.loadProjectResources('secret_storages')]);
-      } else {
-        this.secretStorages = [];
-
-        if (this.item.secret_storage_id) {
-          this.secretStorages.push(
-            await this.loadProjectResource('secret_storages', this.item.secret_storage_id),
-          );
-        }
-      }
-
-      if (!this.item.sync_paths) {
-        this.$set(this.item, 'sync_paths', []);
-      }
-      if (this.item.sync_enabled == null) {
-        this.$set(this.item, 'sync_enabled', false);
-      }
-      if (this.item.sync_interval == null) {
-        this.$set(this.item, 'sync_interval', 0);
-      }
+      this.$set(this.item, 'key_bindings', this.item.key_bindings || []);
+      this.$set(this.item, 'key_sources', this.item.key_sources || []);
 
       this.json = JSON.stringify(JSON.parse(this.item?.json || '{}'), null, 2);
 
@@ -927,13 +644,12 @@ export default {
       const secrets = this.item?.secrets || [];
 
       this.extraVars = this.objectToExtraVars(json);
-      this.extraVarsEditMode = 'table';
+      this.yaml = dumpYaml(json);
+      this.editorMode = 'table';
+      this.tab = 'variables';
+      this.formError = null;
 
       this.env = Object.keys(env)
-        // .filter((x) => {
-        //   const index = PREDEFINED_ENV_VARS.findIndex((v) => v.name === x);
-        //   return index === -1 || PREDEFINED_ENV_VARS[index].value !== env[x];
-        // })
         .map((x) => ({
           name: x,
           value: env[x],
@@ -946,12 +662,12 @@ export default {
         type: x.type,
       }));
 
-      // Object.keys(env).forEach((x) => {
-      //   const index = PREDEFINED_ENV_VARS.findIndex((v) => v.name === x);
-      //   if (index !== -1 && PREDEFINED_ENV_VARS[index].value === env[x]) {
-      //     this.predefinedEnvVars.push(index);
-      //   }
-      // });
+      this.secrets.push(...(this.item.secret_expressions || []).map((expression) => ({
+        name: expression.name,
+        type: expression.type,
+        value: expression.expression,
+        expression: true,
+      })));
     },
 
     getItemsUrl() {

@@ -3,12 +3,11 @@ package runners
 import (
 	"fmt"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/db_lib"
-	"github.com/impishMD/jeh/pro/services/tasks/docker"
-	"github.com/impishMD/jeh/pro/services/tasks/k8s"
-	"github.com/impishMD/jeh/services/tasks"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/db_lib"
+	"github.com/impishMD/taskexec/services/tasks"
+	"github.com/impishMD/taskexec/services/tasks/docker"
+	"github.com/impishMD/taskexec/util"
 )
 
 // newExecutorProvider picks the ExecutorProvider implementation that matches the
@@ -22,11 +21,7 @@ func newExecutorProvider(executorCfg *util.ExecutorConfig, keyInstaller db_lib.A
 	case util.ExecutorTypeLocal:
 		return tasks.NewLocalExecutorProvider(keyInstaller), nil
 	case util.ExecutorTypeKubernetes:
-		k8sCfg := util.RunnerK8sConfig{}
-		if executorCfg != nil {
-			k8sCfg = executorCfg.K8s
-		}
-		return k8s.NewProvider(k8sCfg)
+		return nil, fmt.Errorf("k8s executor is not implemented; use local or docker")
 	case util.ExecutorTypeDocker:
 		dockerCfg := util.RunnerDockerConfig{}
 		if executorCfg != nil {

@@ -1,6 +1,6 @@
-# JEH web interface
+# TaskExec web interface
 
-Vue 2 and Vuetify frontend for Job Executor Hub.
+Vue 2 and Vuetify frontend for TaskExec.
 
 ```sh
 npm ci

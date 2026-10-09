@@ -7,18 +7,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/impishMD/jeh/db/sql"
-	"github.com/impishMD/jeh/pkg/ssh"
+	"github.com/impishMD/taskexec/db/sql"
+	"github.com/impishMD/taskexec/pkg/ssh"
 
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/pro_interfaces"
+	"github.com/impishMD/taskexec/pkg/task_logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/impishMD/jeh/db_lib"
+	"github.com/impishMD/taskexec/db_lib"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/util"
 )
 
 type KeyInstallerMock struct {
@@ -70,20 +69,6 @@ func (s *EncryptionServiceMock) DeleteTaskSurveySecrets(projectID int, taskID in
 	return nil
 }
 
-type mockLogWriteService struct {
-}
-
-func (l *mockLogWriteService) WriteEventLog(event pro_interfaces.EventLogRecord) error {
-	return nil
-}
-
-func (l *mockLogWriteService) WriteTaskLog(task pro_interfaces.TaskLogRecord) error {
-	return nil
-}
-func (l *mockLogWriteService) WriteResult(task any) error {
-	return nil
-}
-
 type successfulKilledJob struct {
 	onRun func()
 }
@@ -115,7 +100,6 @@ func newTaskRunnerRunFixture(t *testing.T) taskRunnerRunFixture {
 		&InventoryServiceMock{},
 		&EncryptionServiceMock{},
 		keyInstaller,
-		&mockLogWriteService{},
 		nil,
 		nil,
 	)
@@ -598,7 +582,7 @@ func TestTaskGetPlaybookArgs(t *testing.T) {
 	args, _, err := tsk.job.(*LocalExecutor).getPlaybookArgs("", nil)
 	require.NoError(t, err)
 
-	assert.Equal(t, "--inventory /tmp/project_0/inventory_0 --extra-vars {\"jeh_vars\":{\"task_details\":{\"commit_hash\":null,\"commit_message\":\"\",\"id\":0,\"inventory_id\":0,\"inventory_name\":\"\",\"repository_id\":0,\"repository_name\":\"\",\"url\":null,\"username\":\"\"}}} /tmp/project_0/repository_0_template_0_da39a3ee5e6b4b0d3255bfef95601890/test.yml", strings.Join(args, " "))
+	assert.Equal(t, "--inventory /tmp/project_0/inventory_0 --extra-vars {\"taskexec_vars\":{\"task_details\":{\"commit_hash\":null,\"commit_message\":\"\",\"id\":0,\"inventory_id\":0,\"inventory_name\":\"\",\"repository_id\":0,\"repository_name\":\"\",\"url\":null,\"username\":\"\"}}} /tmp/project_0/repository_0_template_0_da39a3ee5e6b4b0d3255bfef95601890/test.yml", strings.Join(args, " "))
 }
 
 func TestTaskGetPlaybookArgs2(t *testing.T) {
@@ -648,7 +632,7 @@ func TestTaskGetPlaybookArgs2(t *testing.T) {
 	args, _, err := tsk.job.(*LocalExecutor).getPlaybookArgs("", nil)
 	require.NoError(t, err)
 
-	assert.Equal(t, "--inventory /tmp/project_0/inventory_0 --extra-vars {\"jeh_vars\":{\"task_details\":{\"commit_hash\":null,\"commit_message\":\"\",\"id\":0,\"inventory_id\":0,\"inventory_name\":\"\",\"repository_id\":0,\"repository_name\":\"\",\"url\":null,\"username\":\"\"}}} /tmp/project_0/repository_0_template_0_da39a3ee5e6b4b0d3255bfef95601890/test.yml", strings.Join(args, " "))
+	assert.Equal(t, "--inventory /tmp/project_0/inventory_0 --extra-vars {\"taskexec_vars\":{\"task_details\":{\"commit_hash\":null,\"commit_message\":\"\",\"id\":0,\"inventory_id\":0,\"inventory_name\":\"\",\"repository_id\":0,\"repository_name\":\"\",\"url\":null,\"username\":\"\"}}} /tmp/project_0/repository_0_template_0_da39a3ee5e6b4b0d3255bfef95601890/test.yml", strings.Join(args, " "))
 }
 
 func TestTaskGetPlaybookArgs3(t *testing.T) {
@@ -699,7 +683,7 @@ func TestTaskGetPlaybookArgs3(t *testing.T) {
 	args, _, err := tsk.job.(*LocalExecutor).getPlaybookArgs("", nil)
 	require.NoError(t, err)
 
-	assert.Equal(t, "--inventory /tmp/project_0/inventory_0 --extra-vars {\"jeh_vars\":{\"task_details\":{\"commit_hash\":null,\"commit_message\":\"\",\"id\":0,\"inventory_id\":0,\"inventory_name\":\"\",\"repository_id\":0,\"repository_name\":\"\",\"url\":null,\"username\":\"\"}}} /tmp/project_0/repository_0_template_0_da39a3ee5e6b4b0d3255bfef95601890/test.yml", strings.Join(args, " "))
+	assert.Equal(t, "--inventory /tmp/project_0/inventory_0 --extra-vars {\"taskexec_vars\":{\"task_details\":{\"commit_hash\":null,\"commit_message\":\"\",\"id\":0,\"inventory_id\":0,\"inventory_name\":\"\",\"repository_id\":0,\"repository_name\":\"\",\"url\":null,\"username\":\"\"}}} /tmp/project_0/repository_0_template_0_da39a3ee5e6b4b0d3255bfef95601890/test.yml", strings.Join(args, " "))
 }
 
 func TestCheckTmpDir(t *testing.T) {

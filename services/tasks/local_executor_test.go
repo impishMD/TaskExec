@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/ssh"
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/ssh"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -104,7 +104,7 @@ func TestGetEnvironmentExtraVars_EmptySecret(t *testing.T) {
 			require.NoError(t, err)
 
 			assert.Equal(t, "hello", extraVars["PLAIN_VAR"])
-			assert.Len(t, extraVars, 2) // PLAIN_VAR + jeh_vars only
+			assert.Len(t, extraVars, 2) // PLAIN_VAR + taskexec_vars only
 		})
 	}
 }
@@ -483,7 +483,7 @@ func TestGetPlaybookArgs_InventorySSHCommonArgs(t *testing.T) {
 	})
 
 	t.Run("mappings point ansible at the generated config", func(t *testing.T) {
-		installation := &ssh.HostConfigInstallation{ConfigFile: "/tmp/jeh/project_1/ssh-config-x.conf"}
+		installation := &ssh.HostConfigInstallation{ConfigFile: "/tmp/taskexec/project_1/ssh-config-x.conf"}
 
 		args, _, err := newExecutor(installation).getPlaybookArgs("admin", nil)
 
@@ -492,7 +492,7 @@ func TestGetPlaybookArgs_InventorySSHCommonArgs(t *testing.T) {
 
 		i := indexOfArg(args, "--ssh-common-args")
 		require.Less(t, i+1, len(args))
-		assert.Equal(t, "-F /tmp/jeh/project_1/ssh-config-x.conf", args[i+1])
+		assert.Equal(t, "-F /tmp/taskexec/project_1/ssh-config-x.conf", args[i+1])
 	})
 }
 
@@ -583,23 +583,23 @@ func TestTaskIdentityEnv(t *testing.T) {
 	}{
 		{
 			name:    "plain task",
-			webHost: "https://jeh.example.com",
+			webHost: "https://taskexec.example.com",
 			task:    db.Task{ID: 11, ProjectID: 3},
 			expected: []string{
-				"JEH_PROJECT_ID=3",
-				"JEH_TASK_ID=11",
+				"TASKEXEC_PROJECT_ID=3",
+				"TASKEXEC_TASK_ID=11",
 			},
 		},
 		{
 			name:    "workflow task",
-			webHost: "https://jeh.example.com",
+			webHost: "https://taskexec.example.com",
 			task:    db.Task{ID: 11, ProjectID: 3, WorkflowRunID: &runID, WorkflowTemplateID: &workflowID},
 			expected: []string{
-				"JEH_PROJECT_ID=3",
-				"JEH_TASK_ID=11",
-				"JEH_WORKFLOW_RUN_ID=42",
-				"JEH_WORKFLOW_ID=7",
-				"JEH_WORKFLOW_URL=https://jeh.example.com/project/3/workflows/7/runs/42",
+				"TASKEXEC_PROJECT_ID=3",
+				"TASKEXEC_TASK_ID=11",
+				"TASKEXEC_WORKFLOW_RUN_ID=42",
+				"TASKEXEC_WORKFLOW_ID=7",
+				"TASKEXEC_WORKFLOW_URL=https://taskexec.example.com/project/3/workflows/7/runs/42",
 			},
 		},
 		{
@@ -607,10 +607,10 @@ func TestTaskIdentityEnv(t *testing.T) {
 			webHost: "",
 			task:    db.Task{ID: 11, ProjectID: 3, WorkflowRunID: &runID, WorkflowTemplateID: &workflowID},
 			expected: []string{
-				"JEH_PROJECT_ID=3",
-				"JEH_TASK_ID=11",
-				"JEH_WORKFLOW_RUN_ID=42",
-				"JEH_WORKFLOW_ID=7",
+				"TASKEXEC_PROJECT_ID=3",
+				"TASKEXEC_TASK_ID=11",
+				"TASKEXEC_WORKFLOW_RUN_ID=42",
+				"TASKEXEC_WORKFLOW_ID=7",
 			},
 		},
 	}
@@ -624,4 +624,10 @@ func TestTaskIdentityEnv(t *testing.T) {
 			assert.Equal(t, tt.expected, taskIdentityEnv(tt.task))
 		})
 	}
+}
+
+func TestLocalExecutorRejectsContainerImage(t *testing.T) {
+	image := "taskexec:job"
+	executor := &LocalExecutor{Template: db.Template{ExecutorImage: &image}, Logger: task_logger.NopLogger{}}
+	require.ErrorContains(t, executor.Prepare("", nil, ""), "requires a Docker runner")
 }

@@ -3,7 +3,7 @@ package util
 import (
 	"math/rand"
 
-	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/taskexec/pkg/tz"
 )
 
 //HELPERS

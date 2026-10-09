@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 func (d *SqlDb) GetProjectInvites(projectID int, params db.RetrieveQueryParams) (invites []db.ProjectInviteWithUser, err error) {

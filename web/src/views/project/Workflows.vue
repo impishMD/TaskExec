@@ -60,7 +60,7 @@
       <template v-slot:item.status="{ item }">
         <div class="mt-2 mb-2 d-flex" v-if="item.last_run != null">
           <v-chip :color="statusColor(item.last_run.status)" small>
-            {{ item.last_run.status }}
+            {{ statusTitle(item.last_run.status) }}
           </v-chip>
         </div>
         <div v-else class="mt-3 mb-2 d-flex" style="color: gray;">{{ $t('notLaunched') }}</div>
@@ -110,7 +110,7 @@
               </router-link>
             </template>
             <template v-slot:item.status="{ item: run }">
-              <v-chip :color="statusColor(run.status)" small>{{ run.status }}</v-chip>
+              <v-chip :color="statusColor(run.status)" small>{{ statusTitle(run.status) }}</v-chip>
             </template>
             <template v-slot:item.version="{ item: run }">
               {{ run.version || '—' }}
@@ -148,6 +148,7 @@
 }
 </style>
 <script>
+import DisplayLabelsMixin from '@/components/DisplayLabelsMixin';
 import ItemListPageBase from '@/components/ItemListPageBase';
 import TableSettingsSheet from '@/components/TableSettingsSheet.vue';
 import axios from 'axios';
@@ -158,7 +159,7 @@ export default {
   components: {
     TableSettingsSheet,
   },
-  mixins: [ItemListPageBase],
+  mixins: [DisplayLabelsMixin, ItemListPageBase],
 
   data() {
     return {

@@ -7,22 +7,23 @@ repo=$(cd "$(dirname "$0")/.." && pwd)
 if [[ "$role" == job || "$role" == helper ]]; then
   docker run --rm "$image" sh -ec 'test "$(id -u)" != 0; git --version; ssh -V'
   if [[ "$role" == job ]]; then
+    docker run --rm "$image" taskexec version | grep -F -- "$version-"
     docker run --rm "$image" sh -ec 'ansible-playbook --version; tofu version; terraform version; terragrunt --version'
     docker run --rm -v "$repo/examples/demo:/examples:ro" "$image" \
       ansible-playbook -i localhost, -c local /examples/ping.yml
   fi
   exit 0
 fi
-docker run --rm "$image" jeh version | grep -F -- "$version-"
-docker run --rm "$image" sh -ec 'test "$(id -u)" = 1001; jeh runner start --help; ansible-playbook --version; tofu version'
+docker run --rm "$image" taskexec version | grep -F -- "$version-"
+docker run --rm "$image" sh -ec 'test "$(id -u)" = 1001; taskexec runner start --help; ansible-playbook --version; tofu version'
 if [[ "$role" == runner ]]; then exit 0; fi
-name="jeh-smoke-$RANDOM-$$"
+name="taskexec-smoke-$RANDOM-$$"
 cleanup() { result=$?; if [[ "$result" != 0 ]]; then docker logs "$name" || true; fi; docker rm -f "$name" > /dev/null 2>&1 || true; }
 trap cleanup EXIT
 key=$(openssl rand -base64 32)
 docker run -d --name "$name" -p 127.0.0.1::3000 \
-  -e JEH_DB_DIALECT=sqlite -e JEH_ADMIN=admin -e JEH_ADMIN_PASSWORD=jeh-ci-only-password \
-  -e JEH_ACCESS_KEY_ENCRYPTION="$key" "$image" > /dev/null
+  -e TASKEXEC_DB_DIALECT=sqlite -e TASKEXEC_ADMIN=admin -e TASKEXEC_ADMIN_PASSWORD=taskexec-ci-only-password \
+  -e TASKEXEC_ACCESS_KEY_ENCRYPTION="$key" "$image" > /dev/null
 port=$(docker port "$name" 3000/tcp | head -1 | sed 's/.*://')
 url="http://127.0.0.1:$port"
 ready=false
@@ -31,10 +32,10 @@ for _ in $(seq 1 90); do
   sleep 1
 done
 if [[ "$ready" != true ]]; then docker logs "$name"; exit 1; fi
-curl -fsS "$url/" | grep -F 'Job Executor Hub'
-curl -fsS "$url/favicon.svg" | grep -F 'aria-label="JEH"'
+curl -fsS "$url/" | grep -F 'TaskExec'
+curl -fsS "$url/favicon.svg" | grep -F 'aria-label="TaskExec"'
 status=$(curl -sS -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' \
-  -d '{"auth":"admin","password":"jeh-ci-only-password"}' "$url/api/auth/login")
+  -d '{"auth":"admin","password":"taskexec-ci-only-password"}' "$url/api/auth/login")
 test "$status" = 204
 # Persisted SQLite configuration must survive container restart.
 docker restart "$name" > /dev/null
@@ -45,5 +46,5 @@ for _ in $(seq 1 60); do
   sleep 1
 done
 status=$(curl -sS -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' \
-  -d '{"auth":"admin","password":"jeh-ci-only-password"}' "$url/api/auth/login")
+  -d '{"auth":"admin","password":"taskexec-ci-only-password"}' "$url/api/auth/login")
 test "$status" = 204

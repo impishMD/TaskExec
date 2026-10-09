@@ -9,15 +9,15 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/db/sql"
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/services/audit/audittest"
-	"github.com/impishMD/jeh/services/runners"
-	"github.com/impishMD/jeh/services/tasks"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/db/sql"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/services/audit/audittest"
+	"github.com/impishMD/taskexec/services/runners"
+	"github.com/impishMD/taskexec/services/tasks"
+	"github.com/impishMD/taskexec/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -93,7 +93,7 @@ func TestRunnerMiddleware_PutsTheRunnerIntoTheAuditContext(t *testing.T) {
 
 func TestUpdateRunner_InvalidStatusIsRecorded(t *testing.T) {
 	store := sql.InitConfigCreateTestStore()
-	pool := tasks.CreateTaskPool(store, tasks.NewMemoryTaskStateStore(), nil, nil, nil, nil, nil, nil, nil)
+	pool := tasks.CreateTaskPool(store, tasks.NewMemoryTaskStateStore(), nil, nil, nil, nil, nil, nil)
 	ctrl := NewRunnerController(nil, &pool, nil, nil)
 	runnerID := 1
 	tr := tasks.NewTaskRunner(db.Task{ID: 7, ProjectID: 1, RunnerID: &runnerID, Status: task_logger.TaskRunningStatus}, &pool, "", nil)

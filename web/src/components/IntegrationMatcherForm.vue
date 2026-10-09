@@ -13,8 +13,8 @@
     </v-alert>
     <v-text-field
       v-model="item.name"
-      label="Name"
-      :rules="[v => !!v || 'Name is required']"
+      :label="$t('name')"
+      :rules="[v => !!v || $t('name_required')]"
       required
       :disabled="formSaving"
       outlined
@@ -26,11 +26,11 @@
     <div>
       <v-select
         v-model="item.match_type"
-        label="Match on *"
+        :label="$t('uiMatchOn')"
         :items="matchTypes"
         item-value="id"
         item-text="text"
-        :rules="[v => !!v || 'Match source is required']"
+        :rules="[v => !!v || $t('matchSourceRequired')]"
         outlined
         dense
         required
@@ -39,11 +39,11 @@
       <v-select
         v-model="item.body_data_type"
         v-if="item.match_type == 'body'"
-        label="Body Data Format *"
+        :label="$t('uiBodyDataFormat')"
         :items="bodyDataFormats"
         item-value="id"
         item-text="text"
-        :rules="[v => !!v || 'Body Data Format is required']"
+        :rules="[v => !!v || $t('uiBodyFormatRequired')]"
         outlined
         dense
         required
@@ -51,8 +51,8 @@
       ></v-select>
       <v-text-field
         v-model="item.key"
-        label="Key *"
-        :rules="[v => !!v || 'Key is required']"
+        :label="$t('uiKey')"
+        :rules="[v => !!v || $t('key_required')]"
         outlined
         dense
         required
@@ -60,11 +60,11 @@
       ></v-text-field>
       <v-select
         v-model="item.method"
-        label="Comparison Method *"
+        :label="$t('uiComparisonMethod')"
         :items="methods"
         item-value="id"
         item-text="text"
-        :rules="[v => !!v || 'Comparison Method is required']"
+        :rules="[v => !!v || $t('uiComparisonRequired')]"
         outlined
         dense
         required
@@ -72,8 +72,8 @@
       ></v-select>
       <v-text-field
         v-model="item.value"
-        label="Value *"
-        :rules="[v => !!v || 'Value is required']"
+        :label="$t('uiValue')"
+        :rules="[v => !!v || $t('valueRequired')]"
         outlined
         dense
         required
@@ -95,17 +95,17 @@ export default {
       MATCHER_TYPE_TITLES,
       matchTypes: [{
         id: 'body',
-        text: 'Body',
+        text: this.$t('uiBody'),
       }, {
         id: 'header',
-        text: 'Header',
+        text: this.$t('uiHeader'),
       }],
       bodyDataFormats: [{
         id: 'json',
         text: 'JSON',
       }, {
         id: 'string',
-        text: 'String',
+        text: this.$t('uiString'),
       }],
       methods: [{
         id: 'equals',
@@ -115,7 +115,7 @@ export default {
         text: '!=',
       }, {
         id: 'contains',
-        text: 'Contains',
+        text: this.$t('uiContains'),
       }],
     };
   },

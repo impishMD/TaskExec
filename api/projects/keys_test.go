@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
 	"github.com/stretchr/testify/assert"
 )
 

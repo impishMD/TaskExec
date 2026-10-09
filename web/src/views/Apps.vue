@@ -2,8 +2,8 @@
   <div v-if="items != null && isAppsLoaded">
     <EditDialog
         v-model="editDialog"
-        save-button-text="Save"
-        :title="$t('Edit App')"
+        :save-button-text="$t('save')"
+        :title="$t('uiEditApp')"
         @save="loadItems()"
     >
       <template v-slot:form="{ onSave, onError, needSave, needReset }">
@@ -19,27 +19,21 @@
     </EditDialog>
 
     <YesNoDialog
-        :title="$t('Delete App')"
-        :text="$t('Do you really want to delete this app?')"
+        :title="$t('uiDeleteApp')"
+        :text="$t('uiDoYouReallyWantToDeleteThisApp')"
         v-model="deleteItemDialog"
         @yes="deleteItem(itemId)"
     />
 
     <v-toolbar flat >
-      <v-btn
-          icon
-          class="mr-4"
-          @click="returnToProjects()"
-      >
-        <v-icon>mdi-arrow-left</v-icon>
-      </v-btn>
-      <v-toolbar-title>{{ $t('Applications') }}</v-toolbar-title>
+      <v-app-bar-nav-icon @click="showDrawer()" />
+      <v-toolbar-title>{{ $t('applications') }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn
           :disabled="!isAdmin"
           color="primary"
           @click="editItem('')"
-      >{{ $t('New App') }}</v-btn>
+      >{{ $t('uiNewApp') }}</v-btn>
     </v-toolbar>
 
     <v-data-table
@@ -126,7 +120,7 @@ export default {
         text: this.$i18n.t('name'),
         value: 'title',
       }, {
-        text: 'ID',
+        text: this.$t('uiID'),
         value: 'id',
         width: '100%',
       }, {

@@ -12,8 +12,10 @@
       dismissible
       class="mb-6"
     >
-      Use environment variable <code>JEH_SCHEDULE_TIMEZONE</code> or config param
-      <code>schedule.timezone</code> to set timezone for Schedule.
+      <i18n path="scheduleTimezoneHint" tag="span">
+        <code place="environmentVariable">TASKEXEC_SCHEDULE_TIMEZONE</code>
+        <code place="configParameter">schedule.timezone</code>
+      </i18n>
     </v-alert>
 
     <v-alert
@@ -25,7 +27,7 @@
 
     <v-text-field
       v-model="item.name"
-      :label="$t('Name')"
+      :label="$t('name')"
       :rules="[v => !!v || $t('name_required')]"
       required
       :disabled="formSaving"
@@ -35,11 +37,11 @@
 
     <v-autocomplete
       v-model="item.template_id"
-      :label="$t('Template')"
+      :label="$t('template')"
       :items="templates"
       item-value="id"
       :item-text="(itm) => itm.name"
-      :rules="[v => !!v || $t('template_required')]"
+      :rules="[v => !!v || $t('workflowTemplateRequired')]"
       required
       :disabled="formSaving"
       outlined
@@ -76,10 +78,10 @@
 
         v-model="runAtInput"
         type="datetime-local"
-        label="Run at"
+        :label="$t('uiRunAt')"
         :rules="runAtRules"
         :disabled="formSaving"
-        :suffix="timezone + ' time'"
+        :suffix="$t('timeInZone', { zone: timezone })"
         outlined
         dense
       ></v-text-field>
@@ -92,7 +94,7 @@
           class="mt-0 pt-0"
         >
           <template v-slot:label>
-            {{ $t('Delete after run') }}
+            {{ $t('uiDeleteAfterRun') }}
           </template>
         </v-checkbox>
       </div>
@@ -101,19 +103,19 @@
     <div v-else>
       <v-switch
         v-model="rawCron"
-        label="Show cron format"
+        :label="$t('uiShowCronFormat')"
         :disabled="disableRawCron"
       />
 
       <v-text-field
         v-if="rawCron"
         v-model="item.cron_format"
-        :label="$t('Cron')"
-        :rules="[v => !!v || $t('Cron required')]"
+        :label="$t('cron')"
+        :rules="[v => !!v || $t('uiCronRequired')]"
         required
         :disabled="formSaving"
         @input="refreshCheckboxes()"
-        :suffix="timezone + ' time'"
+        :suffix="$t('timeInZone', { zone: timezone })"
         outlined
         :error="cronFormatError != null"
         :error-messages="cronFormatError"
@@ -123,11 +125,11 @@
       <div v-else>
         <v-select
           v-model="timing"
-          :label="$t('Timing')"
+          :label="$t('uiTiming')"
           :items="TIMINGS"
           item-value="id"
           item-text="title"
-          :rules="[v => !!v || $t('template_required')]"
+          :rules="[v => !!v || $t('workflowTemplateRequired')]"
           required
           :disabled="formSaving"
           @change="refreshCron()"
@@ -137,7 +139,7 @@
         />
 
         <div v-if="['yearly'].includes(timing)">
-          <div class="mt-4">Months</div>
+          <div class="mt-4">{{ $t('uiMonths') }}</div>
           <div class="d-flex flex-wrap">
             <v-checkbox
               class="mr-2 mt-0 ScheduleCheckbox"
@@ -154,7 +156,7 @@
         </div>
 
         <div v-if="['weekly'].includes(timing)">
-          <div class="mt-4">Weekdays</div>
+          <div class="mt-4">{{ $t('uiWeekdays') }}</div>
           <div class="d-flex flex-wrap">
             <v-checkbox
               class="mr-2 mt-0 ScheduleCheckbox"
@@ -170,7 +172,7 @@
         </div>
 
         <div v-if="['yearly', 'monthly'].includes(timing)">
-          <div class="mt-4">Days</div>
+          <div class="mt-4">{{ $t('uiDays') }}</div>
           <div class="d-flex flex-wrap">
             <v-checkbox
               class="mr-2 mt-0 ScheduleCheckbox"
@@ -188,8 +190,8 @@
 
         <div v-if="['yearly', 'monthly', 'weekly', 'daily'].includes(timing)">
           <div class="mt-4 d-flex justify-space-between">
-            <span>Hours</span>
-            <b style="color: red;">{{ timezone + ' time' }}</b>
+            <span>{{ $t('uiHours') }}</span>
+            <b style="color: red;">{{ $t('timeInZone', { zone: timezone }) }}</b>
           </div>
           <div class="d-flex flex-wrap">
             <v-checkbox
@@ -207,7 +209,7 @@
         </div>
 
         <div>
-          <div class="mt-4">Minutes</div>
+          <div class="mt-4">{{ $t('uiMinutes') }}</div>
           <div class="d-flex flex-wrap">
             <v-checkbox
               class="mr-2 mt-0 ScheduleCheckbox"
@@ -229,17 +231,15 @@
       class="text-center text-subtitle-1 mb-3"
       :class="{'mt-8': !rawCron, 'mt-3': rawCron}"
       style="color: limegreen; font-weight: bold;"
-    >
-      Next run time
-    </div>
+    >{{ $t('uiNextRunTime') }}</div>
 
     <v-simple-table class="TaskDetails__table text-sub mb-2">
       <template v-slot:default>
         <thead>
         <tr>
-          <th>Time Zone</th>
-          <th>Date</th>
-          <th>Time</th>
+          <th>{{ $t('uiTimeZone') }}</th>
+          <th>{{ $t('uiDate') }}</th>
+          <th>{{ $t('time') }}</th>
         </tr>
         </thead>
         <tbody>
@@ -333,82 +333,21 @@ dayjs.extend(utc);
 dayjs.extend(timezonePlugin);
 dayjs.extend(customParseFormat);
 
-const MONTHS = [{
-  id: 1,
-  title: 'Jan',
-}, {
-  id: 2,
-  title: 'Feb',
-}, {
-  id: 3,
-  title: 'March',
-}, {
-  id: 4,
-  title: 'April',
-}, {
-  id: 5,
-  title: 'May',
-}, {
-  id: 6,
-  title: 'June',
-}, {
-  id: 7,
-  title: 'July',
-}, {
-  id: 8,
-  title: 'August',
-}, {
-  id: 9,
-  title: 'September',
-}, {
-  id: 10,
-  title: 'October',
-}, {
-  id: 11,
-  title: 'November',
-}, {
-  id: 12,
-  title: 'December',
-}];
-
 const TIMINGS = [{
   id: 'yearly',
-  title: 'Yearly',
+  title: 'timingYearly',
 }, {
   id: 'monthly',
-  title: 'Monthly',
+  title: 'timingMonthly',
 }, {
   id: 'weekly',
-  title: 'Weekly',
+  title: 'timingWeekly',
 }, {
   id: 'daily',
-  title: 'Daily',
+  title: 'timingDaily',
 }, {
   id: 'hourly',
-  title: 'Hourly',
-}];
-
-const WEEKDAYS = [{
-  id: 0,
-  title: 'Sunday',
-}, {
-  id: 1,
-  title: 'Monday',
-}, {
-  id: 2,
-  title: 'Tuesday',
-}, {
-  id: 3,
-  title: 'Wednesday',
-}, {
-  id: 4,
-  title: 'Thursday',
-}, {
-  id: 5,
-  title: 'Friday',
-}, {
-  id: 6,
-  title: 'Saturday',
+  title: 'timingHourly',
 }];
 
 const MINUTES = [
@@ -477,9 +416,7 @@ export default {
     return {
       templates: null,
       timing: 'hourly',
-      TIMINGS,
-      MONTHS,
-      WEEKDAYS,
+      TIMINGS: TIMINGS.map((item) => ({ ...item, title: this.$t(item.title) })),
       MINUTES,
       minutes: [],
       hours: [],
@@ -529,8 +466,20 @@ export default {
   },
 
   computed: {
+    MONTHS() {
+      return Array.from({ length: 12 }, (_, i) => ({
+        id: i + 1,
+        title: new Intl.DateTimeFormat(this.$i18n.locale.replace('_', '-'), { month: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(2024, i, 1))),
+      }));
+    },
+    WEEKDAYS() {
+      return Array.from({ length: 7 }, (_, i) => ({
+        id: i,
+        title: new Intl.DateTimeFormat(this.$i18n.locale.replace('_', '-'), { weekday: 'short', timeZone: 'UTC' }).format(new Date(Date.UTC(2024, 0, 7 + i))),
+      }));
+    },
     localTimezone() {
-      return 'Local';
+      return this.$t('uiLocal');
     },
 
     runAtRules() {
@@ -539,7 +488,7 @@ export default {
       }
 
       return [
-        (v) => !!v || 'Run time is required',
+        (v) => !!v || this.$t('runTimeRequired'),
       ];
     },
 
@@ -630,7 +579,7 @@ export default {
         });
         return null;
       } catch (err) {
-        return getErrorMessage(err);
+        return err.response?.status === 400 ? this.$t('invalidCron') : getErrorMessage(err);
       }
     },
 
@@ -744,7 +693,7 @@ export default {
           : null;
 
         if (!parsed || !parsed.isValid()) {
-          this.formError = 'Please provide a valid run time for the run_at schedule.';
+          this.formError = this.$t('runTimeInvalid');
           throw new Error(this.formError);
         }
 

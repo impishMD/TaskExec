@@ -12,22 +12,18 @@ import (
 	"time"
 
 	"github.com/gorilla/handlers"
-	"github.com/impishMD/jeh/api"
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/api/sockets"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/db/factory"
-	"github.com/impishMD/jeh/pkg/debuglog"
-	"github.com/impishMD/jeh/pkg/metrics"
-	proFactory "github.com/impishMD/jeh/pro/db/factory"
-	proHA "github.com/impishMD/jeh/pro/services/ha"
-	proServer "github.com/impishMD/jeh/pro/services/server"
-	proTasks "github.com/impishMD/jeh/pro/services/tasks"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/services/schedules"
-	"github.com/impishMD/jeh/services/server"
-	"github.com/impishMD/jeh/services/tasks"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/api"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/api/sockets"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/db/factory"
+	"github.com/impishMD/taskexec/pkg/debuglog"
+	"github.com/impishMD/taskexec/pkg/metrics"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/services/schedules"
+	"github.com/impishMD/taskexec/services/server"
+	"github.com/impishMD/taskexec/services/tasks"
+	"github.com/impishMD/taskexec/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -40,11 +36,11 @@ var persistentFlags struct {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "jeh",
-	Short: "Job Executor Hub (JEH) runs Ansible, Terraform, OpenTofu and scripts",
-	Long: `Job Executor Hub (JEH) runs Ansible, Terraform, OpenTofu and scripts.
-Source code is available at https://github.com/impishMD/jeh.
-Complete documentation is available at https://github.com/impishMD/jeh`,
+	Use:   "taskexec",
+	Short: "TaskExec runs Ansible, Terraform, OpenTofu and scripts",
+	Long: `TaskExec runs Ansible, Terraform, OpenTofu and scripts.
+Source code is available at https://github.com/impishMD/TaskExec.
+Complete documentation is available at https://github.com/impishMD/TaskExec`,
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = cmd.Help()
 		os.Exit(0)
@@ -53,7 +49,7 @@ Complete documentation is available at https://github.com/impishMD/jeh`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		str := persistentFlags.logLevel
 		if str == "" {
-			str = os.Getenv("JEH_LOG_LEVEL")
+			str = os.Getenv("TASKEXEC_LOG_LEVEL")
 		}
 
 		if str != "" {
@@ -71,7 +67,7 @@ Complete documentation is available at https://github.com/impishMD/jeh`,
 }
 
 // initDebugFilter installs a Node.js-`debug`-style namespace filter for DEBUG
-// logs, driven by the --debug-filter flag or JEH_DEBUG_FILTER env var.
+// logs, driven by the --debug-filter flag or TASKEXEC_DEBUG_FILTER env var.
 // The filter only narrows DEBUG-level output and only takes effect when the log
 // level is already DEBUG; otherwise there are no debug entries to filter and the
 // logger is left untouched.
@@ -92,7 +88,7 @@ func initDebugFilter() {
 func configuredDebugFilter() (string, *debuglog.Filter) {
 	spec := persistentFlags.debugFilter
 	if spec == "" {
-		spec = os.Getenv("JEH_DEBUG_FILTER")
+		spec = os.Getenv("TASKEXEC_DEBUG_FILTER")
 	}
 
 	if spec == "" || log.GetLevel() < log.DebugLevel {
@@ -159,6 +155,9 @@ func watchEncryptionKeyReload() {
 func runService() {
 	store := createStore("root")
 	defer store.Close()
+	if err := util.Config.ValidateServerCapabilities(); err != nil {
+		log.WithError(err).Fatal("unsupported server configuration")
+	}
 
 	watchEncryptionKeyReload()
 
@@ -178,17 +177,17 @@ func runService() {
 		store,
 		util.Config.Audit,
 		util.HANodeID(),
-		proServer.NewAuditExporter(store, util.Config.Audit, proHA.NewAuditExportLeaser(), appMetrics),
+		nil,
 	)
 	if auditErr != nil {
 		log.WithError(auditErr).Fatal("failed to start the audit log")
 	}
 	defer auditService.Stop()
 
-	state := proTasks.NewTaskStateStore()
-	terraformStore := proFactory.NewTerraformStore(store)
-	ansibleTaskRepo := proFactory.NewAnsibleTaskRepository(store)
-	workflowStore := proFactory.NewWorkflowStore(store)
+	state := tasks.NewMemoryTaskStateStore()
+	terraformStore := store
+	ansibleTaskRepo := store
+	workflowStore := store
 
 	projectService := server.NewProjectService(store, store)
 	encryptionService := server.NewAccessKeyEncryptionService(store, store, store, store)
@@ -202,11 +201,8 @@ func runService() {
 	)
 	accessKeyService := server.NewAccessKeyService(store, encryptionService, store, store)
 	secretStorageService := server.NewSecretStorageService(store, store, accessKeyService, encryptionService)
-	secretStorageSyncScheduler := server.NewSecretStorageSyncScheduler(store, secretStorageService)
 	environmentService := server.NewEnvironmentService(store, encryptionService, store)
 	runnerService := server.NewRunnerService(store)
-	subscriptionService := proServer.NewSubscriptionService(store, store, store, terraformStore)
-	logWriteService := proServer.NewLogWriteService()
 
 	taskPool := tasks.CreateTaskPool(
 		store,
@@ -215,7 +211,6 @@ func runService() {
 		inventoryService,
 		encryptionService,
 		accessKeyInstallationService,
-		logWriteService,
 		jwtSigner,
 		appMetrics,
 	)
@@ -225,10 +220,8 @@ func runService() {
 	// The workflow service orchestrates workflow runs and launches each node's
 	// task through the pool; the pool calls back into it when a workflow task
 	// finishes. Wire the cycle: pool first, then service (with the pool as its
-	// enqueuer), then inject the service back into the pool. The run locker is
-	// Redis-backed in HA mode (cluster-wide progression locks) and nil
-	// otherwise, which makes the service fall back to its in-process locker.
-	workflowService := proServer.NewWorkflowService(workflowStore, store, &taskPool, proHA.NewWorkflowRunLocker())
+	// enqueuer), then inject the service back into the pool.
+	workflowService := server.NewWorkflowService(workflowStore, store, &taskPool, auditService.Recorder())
 	taskPool.SetWorkflowService(workflowService)
 
 	schedulePool := schedules.CreateSchedulePool(
@@ -241,59 +234,6 @@ func runService() {
 	defer schedulePool.Destroy()
 	defer taskPool.Stop()
 
-	// --- Active-Active HA Setup ---
-	// When HA is enabled, multiple JEH nodes share the same Redis-backed
-	// task state and coordinate via Pub/Sub. The following components ensure:
-	// 1. Node registry: heartbeat-based cluster membership
-	// 2. Schedule deduplication: only one node fires each schedule occurrence
-	// 3. WebSocket broadcaster: real-time events reach clients on all nodes
-	// 4. Orphan cleaner: tasks from dead nodes are marked as failed
-	if nodeRegistry := proHA.NewNodeRegistry(); nodeRegistry != nil {
-		if err := nodeRegistry.Start(); err != nil {
-			log.WithError(err).Fatal("failed to start HA node registry")
-		}
-		defer nodeRegistry.Stop()
-		log.WithField("node_id", nodeRegistry.NodeID()).Info("HA active-active mode enabled")
-	}
-
-	// Cluster inspector powers the admin Cluster Dashboard. It is nil when HA
-	// is disabled; the dashboard then falls back to the local task pool. The
-	// instance is injected per-request below.
-	clusterInspector := proHA.NewClusterInspector()
-
-	if dedup := proHA.NewScheduleDeduplicator(); dedup != nil {
-		schedulePool.SetDeduplicator(dedup)
-		secretStorageSyncScheduler.SetTickDeduplicator(dedup)
-	}
-
-	// Each process holds its own in-memory cron table. Schedule CRUD handlers only
-	// call Refresh on the node that served the HTTP request, so other HA nodes
-	// would keep stale jobs until restart. Reload from the shared DB on an interval.
-	if util.HAEnabled() {
-		const haSchedulePoolSyncInterval = 60 * time.Second
-		go func() {
-			ticker := time.NewTicker(haSchedulePoolSyncInterval)
-			defer ticker.Stop()
-			for range ticker.C {
-				schedulePool.Refresh()
-			}
-		}()
-	}
-
-	if orphanCleaner := proHA.NewOrphanCleaner(store); orphanCleaner != nil {
-		orphanCleaner.Start()
-		defer orphanCleaner.Stop()
-	}
-
-	// The workflow reconciler periodically progresses non-terminal runs so
-	// approval timeouts fire and statuses converge without a browser poll or a
-	// task completion. Cluster-safe: each pass takes the per-run lock. Nil in
-	// the open-source build (workflows are Pro-gated).
-	if workflowReconciler := proServer.NewWorkflowReconciler(workflowStore, workflowService); workflowReconciler != nil {
-		workflowReconciler.Start()
-		defer workflowReconciler.Stop()
-	}
-
 	util.Config.PrintDbInfo()
 
 	port := util.Config.Port
@@ -303,28 +243,25 @@ func runService() {
 	}
 
 	fmt.Printf("Tmp Path (projects home) %v\n", util.Config.TmpPath)
-	fmt.Printf("JEH %v\n", util.Version())
+	fmt.Printf("TaskExec %v\n", util.Version())
 	fmt.Printf("Interface %v\n", util.Config.Interface)
 	fmt.Printf("Port %v\n", util.Config.Port)
-
-	subscriptionService.StartValidationCron()
 
 	// Start the WebSocket hub before the broadcaster so that h.broadcast
 	// channel is being consumed when LocalBroadcast is called.
 	go sockets.StartWS()
 
-	if wsBroadcaster := proHA.NewWSBroadcaster(); wsBroadcaster != nil {
-		sockets.SetBroadcaster(wsBroadcaster)
-		wsBroadcaster.Start()
-		defer wsBroadcaster.Stop()
-	}
-
 	taskPool.LogRunnerStateSnapshot()
 	go schedulePool.Run()
 	go taskPool.Run()
+	if err := taskPool.RecoverWorkflowTasks(); err != nil {
+		log.WithError(err).Fatal("cannot recover interrupted workflow tasks")
+	}
+	// Timers and approvals progress without an open browser, including after restart.
+	workflowReconciler := server.NewWorkflowReconciler(workflowStore, workflowService)
+	workflowReconciler.Start()
+	defer workflowReconciler.Stop()
 
-	secretStorageSyncScheduler.Start()
-	defer secretStorageSyncScheduler.Stop()
 
 	route := api.Route(
 		store,
@@ -339,7 +276,6 @@ func runService() {
 		secretStorageService,
 		accessKeyService,
 		environmentService,
-		subscriptionService,
 		jwtSigner,
 		runnerService,
 		workflowService,
@@ -351,8 +287,6 @@ func runService() {
 			r = helpers.SetContextValue(r, "store", store)
 			r = helpers.SetContextValue(r, "schedule_pool", schedulePool)
 			r = helpers.SetContextValue(r, "task_pool", &taskPool)
-			r = helpers.SetContextValue(r, "log_writer", logWriteService)
-			r = helpers.SetContextValue(r, "cluster_inspector", clusterInspector)
 			r = helpers.SetContextValue(r, "audit", auditService.Recorder())
 
 			next.ServeHTTP(w, r)

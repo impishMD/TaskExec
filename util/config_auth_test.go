@@ -29,7 +29,7 @@ func TestConfigType_MaxSessionLife(t *testing.T) {
 }
 
 func TestAuthConfig_LoadFromEnvironment(t *testing.T) {
-	t.Setenv("JEH_AUTH_MAX_SESSION_LIFE_HOURS", "36")
+	t.Setenv("TASKEXEC_AUTH_MAX_SESSION_LIFE_HOURS", "36")
 
 	cfg := &ConfigType{}
 	_, err := loadEnvironmentToObject(cfg)

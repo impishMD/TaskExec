@@ -3,7 +3,7 @@ package galaxy
 import (
 	"strings"
 
-	"github.com/impishMD/jeh/pkg/common_errors"
+	"github.com/impishMD/taskexec/pkg/common_errors"
 )
 
 // InstallType selects the `ansible-galaxy <type> install` subcommand.
@@ -20,7 +20,7 @@ const (
 //
 // Deliberately excluded: --token/--api-key (secret in argv, visible in the
 // process list), -p/--roles-path/--collections-path (write outside the
-// repository), -r (set by JEH).
+// repository), -r (set by TaskExec).
 func installFlags(installType InstallType) map[string]bool {
 	flags := map[string]bool{
 		"-c":                false,

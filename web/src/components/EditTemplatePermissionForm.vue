@@ -16,17 +16,17 @@
       v-model="item.role_slug"
       :items="availableRoles"
       item-value="slug"
-      item-text="name"
+      :item-text="roleTitle"
       :label="$t('role')"
       :rules="[v => !!v || $t('role_required')]"
       required
       outlined
       dense
-      :disabled="formSaving"
+      :disabled="formSaving || !isNew"
     >
       <template v-slot:item="{ item: role }">
         <v-list-item-content>
-          <v-list-item-title>{{ role.name }}</v-list-item-title>
+          <v-list-item-title>{{ roleTitle(role) }}</v-list-item-title>
           <v-list-item-subtitle>{{ role.slug }}</v-list-item-subtitle>
         </v-list-item-content>
       </template>
@@ -47,13 +47,14 @@
 </template>
 
 <script>
+import DisplayLabelsMixin from '@/components/DisplayLabelsMixin';
 import ItemFormBase from '@/components/ItemFormBase';
 import axios from 'axios';
 import { getErrorMessage } from '@/lib/error';
 import { ROLE_PERMISSIONS } from '@/lib/constants';
 
 export default {
-  mixins: [ItemFormBase],
+  mixins: [DisplayLabelsMixin, ItemFormBase],
 
   props: {
     templateId: [Number, String],

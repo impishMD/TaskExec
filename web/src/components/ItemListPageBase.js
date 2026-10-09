@@ -124,6 +124,7 @@ export default {
           method: 'delete',
           url: this.getSingleItemUrl(),
           responseType: 'json',
+          ...this.getDeleteRequestOptions(),
         });
 
         EventBus.$emit(this.getEventName(), {
@@ -138,6 +139,10 @@ export default {
           text: getErrorMessage(err),
         });
       }
+    },
+
+    getDeleteRequestOptions() {
+      return {};
     },
 
     editItem(itemId) {

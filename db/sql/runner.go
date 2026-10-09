@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 func validateTag(tag string) error {

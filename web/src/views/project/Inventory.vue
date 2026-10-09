@@ -3,11 +3,11 @@
 
     <EditDialog
       v-model="attachInventoryDialog"
-      :save-button-text="$t('Attach')"
+      :save-button-text="$t('uiAttach')"
       :icon="getAppIcon(itemApp)"
       :icon-color="getAppColor(itemApp)"
       :max-width="450"
-      title="Choose workspace to attach"
+      :title="$t('uiChooseWorkspaceToAttach')"
       @save="attachInventory($event.itemId)"
     >
       <template v-slot:form="{ onSave, needSave, needReset }">
@@ -44,7 +44,7 @@
     </EditDialog>
 
     <ObjectRefsDialog
-      object-title="inventory"
+      :object-title="$t('inventory')"
       :object-refs="itemRefs"
       :project-id="projectId"
       v-model="itemRefsDialog"
@@ -114,7 +114,7 @@
       </template>
 
       <template v-slot:item.type="{ item }">
-        <code>{{ item.type }}</code>
+        {{ inventoryTypeTitle(item.type) }}
       </template>
       <template v-slot:item.inventory="{ item }">
         {{ ['file', 'terraform-workspace'].includes(item.type) ? item.inventory : '&mdash;' }}
@@ -147,6 +147,7 @@
 
 </template>
 <script>
+import DisplayLabelsMixin from '@/components/DisplayLabelsMixin';
 import ItemListPageBase from '@/components/ItemListPageBase';
 import InventoryForm from '@/components/InventoryForm.vue';
 import { APP_INVENTORY_TITLE } from '@/lib/constants';
@@ -157,10 +158,12 @@ import TemplateSelectForm from '@/components/TemplateSelectForm.vue';
 export default {
   computed: {
     APP_INVENTORY_TITLE() {
-      return APP_INVENTORY_TITLE;
+      return Object.fromEntries(Object.entries(APP_INVENTORY_TITLE).map(([id, title]) => [
+        id, this.$t(id === 'ansible' ? 'appInventory' : 'appWorkspace', { app: title.split(' ')[0] }),
+      ]));
     },
   },
-  mixins: [ItemListPageBase, AppsMixin],
+  mixins: [DisplayLabelsMixin, ItemListPageBase, AppsMixin],
   components: { TemplateSelectForm, InventoryForm },
 
   props: {

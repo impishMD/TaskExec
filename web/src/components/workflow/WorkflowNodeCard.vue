@@ -53,7 +53,6 @@
           x-small
           outlined
           color="error"
-          class="ml-1"
           @mousedown.native.stop
           @click.stop="resolve('rejected')"
         >{{ $t('workflowReject') }}</v-btn>
@@ -94,6 +93,7 @@
 </template>
 
 <script>
+import DisplayLabelsMixin from '@/components/DisplayLabelsMixin';
 import { APP_ICONS, APP_SHORT_TITLE } from '@/lib/constants';
 import { formatDurationLong, statusKind } from '@/lib/workflowGraph';
 
@@ -102,6 +102,7 @@ const TAP_THRESHOLD_PX = 4;
 // Rendered inside a Drawflow node. All data comes through the graph's
 // reactive `store` so the card repaints in place when statuses change.
 export default {
+  mixins: [DisplayLabelsMixin],
   props: {
     store: { type: Object, required: true },
     nodeId: { type: Number, required: true },
@@ -225,7 +226,7 @@ export default {
       if (this.kind === 'approval' && this.status === 'pending') {
         return this.run.message || this.$t('workflowApprovalPending');
       }
-      const parts = [this.status];
+      const parts = [this.statusTitle(this.status)];
       if (this.run.start) {
         const end = this.run.end ? new Date(this.run.end).getTime() : this.now;
         parts.push(formatDurationLong(end - new Date(this.run.start).getTime()));
@@ -441,6 +442,8 @@ export default {
 
   &__actions {
     display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
     margin-top: 6px;
   }
 

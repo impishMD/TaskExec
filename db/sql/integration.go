@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 func (d *SqlDb) CreateIntegration(integration db.Integration) (newIntegration db.Integration, err error) {

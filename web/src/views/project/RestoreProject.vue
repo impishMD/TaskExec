@@ -18,7 +18,7 @@
         </div>
 
         <div class="text-right">
-            <v-btn color="primary" @click="restoreProject()">{{ $t('restore') }}</v-btn>
+            <v-btn color="primary" @click="restoreProject()">{{ $t('uiRestore') }}</v-btn>
         </div>
         </div>
     </div>

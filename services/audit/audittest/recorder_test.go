@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/taskexec/services/audit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

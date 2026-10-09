@@ -1,5 +1,5 @@
 #!/bin/sh
 set -eu
-getent group jeh >/dev/null || groupadd --system jeh
-id jeh >/dev/null 2>&1 || useradd --system --gid jeh --home-dir /var/lib/jeh --shell /usr/sbin/nologin jeh
-install -d -m 0750 -o jeh -g jeh /var/lib/jeh /etc/jeh
+getent group taskexec >/dev/null || groupadd --system taskexec
+id taskexec >/dev/null 2>&1 || useradd --system --gid taskexec --home-dir /var/lib/taskexec --shell /usr/sbin/nologin taskexec
+install -d -m 0750 -o taskexec -g taskexec /var/lib/taskexec /etc/taskexec

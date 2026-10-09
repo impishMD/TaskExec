@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/ssh"
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/ssh"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

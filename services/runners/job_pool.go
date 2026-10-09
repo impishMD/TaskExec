@@ -15,12 +15,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/taskexec/pkg/tz"
 
-	"github.com/impishMD/jeh/db_lib"
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/services/tasks"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db_lib"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/services/tasks"
+	"github.com/impishMD/taskexec/util"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -267,6 +267,9 @@ func (p *JobPool) Unregister() (err error) {
 const runnerProgressInterval = time.Second
 
 func (p *JobPool) Run() {
+	if closer, ok := p.provider.(interface{ Close() error }); ok {
+		defer closer.Close()
+	}
 	launched := false
 
 	if util.Config.Runner.Token == "" {

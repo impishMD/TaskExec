@@ -123,8 +123,8 @@ func TestLoadEnvironmentToObject_Map(t *testing.T) {
 func TestLoadEnvironmentToObject_RunnerExecutor(t *testing.T) {
 	var val RunnerConfig
 
-	t.Setenv("JEH_RUNNER_EXECUTOR", `{"type":"docker","docker":{"image":"example.com/job:1"}}`)
-	t.Setenv("JEH_RUNNER_DOCKER_NETWORK", "host")
+	t.Setenv("TASKEXEC_RUNNER_EXECUTOR", `{"type":"docker","docker":{"image":"example.com/job:1"}}`)
+	t.Setenv("TASKEXEC_RUNNER_DOCKER_NETWORK", "host")
 
 	_, err := loadEnvironmentToObject(&val)
 	require.NoError(t, err)
@@ -362,12 +362,12 @@ func TestLoadConfigEnvironmet(t *testing.T) {
 	envLdapNeedTls := "1"
 	envDbHost := "192.168.0.1"
 
-	t.Setenv("JEH_PORT", envPort)
-	t.Setenv("JEH_COOKIE_HASH", envCookieHash)
-	t.Setenv("JEH_ACCESS_KEY_ENCRYPTION", envAccessKeyEncryption)
-	t.Setenv("JEH_MAX_PARALLEL_TASKS", envMaxParallelTasks)
-	t.Setenv("JEH_LDAP_NEEDTLS", envLdapNeedTls)
-	t.Setenv("JEH_DB_HOST", envDbHost)
+	t.Setenv("TASKEXEC_PORT", envPort)
+	t.Setenv("TASKEXEC_COOKIE_HASH", envCookieHash)
+	t.Setenv("TASKEXEC_ACCESS_KEY_ENCRYPTION", envAccessKeyEncryption)
+	t.Setenv("TASKEXEC_MAX_PARALLEL_TASKS", envMaxParallelTasks)
+	t.Setenv("TASKEXEC_LDAP_NEEDTLS", envLdapNeedTls)
+	t.Setenv("TASKEXEC_DB_HOST", envDbHost)
 
 	loadConfigEnvironment()
 
@@ -403,7 +403,7 @@ func TestIsYAMLConfig(t *testing.T) {
 	}{
 		{"config.yaml", true},
 		{"config.yml", true},
-		{"/etc/jeh/config.YAML", true},
+		{"/etc/taskexec/config.YAML", true},
 		{"config.json", false},
 		{"config", false},
 		{"", false},
@@ -491,7 +491,7 @@ func TestLoadConfigDefaults(t *testing.T) {
 	if Config.Port != ":3000" {
 		t.Error(errMsg)
 	}
-	if Config.TmpPath != "/tmp/jeh" {
+	if Config.TmpPath != "/tmp/taskexec" {
 		t.Error(errMsg)
 	}
 	if Config.GitSubmoduleJobs != 4 {
@@ -612,14 +612,14 @@ func TestGetSecretsPath_Precedence(t *testing.T) {
 func TestGetSecretsPath_Default(t *testing.T) {
 	Config = NewConfigType()
 	loadConfigDefaults()
-	assert.Equal(t, "/tmp/jeh", Config.GetSecretsPath())
+	assert.Equal(t, "/tmp/taskexec", Config.GetSecretsPath())
 	require.NotNil(t, Config.Dirs)
-	assert.Equal(t, "/tmp/jeh", Config.Dirs.SSHAgentSockets)
+	assert.Equal(t, "/tmp/taskexec", Config.Dirs.SSHAgentSockets)
 }
 
 func TestGetSecretsPath_Env(t *testing.T) {
 	Config = NewConfigType()
-	t.Setenv("JEH_SECRETS_PATH", "/env/secrets/path")
+	t.Setenv("TASKEXEC_SECRETS_PATH", "/env/secrets/path")
 
 	loadConfigEnvironment()
 	loadConfigDefaults()
@@ -647,11 +647,11 @@ func unsetTestEnv(t *testing.T, key string) {
 
 func TestLoadEnvironmentToObject_TLS_HTTPRedirectPort(t *testing.T) {
 	Config = NewConfigType()
-	setTestEnv(t, "JEH_TLS_ENABLED", "true")
-	setTestEnv(t, "JEH_TLS_CERT_FILE", "/path/to/cert.pem")
-	setTestEnv(t, "JEH_TLS_KEY_FILE", "/path/to/key.pem")
-	setTestEnv(t, "JEH_TLS_HTTP_REDIRECT_PORT", "8080")
-	unsetTestEnv(t, "JEH_TLS_HTTP_REDIRECT_ADDR")
+	setTestEnv(t, "TASKEXEC_TLS_ENABLED", "true")
+	setTestEnv(t, "TASKEXEC_TLS_CERT_FILE", "/path/to/cert.pem")
+	setTestEnv(t, "TASKEXEC_TLS_KEY_FILE", "/path/to/key.pem")
+	setTestEnv(t, "TASKEXEC_TLS_HTTP_REDIRECT_PORT", "8080")
+	unsetTestEnv(t, "TASKEXEC_TLS_HTTP_REDIRECT_ADDR")
 
 	loadConfigEnvironment()
 
@@ -666,9 +666,9 @@ func TestLoadEnvironmentToObject_TLS_HTTPRedirectPort(t *testing.T) {
 
 func TestLoadEnvironmentToObject_TLS_HTTPRedirectAddr(t *testing.T) {
 	Config = NewConfigType()
-	setTestEnv(t, "JEH_TLS_ENABLED", "true")
-	setTestEnv(t, "JEH_TLS_HTTP_REDIRECT_ADDR", "0.0.0.0:8080")
-	unsetTestEnv(t, "JEH_TLS_HTTP_REDIRECT_PORT")
+	setTestEnv(t, "TASKEXEC_TLS_ENABLED", "true")
+	setTestEnv(t, "TASKEXEC_TLS_HTTP_REDIRECT_ADDR", "0.0.0.0:8080")
+	unsetTestEnv(t, "TASKEXEC_TLS_HTTP_REDIRECT_PORT")
 
 	loadConfigEnvironment()
 
@@ -719,13 +719,13 @@ func TestLoadEnvironmentToObject_PrimitivePointers(t *testing.T) {
 
 func TestLoadEnvironmentToObject_ConfigProcess_UID_GID(t *testing.T) {
 	Config = NewConfigType()
-	setTestEnv(t, "JEH_PROCESS_USER", "jeh")
-	setTestEnv(t, "JEH_PROCESS_UID", "1001")
-	setTestEnv(t, "JEH_PROCESS_GID", "1002")
+	setTestEnv(t, "TASKEXEC_PROCESS_USER", "taskexec")
+	setTestEnv(t, "TASKEXEC_PROCESS_UID", "1001")
+	setTestEnv(t, "TASKEXEC_PROCESS_GID", "1002")
 
 	loadConfigEnvironment()
 
-	assert.Equal(t, "jeh", Config.Process.User)
+	assert.Equal(t, "taskexec", Config.Process.User)
 	require.NotNil(t, Config.Process.UID)
 	assert.Equal(t, uint32(1001), *Config.Process.UID)
 	require.NotNil(t, Config.Process.GID)

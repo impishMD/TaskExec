@@ -8,6 +8,7 @@ import vuetify from './plugins/vuetify';
 import './assets/scss/main.scss';
 import i18n from './plugins/i18';
 import filtersPlugin from './plugins/filters';
+import setDateLocale from './plugins/dateLocale';
 
 axios.defaults.baseURL = document.baseURI;
 Vue.config.productionTip = false;
@@ -25,5 +26,14 @@ new Vue({
   router,
   vuetify,
   i18n,
+  watch: {
+    '$i18n.locale': {
+      immediate: true,
+      handler(locale) {
+        this.$vuetify.lang.current = locale;
+        setDateLocale(locale);
+      },
+    },
+  },
   render: (h) => h(App),
 }).$mount('#app');

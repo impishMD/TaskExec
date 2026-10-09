@@ -13,6 +13,9 @@
       dense
     ></v-text-field>
 
+    <ProjectIconPicker v-model="item.icon" :name="item.name" :disabled="formSaving"
+      @loading="iconLoading = $event" />
+
     <v-text-field
       v-model.number="item.max_parallel_tasks"
       :label="$t('maxNumberOfParallelTasksOptional')"
@@ -21,44 +24,48 @@
         (v) => v == null || v === '' || Math.floor(v) === v || $t('mustBeInteger'),
         (v) => v == null || v === '' || v >= 0 || $t('mustBe0OrGreater'),
       ]"
-      hint="Should be 0 or greater, 0 - unlimited."
+      :hint="$t('uiShouldBe0OrGreater0Unlimited')"
       type="number"
       :step="1"
       outlined
       dense
     ></v-text-field>
 
-    <v-text-field
-      v-model="item.alert_chat"
-      :label="$t('telegramChatIdOptional')"
+    <ProjectAlertSettingsDialog
+      v-if="!isNew"
+      v-model="alertDialog"
+      :project-id="Number(itemId)"
+    />
+    <v-btn
+      v-if="!isNew"
+      outlined color="primary" class="mb-4"
       :disabled="formSaving"
-      data-testid="newProject-tg"
-      outlined
-      dense
-    ></v-text-field>
-
-    <v-checkbox
-      class="mt-0"
-      v-model="item.alert"
-      :label="$t('allowAlertsForThisProject')"
-      data-testid="newProject-alert"
-    ></v-checkbox>
+      @click="alertDialog = true"
+      data-testid="project-configure-alerts"
+    >
+      <v-icon left>mdi-bell-outline</v-icon>{{ $t('alertsConfigure') }}
+    </v-btn>
+    <p v-else class="text-body-2 text--secondary">{{ $t('alertsAfterCreation') }}</p>
 
     <v-switch
       data-testid="newProject-demo"
       v-if="itemId === 'new' && !hideDemoSwitch"
       v-model="item.demo"
-      label="Demo"
+      :label="$t('uiDemo')"
       style="position: absolute; left: 24px; bottom: 15px"
       hide-details
     />
   </v-form>
 </template>
 <script>
+import ProjectAlertSettingsDialog from '@/components/ProjectAlertSettingsDialog.vue';
 import ItemFormBase from '@/components/ItemFormBase';
+import ProjectIconPicker from '@/components/ProjectIconPicker.vue';
 
 export default {
   mixins: [ItemFormBase],
+  components: { ProjectAlertSettingsDialog, ProjectIconPicker },
+  data() { return { alertDialog: false, iconLoading: false }; },
   props: {
     projectNameTitle: {
       type: String,
@@ -74,6 +81,7 @@ export default {
       return `/api/project/${this.itemId}`;
     },
     beforeSave() {
+      if (this.iconLoading) throw new Error(this.$t('projectIconLoading'));
       if (this.item.max_parallel_tasks === '') {
         this.item.max_parallel_tasks = 0;
       }

@@ -1,0 +1,103 @@
+# Single-server deployment. TaskExec does not support multiple server replicas.
+replicaCount: 1
+nameOverride: ""
+fullnameOverride: ""
+image:
+  repository: ghcr.io/impishmd/taskexec
+  # Empty selects v<Chart.appVersion>. A digest takes precedence over the tag.
+  tag: ""
+  digest: ""
+  pullPolicy: IfNotPresent
+imagePullSecrets: []
+
+# Required, in the release namespace. Keys:
+# TASKEXEC_ADMIN_PASSWORD, TASKEXEC_ACCESS_KEY_ENCRYPTION (base64-encoded 32 bytes).
+# External databases also need TASKEXEC_DB_USER and TASKEXEC_DB_PASS.
+existingSecret: ""
+config:
+  # Public URL, including any subpath, e.g. https://tasks.example.com/taskexec
+  webRoot: ""
+  admin:
+    username: admin
+    name: Administrator
+    email: admin@localhost
+  database:
+    dialect: sqlite
+    # For postgres/mysql: an existing server and an already created database.
+    host: ""
+    # 0 selects 5432 for PostgreSQL or 3306 for MySQL.
+    port: 0
+    name: taskexec
+    options: {}
+
+service:
+  type: ClusterIP
+  port: 3000
+  annotations: {}
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: tasks.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+persistence:
+  # Holds both config/config.json and database.sqlite (for SQLite).
+  existingClaim: ""
+  size: 10Gi
+  # null: cluster default; "": no storage class; otherwise: class name.
+  storageClass: null
+  accessModes: [ReadWriteOnce]
+  retain: true
+  annotations: {}
+volumePermissions:
+  # Only needed for volumes/imports that do not respect fsGroup ownership.
+  enabled: false
+
+podAnnotations: {}
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+  fsGroupChangePolicy: OnRootMismatch
+  seccompProfile:
+    type: RuntimeDefault
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: [ALL]
+  # Local tasks and tool installation need writable locations in the image.
+  readOnlyRootFilesystem: false
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 1Gi
+startupProbe:
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 60
+readinessProbe:
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+livenessProbe:
+  periodSeconds: 20
+  timeoutSeconds: 3
+  failureThreshold: 6
+terminationGracePeriodSeconds: 60
+nodeSelector: {}
+tolerations: []
+affinity: {}
+# Additional non-secret environment variables. Built-in chart settings cannot be overridden.
+extraEnv: {}
+# Additional Secrets/ConfigMaps. Prefer existingSecret for bootstrap/database credentials.
+extraEnvFrom: []
+extraVolumes: []
+extraVolumeMounts: []

@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 // maxRepositoryFiles caps the number of paths returned by FindRepositoryFiles.

@@ -15,7 +15,7 @@
     <div style="position: relative">
       <v-combobox
         v-model="item.tags"
-        :label="$t('Tags')"
+        :label="$t('tags')"
         :items="tagSuggestions || []"
         :rules="
           projectId
@@ -33,26 +33,15 @@
         outlined
         hide-details
       />
-
-      <v-chip
-        v-if="!isTagsAvailable"
-        color="hsl(348deg, 86%, 61%)"
-        text-color="white"
-        small
-        label
-        style="position: absolute; top: -10px; right: 15px"
-        @click="upgradeToPro('runners')"
-      >
-        Upgrade to PRO
-      </v-chip>
     </div>
 
     <v-row>
       <v-col>
         <v-checkbox v-model="item.is_default">
           <template v-slot:label>
-            Is default
-            <v-chip class="ml-2" color="error" small>New</v-chip>
+            {{ $t('uiIsDefault') }}<v-chip class="ml-2" color="error" small>
+            {{ $t('nnew') }}
+          </v-chip>
           </template>
         </v-checkbox>
       </v-col>
@@ -60,7 +49,7 @@
         <v-checkbox v-if="isNew" v-model="item.registered" :disabled="formSaving">
           <template v-slot:label>
             {{ $t('register') }}
-            <v-chip class="ml-2" color="error" small>New</v-chip>
+            <v-chip class="ml-2" color="error" small>{{ $t('nnew') }}</v-chip>
           </template>
         </v-checkbox>
       </v-col>
@@ -72,7 +61,7 @@
 
     <v-text-field
       v-model="item.webhook"
-      :label="$t('Webhook')"
+      :label="$t('uiWebhook')"
       required
       :disabled="formSaving"
       outlined

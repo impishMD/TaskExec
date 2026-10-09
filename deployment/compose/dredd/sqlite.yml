@@ -3,7 +3,7 @@ version: "3.4"
 services:
   dredd:
     environment:
-      JEH_DB_DIALECT: sqlite
-      JEH_DB_CONFIG: '{"host": "/data/database.sqlite3"}'
+      TASKEXEC_DB_DIALECT: sqlite
+      TASKEXEC_DB_CONFIG: '{"host": "/data/database.sqlite3"}'
     depends_on:
       - server

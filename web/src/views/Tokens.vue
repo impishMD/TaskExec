@@ -2,14 +2,14 @@
   <div v-if="items != null">
     <v-dialog v-model="newTokenDialog" max-width="480" persistent>
       <v-card>
-        <v-card-title>{{ $t('New Token') }}</v-card-title>
+        <v-card-title>{{ $t('uiNewToken') }}</v-card-title>
         <v-card-text class="pb-0 pt-4">
           <v-text-field v-model="newTokenName" :label="$t('tokenName')" outlined dense />
 
           <v-select
             v-model="expiresInDays"
             :items="expiryOptions"
-            :label="$t('Expires')"
+            :label="$t('uiExpires')"
             outlined
             dense
           />
@@ -17,7 +17,7 @@
             v-if="expiresInDays === 'custom'"
             v-model="customExpiresAt"
             type="datetime-local"
-            :label="$t('Expiration date')"
+            :label="$t('uiExpirationDate')"
             outlined
             dense
           />
@@ -25,19 +25,17 @@
         <v-card-actions>
           <v-spacer />
           <v-btn text color="primary" @click="newTokenDialog = false" :disabled="creatingToken">
-            {{ $t('Cancel') }}
+            {{ $t('cancel') }}
           </v-btn>
           <v-btn text color="primary" @click="createToken()" :loading="creatingToken">
-            {{ $t('Create') }}
+            {{ $t('create') }}
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <v-toolbar flat>
-      <v-btn icon class="mr-4" @click="returnToProjects()">
-        <v-icon>mdi-arrow-left</v-icon>
-      </v-btn>
+      <v-app-bar-nav-icon @click="showDrawer()" />
       <v-toolbar-title>{{ $t('api_tokens') }}</v-toolbar-title>
       <v-spacer></v-spacer>
 
@@ -46,10 +44,10 @@
         class="mr-6"
         target="_blank"
       >
-        {{ $t('API Reference') }}
+        {{ $t('uiAPIReference') }}
       </a>
 
-      <v-btn color="primary" @click="newToken()">{{ $t('New Token') }}</v-btn>
+      <v-btn color="primary" @click="newToken()">{{ $t('uiNewToken') }}</v-btn>
     </v-toolbar>
 
     <v-divider />
@@ -71,7 +69,7 @@
         <CopyClipboardButton
           v-if="item.token_id"
           :text="item.token_id"
-          success-message="The token has been copied to the clipboard."
+          :success-message="$t('copiedToClipboard')"
         />
       </template>
 
@@ -85,19 +83,19 @@
 
       <template v-slot:item.expires_at="{ item }">
         <span v-if="item.expires_at">{{ item.expires_at | formatDate }}</span>
-        <span v-else class="text--disabled">{{ $t('Never') }}</span>
+        <span v-else class="text--disabled">{{ $t('uiNever') }}</span>
       </template>
 
       <template v-slot:item.expired="{ item }">
         <div class="pr-4">
           <v-chip v-if="item.expired" style="font-weight: bold" color="error">
-            {{ $t('Revoked') }}
+            {{ $t('uiRevoked') }}
           </v-chip>
           <v-chip v-else-if="isExpiredByTime(item)" style="font-weight: bold" color="warning">
-            {{ $t('Expired') }}
+            {{ $t('uiExpired') }}
           </v-chip>
           <v-chip v-else style="font-weight: bold" color="success">
-            {{ $t('Active') }}
+            {{ $t('active2') }}
           </v-chip>
         </div>
       </template>
@@ -132,11 +130,11 @@ export default {
   computed: {
     expiryOptions() {
       return [
-        { text: this.$i18n.t('Never'), value: 0 },
-        { text: '30 days', value: 30 },
-        { text: '90 days', value: 90 },
-        { text: '1 year', value: 365 },
-        { text: this.$i18n.t('Custom'), value: 'custom' },
+        { text: this.$i18n.t('uiNever'), value: 0 },
+        { text: this.$t('ui30Days'), value: 30 },
+        { text: this.$t('ui90Days'), value: 90 },
+        { text: this.$t('ui1Year'), value: 365 },
+        { text: this.$i18n.t('uiCustom'), value: 'custom' },
       ];
     },
   },
@@ -224,15 +222,15 @@ export default {
           value: 'name',
         },
         {
-          text: this.$i18n.t('token'),
+          text: this.$i18n.t('uiToken'),
           value: 'id',
         },
         {
-          text: this.$i18n.t('created'),
+          text: this.$i18n.t('uiCreated'),
           value: 'created',
         },
         {
-          text: this.$i18n.t('Expires'),
+          text: this.$i18n.t('uiExpires'),
           value: 'expires_at',
         },
         {

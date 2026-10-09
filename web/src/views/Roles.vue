@@ -2,7 +2,7 @@
   <div v-if="items != null">
     <EditDialog
       v-model="editDialog"
-      save-button-text="Save"
+      :save-button-text="$t('save')"
       :title="$t('editRole')"
       @save="loadItems()"
     >
@@ -27,13 +27,11 @@
     />
 
     <v-toolbar flat>
-      <v-btn icon class="mr-4" @click="returnToProjects()">
-        <v-icon>mdi-arrow-left</v-icon>
-      </v-btn>
+      <v-app-bar-nav-icon @click="showDrawer()" />
       <v-toolbar-title>{{ $t('Roles') }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn
-        v-if="can(USER_PERMISSIONS.manageProjectResources)"
+        v-if="can(USER_PERMISSIONS.manageProjectUsers)"
         :disabled="!features.custom_roles_management"
         color="primary"
         @click="editItem('new')"
@@ -44,25 +42,6 @@
     <TeamMenu v-if="projectId" :project-id="projectId" :system-info="systemInfo" />
 
     <v-divider style="margin-top: -1px" />
-
-    <v-alert v-if="!features.custom_roles_management" text color="amber darken-3" class="PageAlert">
-      <span class="mr-1" v-html="$t('roles_only_enterprise')"></span>
-
-      <v-btn
-        dark
-        depressed
-        v-if="isAdmin"
-        color="amber darken-3"
-        href="https://github.com/impishMD/jeh/blob/develop/docs/en/configuration.md#feature-scope"
-        target="_blank"
-      >
-        {{ $t('upgrade_to_pro') }}
-      </v-btn>
-
-      <span v-else style="font-weight: bold">
-        {{ $t('contact_admin_to_upgrade_enterprise') }}
-      </span>
-    </v-alert>
 
     <v-data-table
       :headers="headers"
@@ -89,6 +68,7 @@
 </template>
 <script>
 import EventBus from '@/event-bus';
+import { USER_PERMISSIONS } from '@/lib/constants';
 import YesNoDialog from '@/components/YesNoDialog.vue';
 import ItemListPageBase from '@/components/ItemListPageBase';
 import EditDialog from '@/components/EditDialog.vue';
@@ -130,6 +110,10 @@ export default {
   },
 
   methods: {
+    allowActions() {
+      return this.can(USER_PERMISSIONS.manageProjectUsers);
+    },
+
     getHeaders() {
       return [
         {

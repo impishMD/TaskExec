@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestLegacyFlatAccessKey_DecryptsOldData: data written by old JEH
+// TestLegacyFlatAccessKey_DecryptsOldData: data written by old TaskExec
 // (un-prefixed, encrypted with the flat access_key_encryption) decrypts when the
 // install is configured the old way (only the flat field).
 func TestLegacyFlatAccessKey_DecryptsOldData(t *testing.T) {
@@ -52,7 +52,7 @@ func TestLegacyFlatOptionKey_DecryptsOldOptionData(t *testing.T) {
 }
 
 // TestLegacyFlatAccess_ResolvesToActiveKey: through the real resolve path, the flat
-// field (as set by access_key_encryption / JEH_ACCESS_KEY_ENCRYPTION) becomes
+// field (as set by access_key_encryption / TASKEXEC_ACCESS_KEY_ENCRYPTION) becomes
 // the active key, and new writes round-trip.
 func TestLegacyFlatAccess_ResolvesToActiveKey(t *testing.T) {
 	flatKey := genKey(0x07)

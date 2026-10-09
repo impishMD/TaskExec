@@ -9,15 +9,15 @@
 
 ## Objective
 
-A remote `jeh runner` process registers itself against the server with a
+A remote `taskexec runner` process registers itself against the server with a
 valid registration token, becomes visible in **Runners**, and picks up tasks.
 
 ## Preconditions
 
-* JEH server reachable over network from a second host.
+* TaskExec server reachable over network from a second host.
 * `runner_registration_token` configured on the server (or generated via the
   admin UI).
-* JEH binary present on the runner host.
+* TaskExec binary present on the runner host.
 
 ## Steps
 
@@ -25,7 +25,7 @@ valid registration token, becomes visible in **Runners**, and picks up tasks.
    **Admin → Runners → Registration token**.
 2. On the runner host run:
    ```
-   jeh runner --config /etc/jeh/runner.json
+   taskexec runner --config /etc/taskexec/runner.json
    ```
    with `registration_token` and `server_url` set in the config.
 3. Refresh **Admin → Runners** in the UI.

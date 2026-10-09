@@ -28,9 +28,9 @@
 
       <span class="ml-3 hidden-xs-only task-log-view__status_part">
 
-        Started <span v-if="user">by <b>{{ user.name }}</b></span>
-
-        at <b>{{ item.start | formatDate }}</b>
+        {{ user
+        ? $t('taskStartedByAt', { user: user.name, time: $options.filters.formatDate(item.start) })
+        : $t('taskStartedAt', { time: $options.filters.formatDate(item.start) }) }}
       </span>
 
       <span class="ml-3 hidden-sm-and-down task-log-view__status_part">
@@ -41,14 +41,12 @@
     </div>
 
     <v-tabs class="task-log-view__tabs" right v-model="tab">
-      <v-tab>Log</v-tab>
-      <v-tab>Details</v-tab>
+      <v-tab>{{ $t('uiLog') }}</v-tab>
+      <v-tab>{{ $t('template_details') }}</v-tab>
       <v-tab
-        v-if="isPro"
-        :disabled="!isTaskStopped"
-      >
-        Summary
-      </v-tab>
+        v-if="summaryAvailable"
+        :disabled="!isTaskStopped || !item.end"
+      >{{ $t('uiSummary') }}</v-tab>
     </v-tabs>
 
     <div v-if="tab === 0">
@@ -130,7 +128,6 @@
       <v-divider style="margin-top: -1px;" />
 
       <AnsibleStageView
-        :features="systemInfo.features"
         :project-id="projectId"
         :task-id="itemId"
       />
@@ -258,7 +255,7 @@ export default {
     item: Object,
     projectId: Number,
     systemInfo: Object,
-    features: null,
+    app: String,
   },
 
   data() {
@@ -297,6 +294,10 @@ export default {
   },
 
   computed: {
+    summaryAvailable() {
+      return this.app === 'ansible' && !!this.systemInfo?.features?.task_summary;
+    },
+
     itemId() {
       return this.item?.id;
     },
@@ -327,9 +328,6 @@ export default {
       ].includes(this.item.status);
     },
 
-    isPro() {
-      return (process.env.VUE_APP_BUILD_TYPE || '').startsWith('pro_');
-    },
   },
 
   async created() {
@@ -405,6 +403,7 @@ export default {
     },
 
     reset() {
+      this.tab = 0;
       this.output = [];
       this.outputBuffer = [];
       this.outputInterval = null;

@@ -1,30 +1,29 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
-  <div style="overflow: hidden" class="pb-5">
-    <v-alert text color="hsl(348deg, 86%, 61%)" class="PageAlert" v-if="!features.task_summary">
-      <span class="mr-2">
-        This is <b>DEMO</b> data. Task summary available only in <b>PRO</b> version.
-      </span>
-
-      <v-btn dark class="ml-2" color="hsl(348deg, 86%, 61%)" @click="upgradeToPro('task_summary')">
-        {{ $t('upgrade_to_pro') }}
-      </v-btn>
+  <div class="AnsibleSummary pb-5">
+    <v-progress-linear v-if="loading" indeterminate class="mb-4" />
+    <v-alert v-if="loadFailed" type="error" text class="ma-5">
+      {{ $t('summaryLoadFailed') }}
+      <v-btn text small @click="loadData()">{{ $t('alertsRetry') }}</v-btn>
+    </v-alert>
+    <v-alert v-else-if="!loading && hosts.length === 0" type="info" text class="ma-5">
+      {{ $t('summaryNoRecap') }}
     </v-alert>
 
-    <div class="pl-5 pt-5 d-flex" style="column-gap: 10px">
+    <div v-if="hosts.length" class="pa-5 d-flex flex-wrap" style="gap: 10px">
       <div class="AnsibleServerStatus AnsibleServerStatus--ok">
         <div class="AnsibleServerStatus__count">{{ okServers }}</div>
-        <div class="AnsibleServerStatus__title">OK SERVERS</div>
+        <div class="AnsibleServerStatus__title">{{ $t('uiOKSERVERS') }}</div>
       </div>
 
       <div class="AnsibleServerStatus AnsibleServerStatus--bad">
         <div class="AnsibleServerStatus__count">{{ notOkServers }}</div>
-        <div class="AnsibleServerStatus__title">NOT OK SERVERS</div>
+        <div class="AnsibleServerStatus__title">{{ $t('uiNOTOKSERVERS') }}</div>
       </div>
     </div>
 
     <v-btn-toggle class="pl-5 mt-8 mb-3" dense v-model="tab" mandatory>
-      <v-btn value="notOkServers"> Not ok servers </v-btn>
-      <v-btn value="allServers"> All servers </v-btn>
+      <v-btn value="notOkServers">{{ $t('summaryErrors') }}</v-btn>
+      <v-btn value="allServers">{{ $t('uiAllServers') }}</v-btn>
     </v-btn-toggle>
 
     <v-data-table
@@ -44,36 +43,23 @@
       </template>
       <template v-slot:expanded-item="{ headers, item }">
         <td :colspan="headers.length">
-          <pre
-            style="
-              overflow: auto;
-              background: gray;
-              font-size: 14px;
-              color: white;
-              border-radius: 10px;
-              white-space: pre-wrap;
-              margin-top: 5px;
-              margin-bottom: 5px;
-            "
-            class="pa-2"
-            >{{ item.error.trim() }}</pre
-          >
+          <pre class="AnsibleSummary__error pa-3">{{ item.error }}</pre>
         </td>
       </template>
     </v-data-table>
 
-    <v-simple-table v-else-if="tab === 'allServers'">
+    <v-simple-table v-else-if="tab === 'allServers'" class="AnsibleSummary__hosts">
       <template v-slot:default>
         <thead>
           <tr>
-            <th>Host</th>
-            <th>Changed</th>
-            <th>Failed</th>
-            <th>Ignored</th>
-            <th>Ok</th>
-            <th>Rescued</th>
-            <th>Skipped</th>
-            <th>Unreachable</th>
+            <th>{{ $t('hostConfigTypeHost') }}</th>
+            <th>{{ $t('uiChanged') }}</th>
+            <th>{{ $t('status_failed') }}</th>
+            <th>{{ $t('uiIgnored') }}</th>
+            <th>{{ $t('uiOk') }}</th>
+            <th>{{ $t('uiRescued') }}</th>
+            <th>{{ $t('uiSkipped') }}</th>
+            <th>{{ $t('uiUnreachable') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -148,32 +134,65 @@
   </div>
 </template>
 <style lang="scss">
+.AnsibleSummary {
+  overflow: hidden;
+}
+
+.AnsibleSummary__hosts {
+  table {
+    width: 100%;
+  }
+
+  th {
+    white-space: normal !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    font-size: 12px !important;
+    line-height: 1.4;
+    padding: 12px 10px !important;
+  }
+
+  td {
+    padding: 10px !important;
+  }
+}
+
+.AnsibleSummary__error {
+  overflow: auto;
+  background: var(--highlighted-card-bg-color);
+  border-radius: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 8px 0;
+}
+
 .AnsibleServerStatus {
   text-align: center;
-  width: 250px;
-  font-weight: bold;
-  color: white;
-  font-size: 24px;
-  line-height: 1.2;
-  border-radius: 8px;
+  width: 240px;
+  max-width: 100%;
+  padding: 18px 12px;
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.3;
+  border-radius: 16px;
 }
 
 .AnsibleServerStatus__count {
-  padding-top: 10px;
-  font-size: 80px;
+  font-size: 56px;
   line-height: 1;
+  margin-bottom: 8px;
 }
 
 .AnsibleServerStatus--ok {
-  background-color: #4caf50;
+  background: rgba(32, 140, 105, 0.12);
+  color: var(--v-primary-base);
+  border: 1px solid rgba(32, 140, 105, 0.2);
 }
 
 .AnsibleServerStatus--bad {
-  background-color: #ff5252;
-}
-
-.AnsibleServerStatus__title {
-  padding-bottom: 10px;
+  background: rgba(239, 71, 111, 0.1);
+  color: var(--v-error-base);
+  border: 1px solid rgba(239, 71, 111, 0.2);
 }
 </style>
 
@@ -184,158 +203,78 @@ export default {
   props: {
     projectId: Number,
     taskId: Number,
-    features: Object,
   },
 
   mixins: [ProjectMixin],
 
   data() {
     return {
-      stages: null,
-      okServers: 0,
-      notOkServers: 0,
+      loading: false,
+      loadFailed: false,
       tab: 'notOkServers',
       failedTasks: [],
-      hosts: null,
-      notOkServersHeaders: [
-        {
-          text: 'Server',
-          value: 'host',
-          sortable: false,
-        },
-        {
-          text: 'Task',
-          value: 'task',
-          sortable: false,
-        },
-        {
-          text: 'Error',
-          value: 'error',
-          sortable: false,
-        },
-      ],
+      hosts: [],
+      loadSequence: 0,
     };
   },
 
-  watch: {
-    async taskId() {
-      await this.loadData();
-      this.calcStats();
+  computed: {
+    okServers() {
+      return this.hosts.filter((host) => !host.failed && !host.unreachable).length;
+    },
+    notOkServers() {
+      return this.hosts.length - this.okServers;
+    },
+    notOkServersHeaders() {
+      return [
+        { text: this.$t('uiServer'), value: 'host', sortable: false },
+        { text: this.$t('task2'), value: 'task', sortable: false },
+        { text: this.$t('error'), value: 'error', sortable: false },
+      ];
     },
   },
 
-  async created() {
-    await this.loadData();
-    this.calcStats();
+  watch: {
+    taskId: 'loadData',
+    projectId: 'loadData',
+  },
+
+  created() {
+    this.loadData();
+  },
+
+  beforeDestroy() {
+    this.loadSequence += 1;
   },
 
   methods: {
     async loadData() {
-      if (this.features.task_summary) {
-        [this.failedTasks, this.hosts, this.stages] = await Promise.all([
-          this.loadProjectEndpoint(`/tasks/${this.taskId}/ansible/errors`),
-          this.loadProjectEndpoint(`/tasks/${this.taskId}/ansible/hosts`),
-          this.loadProjectEndpoint(`/tasks/${this.taskId}/stages`),
+      this.loadSequence += 1;
+      const sequence = this.loadSequence;
+      const { projectId, taskId } = this;
+      this.loading = true;
+      this.loadFailed = false;
+      this.hosts = [];
+      this.failedTasks = [];
+      try {
+        const [failures, hosts] = await Promise.all([
+          this.loadEndpoint(`/api/project/${projectId}/tasks/${taskId}/ansible/errors`),
+          this.loadEndpoint(`/api/project/${projectId}/tasks/${taskId}/ansible/hosts`),
         ]);
-      } else {
-        [this.failedTasks, this.hosts, this.stages] = this.getDemoData();
+        if (sequence !== this.loadSequence) {
+          return;
+        }
+        this.failedTasks = failures || [];
+        this.hosts = hosts || [];
+      } catch (e) {
+        if (sequence === this.loadSequence) {
+          this.loadFailed = true;
+        }
+      } finally {
+        if (sequence === this.loadSequence) {
+          this.loading = false;
+        }
       }
-
-      this.hosts.forEach((host) => {
-        if (host.unreachable) {
-          this.failedTasks.push({
-            host: host.host,
-            task: '—',
-            error: 'Host is unreachable',
-          });
-        }
-      });
-    },
-
-    calcStats() {
-      this.hosts.forEach((host) => {
-        if (host.failed > 0 || host.unreachable > 0) {
-          this.notOkServers += 1;
-        } else {
-          this.okServers += 1;
-        }
-      });
-    },
-
-    getDemoData() {
-      const failedTasks = [
-        {
-          id: 1,
-          host: 'web-01.prod.example.com',
-          task: 'Install nginx package',
-          error: 'fatal: [web-01.prod.example.com]: FAILED! => {"changed": false, "msg": "No package matching \'nginx\' is available"}',
-        },
-        {
-          id: 2,
-          host: 'web-02.prod.example.com',
-          task: 'Start nginx service',
-          error: 'fatal: [web-02.prod.example.com]: FAILED! => {"changed": false, "msg": "Could not find the requested service nginx: host"}',
-        },
-        {
-          id: 3,
-          host: 'db-01.prod.example.com',
-          task: 'Apply database migrations',
-          error: 'fatal: [db-01.prod.example.com]: FAILED! => {"changed": false, "msg": "Migration failed: relation \\"users\\" already exists", "rc": 1}',
-        },
-        {
-          id: 4,
-          host: 'cache-01.prod.example.com',
-          task: 'Configure redis maxmemory',
-          error: 'fatal: [cache-01.prod.example.com]: FAILED! => {"changed": false, "msg": "Destination /etc/redis/redis.conf does not exist!"}',
-        },
-      ];
-
-      const hosts = [
-        {
-          host: 'web-01.prod.example.com', changed: 3, failed: 1, ignored: 0, ok: 12, rescued: 0, skipped: 2, unreachable: 0,
-        },
-        {
-          host: 'web-02.prod.example.com', changed: 2, failed: 1, ignored: 0, ok: 11, rescued: 0, skipped: 2, unreachable: 0,
-        },
-        {
-          host: 'web-03.prod.example.com', changed: 4, failed: 0, ignored: 0, ok: 15, rescued: 0, skipped: 1, unreachable: 0,
-        },
-        {
-          host: 'db-01.prod.example.com', changed: 1, failed: 1, ignored: 0, ok: 8, rescued: 0, skipped: 3, unreachable: 0,
-        },
-        {
-          host: 'db-02.prod.example.com', changed: 0, failed: 0, ignored: 0, ok: 9, rescued: 0, skipped: 3, unreachable: 0,
-        },
-        {
-          host: 'cache-01.prod.example.com', changed: 0, failed: 1, ignored: 0, ok: 5, rescued: 0, skipped: 0, unreachable: 0,
-        },
-        {
-          host: 'worker-01.prod.example.com', changed: 2, failed: 0, ignored: 1, ok: 10, rescued: 0, skipped: 1, unreachable: 0,
-        },
-        {
-          host: 'worker-02.prod.example.com', changed: 0, failed: 0, ignored: 0, ok: 0, rescued: 0, skipped: 0, unreachable: 1,
-        },
-      ];
-
-      const stages = [
-        {
-          name: 'Gathering Facts', ok: 7, failed: 0, changed: 0,
-        },
-        {
-          name: 'Install packages', ok: 5, failed: 2, changed: 3,
-        },
-        {
-          name: 'Configure services', ok: 6, failed: 1, changed: 4,
-        },
-        {
-          name: 'Start services', ok: 6, failed: 1, changed: 2,
-        },
-        {
-          name: 'Run migrations', ok: 5, failed: 1, changed: 1,
-        },
-      ];
-
-      return [failedTasks, hosts, stages];
     },
   },
 };

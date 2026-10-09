@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -34,7 +34,7 @@ func TestMigration_2_19_14_DataSurvivesRebuild(t *testing.T) {
 	// newTemplateTestProject is unusable here: its CreateAccessKey call
 	// writes the task_id/expire_at columns which appear only in 2.20.1,
 	// so seed the access key with SQL matching the 2.19.12 schema.
-	project, err := store.CreateProject(db.Project{Name: "proj"})
+	project, err := createLegacyTestProject(store, db.Project{Name: "proj"})
 	require.NoError(t, err)
 	projectID := project.ID
 

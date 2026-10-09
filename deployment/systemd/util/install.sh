@@ -3,8 +3,8 @@ set -e
 
 HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-mkdir -p /etc/jeh
-cp ${HERE}/../jeh.service /etc/systemd/system
-cp ${HERE}/../env /etc/jeh/env
+mkdir -p /etc/taskexec
+cp ${HERE}/../taskexec.service /etc/systemd/system
+cp ${HERE}/../env /etc/taskexec/env
 systemctl daemon-reload
-systemctl start jeh.service
+systemctl start taskexec.service

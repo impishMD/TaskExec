@@ -5,16 +5,16 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/common_errors"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/common_errors"
+	"github.com/impishMD/taskexec/util"
 )
 
 type AccessKeyService interface {
 	Update(key db.AccessKey) error
 	Create(key db.AccessKey) (newKey db.AccessKey, err error)
 	GetAll(projectID int, options db.GetAccessKeyOptions, params db.RetrieveQueryParams) ([]db.AccessKey, error)
-	Delete(projectID int, keyID int) (err error)
+	Delete(projectID int, keyID int, referenceOnly ...bool) (err error)
 }
 
 type AccessKeyServiceImpl struct {
@@ -61,7 +61,7 @@ func (s *AccessKeyServiceImpl) hostConfigsUsing(projectID *int, keyID int) (used
 	return
 }
 
-func (s *AccessKeyServiceImpl) Delete(projectID int, keyID int) (err error) {
+func (s *AccessKeyServiceImpl) Delete(projectID int, keyID int, referenceOnly ...bool) (err error) {
 	key, err := s.accessKeyRepo.GetAccessKey(projectID, keyID)
 	if err != nil {
 		return
@@ -81,6 +81,13 @@ func (s *AccessKeyServiceImpl) Delete(projectID int, keyID int) (err error) {
 		return
 	}
 
+	refs, err := s.accessKeyRepo.GetAccessKeyRefs(projectID, key.ID)
+	if err != nil {
+		return err
+	}
+	if len(refs.Environments) > 0 {
+		return db.ErrInvalidOperation
+	}
 	if key.SourceStorageID != nil {
 		var storage db.SecretStorage
 		storage, err = s.secretStorageRepo.GetSecretStorage(projectID, *key.SourceStorageID)
@@ -88,13 +95,20 @@ func (s *AccessKeyServiceImpl) Delete(projectID int, keyID int) (err error) {
 			return
 		}
 
-		if storage.ReadOnly || key.Synchronized {
+		if storage.ReadOnly || key.Synchronized || (len(referenceOnly) > 0 && referenceOnly[0]) {
 			// Do nothing
 
 			//if key.Synchronized {
 			//	err = common_errors.NewUserErrorS("cannot delete synchronized secret from read-only storage")
 			//}
 		} else {
+			refs, e := s.accessKeyRepo.GetAccessKeyRefs(projectID, key.ID)
+			if e != nil {
+				return e
+			}
+			if len(refs.Templates)+len(refs.Inventories)+len(refs.Repositories)+len(refs.Integrations)+len(refs.Schedules)+len(refs.AccessKeys)+len(refs.HostConfigs) > 0 {
+				return db.ErrInvalidOperation
+			}
 			err = s.encryptionService.DeleteSecret(&key)
 		}
 
@@ -169,6 +183,13 @@ func assignGeneratedSSHKey(key *db.AccessKey) error {
 func (s *AccessKeyServiceImpl) Create(key db.AccessKey) (newKey db.AccessKey, err error) {
 	// Plain is derived data, never taken from the caller.
 	key.Plain = nil
+	if key.ReferenceOnly {
+		if err = s.validateVaultReference(key); err != nil {
+			return
+		}
+		key.Secret = nil
+		return s.accessKeyRepo.CreateAccessKey(key)
+	}
 
 	if key.GenerateSSHKey {
 		err = assignGeneratedSSHKey(&key)
@@ -178,7 +199,7 @@ func (s *AccessKeyServiceImpl) Create(key db.AccessKey) (newKey db.AccessKey, er
 	}
 
 	// SerializeSecret encrypts/persists the secret for writable backends. For read-only
-	// external storage the secret is not stored in JEH, so SerializeSecret fails
+	// external storage the secret is not stored in TaskExec, so SerializeSecret fails
 	// with ErrReadOnlyStorage; we still create the access key row (metadata / reference).
 	// A generated key is the exception: nobody else holds the private half, so
 	// a storage that cannot persist it must reject the request.
@@ -187,6 +208,11 @@ func (s *AccessKeyServiceImpl) Create(key db.AccessKey) (newKey db.AccessKey, er
 		return
 	}
 
+	if errors.Is(err, ErrReadOnlyStorage) && key.SourceStorageType != nil && *key.SourceStorageType == db.AccessKeySourceStorageVault {
+		if _, _, err = vaultReference(&key); err != nil {
+			return
+		}
+	}
 	newKey, err = s.accessKeyRepo.CreateAccessKey(key)
 	return
 }
@@ -194,6 +220,25 @@ func (s *AccessKeyServiceImpl) Create(key db.AccessKey) (newKey db.AccessKey, er
 func (s *AccessKeyServiceImpl) Update(key db.AccessKey) (err error) {
 	// Plain is derived data, never taken from the caller.
 	key.Plain = nil
+	if key.ReferenceOnly {
+		if err = s.validateVaultReference(key); err != nil {
+			return err
+		}
+		old, err := s.accessKeyRepo.GetAccessKey(*key.ProjectID, key.ID)
+		if err != nil {
+			return err
+		}
+		if old.Owner == db.AccessKeyEnvironment && key.Type != db.AccessKeyString {
+			return common_errors.NewValidationError("environment secrets must use string type")
+		}
+		// OverrideSecret is the repository's update-column switch. Do not call the
+		// serializer: only type/reference metadata changes, including for read-only
+		// connections. Host mapping constraints are checked by the repository.
+		key.OverrideSecret = true
+		key.Secret = nil
+		key.IgnorePlain = false
+		return s.accessKeyRepo.UpdateAccessKey(key)
+	}
 
 	if !key.OverrideSecret {
 		err = s.accessKeyRepo.UpdateAccessKey(key)
@@ -214,7 +259,13 @@ func (s *AccessKeyServiceImpl) Update(key db.AccessKey) (err error) {
 		return
 	}
 
-	if oldKey.SourceStorageType != nil && !oldKey.IsNativelyReadOnly() {
+	if oldKey.Synchronized {
+		return common_errors.NewUserError(ErrReadOnlyStorage)
+	}
+	// Switching away from Vault changes a reference; it does not move or delete
+	// the old remote value. Only remote-to-remote writes retain the old guard.
+	if oldKey.SourceStorageType != nil && !oldKey.IsNativelyReadOnly() &&
+		key.SourceStorageType != nil && *key.SourceStorageType == db.AccessKeySourceStorageVault {
 		// validate if it is secure to override secret storage
 
 		var oldSt db.SecretStorage
@@ -227,6 +278,16 @@ func (s *AccessKeyServiceImpl) Update(key db.AccessKey) (err error) {
 			err = common_errors.NewUserErrorS("cannot override secret storage")
 			return
 		}
+	}
+	if key.SourceStorageType == nil {
+		key.SourceStorageID, key.SourceStorageKey, key.SourceMapping = nil, nil, nil
+	} else if key.IsNativelyReadOnly() {
+		key.SourceStorageID = nil
+		key.SourceMapping = nil
+	}
+	if (oldKey.SourceStorageType == nil) != (key.SourceStorageType == nil) ||
+		(oldKey.SourceStorageType != nil && key.SourceStorageType != nil && *oldKey.SourceStorageType != *key.SourceStorageType) {
+		key.IgnorePlain = false
 	}
 
 	// Before the secret is written to its storage: a type the mappings can not
@@ -261,4 +322,35 @@ func (s *AccessKeyServiceImpl) Update(key db.AccessKey) (err error) {
 	err = s.accessKeyRepo.UpdateAccessKey(key)
 
 	return
+}
+
+func (s *AccessKeyServiceImpl) validateVaultReference(key db.AccessKey) error {
+	if key.SourceStorageType == nil || *key.SourceStorageType != db.AccessKeySourceStorageVault ||
+		key.SourceStorageID == nil || key.ProjectID == nil {
+		return common_errors.NewValidationError("vault storage id is required")
+	}
+	if key.GenerateSSHKey || key.OverrideSecret || key.String != "" || key.Object != nil ||
+		key.SshKey != (db.SshKey{}) || key.LoginPassword != (db.LoginPassword{}) {
+		return common_errors.NewValidationError("reference-only key cannot contain secret values")
+	}
+	if key.Type != db.AccessKeySSH && key.Type != db.AccessKeyLoginPassword && key.Type != db.AccessKeyString && key.Type != db.AccessKeyObject {
+		return common_errors.NewValidationError("invalid Vault reference type")
+	}
+	if err := key.Validate(false); err != nil {
+		return common_errors.NewValidationError(err.Error())
+	}
+	if _, _, err := vaultReference(&key); err != nil {
+		return common_errors.NewValidationError(err.Error())
+	}
+	if err := validateVaultMapping(&key); err != nil {
+		return common_errors.NewValidationError(err.Error())
+	}
+	storage, err := s.secretStorageRepo.GetSecretStorage(*key.ProjectID, *key.SourceStorageID)
+	if err != nil {
+		return err
+	}
+	if storage.Type != db.SecretStorageTypeVault {
+		return common_errors.NewValidationError("invalid Vault reference type")
+	}
+	return nil
 }

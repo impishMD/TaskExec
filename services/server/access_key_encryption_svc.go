@@ -7,10 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/common_errors"
-	"github.com/impishMD/jeh/pkg/tz"
-	pro "github.com/impishMD/jeh/pro/services/server"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/common_errors"
+	"github.com/impishMD/taskexec/pkg/tz"
 )
 
 const RekeyBatchSize = 100
@@ -51,6 +50,11 @@ func NewAccessKeyEncryptionService(
 
 func unmarshalAppropriateField(key *db.AccessKey, secret []byte) (err error) {
 	switch key.Type {
+	case db.AccessKeyObject:
+		err = json.Unmarshal(secret, &key.Object)
+		if err == nil && key.Object == nil {
+			err = errors.New("key value must be an object")
+		}
 	case db.AccessKeyString:
 		key.String = string(secret)
 	case db.AccessKeySSH:
@@ -86,7 +90,7 @@ func (s *accessKeyEncryptionServiceImpl) getDeserializer(key *db.AccessKey) (Acc
 	case db.AccessKeySourceStorageEnv, db.AccessKeySourceStorageFile:
 		return &LocalAccessKeyDeserializer{}, true, nil
 	case db.AccessKeySourceStorageVault:
-		if key.SourceStorageID == nil {
+		if key.SourceStorageID == nil || key.ProjectID == nil {
 			return &LocalAccessKeyDeserializer{}, false, errors.New("vault storage id is required")
 		}
 	default:
@@ -99,14 +103,9 @@ func (s *accessKeyEncryptionServiceImpl) getDeserializer(key *db.AccessKey) (Acc
 	}
 
 	switch storage.Type {
-	case db.SecretStorageTypeVault, db.SecretStorageTypeOpenBao:
-		return pro.NewVaultAccessKeyDeserializer(s.accessKeyRepo, s.secretStorageRepo, s), storage.ReadOnly, nil
-	case db.SecretStorageTypeDvls:
-		return pro.NewDvlsAccessKeyDeserializer(s.accessKeyRepo, s.secretStorageRepo, s), storage.ReadOnly, nil
-	case db.SecretStorageTypeAwsSm:
-		return pro.NewAwsSmAccessKeyDeserializer(s.accessKeyRepo, s.secretStorageRepo, s), storage.ReadOnly, nil
-	case db.SecretStorageTypeAzureKv:
-		return pro.NewAzureKvAccessKeyDeserializer(s.accessKeyRepo, s.secretStorageRepo, s), storage.ReadOnly, nil
+	case db.SecretStorageTypeVault:
+		return NewVaultAccessKeyDeserializer(s.accessKeyRepo, s.secretStorageRepo, s), storage.ReadOnly, nil
+
 	}
 
 	return nil, false, fmt.Errorf("unsupported secret storage type '%s'", storage.Type)
@@ -199,6 +198,13 @@ func (s *accessKeyEncryptionServiceImpl) FillEnvironmentSecrets(env *db.Environm
 		})
 	}
 
+	if deserializeSecret {
+		values := map[int]any{}
+		if err := s.fillKeyExpressions(env, values); err != nil {
+			return err
+		}
+		return s.fillKeyBindings(env, values)
+	}
 	return nil
 }
 

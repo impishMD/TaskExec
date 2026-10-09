@@ -1,6 +1,6 @@
 # Code of conduct
 
-JEH welcomes constructive contributions from people of all backgrounds.
+TaskExec welcomes constructive contributions from people of all backgrounds.
 Be respectful, discuss the work, and give actionable feedback. Harassment,
 discrimination, threats and disclosure of others' private information are unacceptable.
 

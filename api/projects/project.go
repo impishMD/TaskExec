@@ -1,17 +1,17 @@
 package projects
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/services/server"
-	"github.com/impishMD/jeh/services/tasks"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/services/server"
+	"github.com/impishMD/taskexec/util"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -113,28 +113,12 @@ type ProjectController struct {
 	ProjectService server.ProjectService
 }
 
-// SendTestNotification triggers sending a test notification to enabled messengers for this project.
-func (c *ProjectController) SendTestNotification(w http.ResponseWriter, r *http.Request) {
-	project := helpers.GetFromContext(r, "project").(db.Project)
-
-	// Respect project.Alert flag: if disabled, still return 204 without sending
-	if !project.Alert {
-		w.WriteHeader(http.StatusConflict)
-		return
-	}
-
-	err := tasks.SendProjectTestAlerts(project, helpers.Store(r))
-	if err != nil {
-		helpers.WriteError(w, err)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
-}
-
 func (c *ProjectController) UpdateProject(w http.ResponseWriter, r *http.Request) {
 	project := helpers.GetFromContext(r, "project").(db.Project)
-	var body db.Project
+	var body struct {
+		db.Project
+		Icon json.RawMessage `json:"icon"`
+	}
 
 	if !helpers.Bind(w, r, &body) {
 		return
@@ -147,7 +131,17 @@ func (c *ProjectController) UpdateProject(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err := c.ProjectService.UpdateProject(body)
+	if len(body.Icon) == 0 {
+		body.Project.Icon = project.Icon
+	} else if err := json.Unmarshal(body.Icon, &body.Project.Icon); err != nil {
+		helpers.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid project icon"})
+		return
+	}
+	if err := body.Project.ValidateIcon(); err != nil {
+		helpers.WriteError(w, err)
+		return
+	}
+	err := c.ProjectService.UpdateProject(body.Project)
 
 	if err != nil {
 		helpers.WriteError(w, err)

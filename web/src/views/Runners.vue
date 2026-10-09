@@ -1,12 +1,5 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
   <div v-if="items != null">
-    <v-toolbar flat v-if="projectId">
-      <v-app-bar-nav-icon @click="showDrawer()"></v-app-bar-nav-icon>
-      <v-toolbar-title>
-        {{ $t('dashboard2') }}
-      </v-toolbar-title>
-    </v-toolbar>
-
     <EditDialog
       v-model="editDialog"
       :save-button-text="itemId === 'new' ? $t('create') : $t('save')"
@@ -60,7 +53,7 @@
 
           <v-checkbox
               v-model="advancedOptions"
-              label="Advanced options"
+              :label="$t('template_advanced')"
             />
 
           <HighlightedCard
@@ -84,8 +77,8 @@
           </HighlightedCard>
 
           <v-tabs v-model="registerTab" :show-arrows="false">
-            <v-tab key="env">Env Vars</v-tab>
-            <v-tab key="config">Config file</v-tab>
+            <v-tab key="env">{{ $t('uiEnvVars') }}</v-tab>
+            <v-tab key="config">{{ $t('uiConfigFile') }}</v-tab>
             <v-tab key="docker">Docker</v-tab>
           </v-tabs>
 
@@ -93,7 +86,7 @@
 
           <v-tabs-items v-model="registerTab">
             <v-tab-item key="env">
-              <div class="mt-3">Register and start the runner:</div>
+              <div class="mt-3">{{ $t('uiRegisterAndStartTheRunner') }}</div>
               <div style="position: relative">
                 <pre
                   class="pa-2"
@@ -115,7 +108,7 @@
             </v-tab-item>
 
             <v-tab-item key="config">
-              <div class="mt-3">Config file content:</div>
+              <div class="mt-3">{{ $t('uiConfigFileContent') }}</div>
               <div style="position: relative">
                 <pre
                   class="pa-2"
@@ -135,7 +128,7 @@
                 />
               </div>
 
-              <div class="mt-3">Register and start the runner:</div>
+              <div class="mt-3">{{ $t('uiRegisterAndStartTheRunner') }}</div>
               <div style="position: relative">
                 <pre
                   class="pa-2"
@@ -157,7 +150,7 @@
             </v-tab-item>
 
             <v-tab-item key="docker">
-              <div class="mt-3">Register and start the runner:</div>
+              <div class="mt-3">{{ $t('uiRegisterAndStartTheRunner') }}</div>
               <div style="position: relative">
                 <pre
                   class="pa-2"
@@ -199,7 +192,7 @@
 
           <v-checkbox
               v-model="advancedOptions"
-              label="Advanced options"
+              :label="$t('template_advanced')"
             />
 
           <HighlightedCard
@@ -222,12 +215,12 @@
             </template>
           </HighlightedCard>
 
-          <h2 class="mt-11 mb-4">Variants of usage</h2>
+          <h2 class="mt-11 mb-4">{{ $t('uiVariantsOfUsage') }}</h2>
 
           <v-tabs v-model="usageTab" :show-arrows="false">
-            <v-tab key="config">Config file</v-tab>
-            <v-tab key="setup">Setup</v-tab>
-            <v-tab key="env">Env Vars</v-tab>
+            <v-tab key="config">{{ $t('uiConfigFile') }}</v-tab>
+            <v-tab key="setup">{{ $t('uiSetup') }}</v-tab>
+            <v-tab key="env">{{ $t('uiEnvVars') }}</v-tab>
             <v-tab key="docker">Docker</v-tab>
           </v-tabs>
 
@@ -235,7 +228,7 @@
 
           <v-tabs-items v-model="usageTab">
             <v-tab-item key="config">
-              <div class="mt-3">Config file content:</div>
+              <div class="mt-3">{{ $t('uiConfigFileContent') }}</div>
               <div style="position: relative">
                 <pre
                   style="
@@ -255,7 +248,7 @@
                 />
               </div>
 
-              <div class="mt-3">Launching the runner:</div>
+              <div class="mt-3">{{ $t('uiLaunchingTheRunner') }}</div>
               <div>
                 <pre
                   style="
@@ -267,12 +260,12 @@
                   "
                   class="pa-2"
                 >
-jeh runner start --config /path/to/config/file</pre
+taskexec runner start --config /path/to/config/file</pre
                 >
               </div>
             </v-tab-item>
             <v-tab-item key="setup">
-              <div class="mt-3">Config file creation:</div>
+              <div class="mt-3">{{ $t('uiConfigFileCreation') }}</div>
               <div style="position: relative">
                 <pre
                   style="
@@ -293,7 +286,7 @@ jeh runner start --config /path/to/config/file</pre
               </div>
 
               <div class="mt-3">
-                <div>Launching the runner:</div>
+                <div>{{ $t('uiLaunchingTheRunner') }}</div>
                 <pre
                   style="
                     overflow: auto;
@@ -304,12 +297,12 @@ jeh runner start --config /path/to/config/file</pre
                   "
                   class="pa-2"
                 >
-jeh runner start --config ./config.runner.json</pre
+taskexec runner start --config ./config.runner.json</pre
                 >
               </div>
             </v-tab-item>
             <v-tab-item key="env">
-              <div class="mt-3">Launching the runner:</div>
+              <div class="mt-3">{{ $t('uiLaunchingTheRunner') }}</div>
               <div style="position: relative">
                 <pre
                   style="
@@ -331,7 +324,7 @@ jeh runner start --config ./config.runner.json</pre
             </v-tab-item>
 
             <v-tab-item key="docker">
-              <div class="mt-3">Launching the runner:</div>
+              <div class="mt-3">{{ $t('uiLaunchingTheRunner') }}</div>
               <div style="position: relative">
                 <pre
                   style="
@@ -365,65 +358,41 @@ jeh runner start --config ./config.runner.json</pre
 
     <YesNoDialog
       v-model="resetRegistrationDialog"
+      :max-width="560"
       :text="$t('askResetRunnerRegistration')"
       :title="$t('regenerateRegistrationToken')"
+      :yes-button-title="$t('confirmTask')"
+      yes-button-filled
       @yes="regenerateRegistrationToken(resetRegistrationRunner)"
     />
 
-    <v-toolbar flat v-if="!projectId">
-      <v-btn icon class="mr-4" @click="returnToProjects()">
-        <v-icon>mdi-arrow-left</v-icon>
-      </v-btn>
+    <v-toolbar flat>
+      <v-app-bar-nav-icon @click="showDrawer()" />
 
       <v-toolbar-title>{{ $t('runners') }}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn color="primary" @click="editItem('new')">{{ $t('newRunner') }}</v-btn>
+      <v-btn
+        :disabled="
+          (projectId && !features.project_runners) || !can(USER_PERMISSIONS.manageProjectResources)
+        "
+        color="primary"
+        @click="editItem('new')"
+      >{{ $t('newRunner') }}</v-btn>
     </v-toolbar>
-
-    <v-btn
-      v-else
-      :disabled="!features.project_runners"
-      style="position: absolute; right: 15px; top: 15px"
-      color="primary"
-      @click="editItem('new')"
-    >{{ $t('newRunner') }}
-    </v-btn>
 
     <v-divider/>
 
     <v-alert
-      v-if="projectId && !features.project_runners"
-      text
-      color="hsl(348deg, 86%, 61%)"
-      class="PageAlert"
-    >
-      <span v-html="$t('project_runners_only_pro')"></span>
-      <v-btn
-        dark
-        v-if="isAdmin"
-        class="ml-2"
-        color="hsl(348deg, 86%, 61%)"
-        @click="upgradeToPro('project_runners')"
-      >
-        {{ $t('upgrade_to_pro') }}
-      </v-btn>
-      <span v-else style="font-weight: bold">
-        {{ $t('contact_admin_to_upgrade') }}
-      </span>
-    </v-alert>
-
-    <v-alert
-      style="border-radius: 0"
       type="info"
       text
+      data-testid="runners-disabled"
       v-if="!systemInfo.use_remote_runner && projectId == null"
     >
-      Global runners
-      <a
-        target="_blank"
-        href="https://github.com/impishMD/jeh/tree/develop/docs/en"
-      >disabled</a
-      >.
+      <i18n path="globalRunnersDisabled" tag="span">
+        <template v-slot:state>
+          <router-link to="/settings">{{ $t('globalRunnersDisabledState') }}</router-link>
+        </template>
+      </i18n>
     </v-alert>
 
     <div
@@ -458,7 +427,7 @@ jeh runner start --config ./config.runner.json</pre
         small
         @click:close="unregisteredFilter = false"
       >
-        {{ $t('unregistered') }}
+        {{ $t('uiUnregistered') }}
       </v-chip>
 
       <v-chip v-if="tagFilter" small close label color="primary" @click:close="tagFilter = null">
@@ -479,7 +448,7 @@ jeh runner start --config ./config.runner.json</pre
           v-model="item.active"
           inset
           @change="setActive(item.id, item.active)"
-          :disabled="item.project_id == null && !isAdmin"
+          :disabled="!canEditRunner(item)"
         />
       </template>
 
@@ -514,7 +483,7 @@ jeh runner start --config ./config.runner.json</pre
           style="cursor: pointer"
           @click="unregisteredFilter = !unregisteredFilter"
         >
-          {{ $t('unregistered') }}
+          {{ $t('uiUnregistered') }}
         </v-chip>
       </template>
 
@@ -538,7 +507,7 @@ jeh runner start --config ./config.runner.json</pre
           <div style="font-weight: bold">{{ $t('lastActivity') }}</div>
           <div style="font-size: 12px; line-height: 1.2">
             <span v-if="item.touched">{{ item.touched | formatDate }}</span>
-            <span v-else>{{ $t('Never') }}</span>
+            <span v-else>{{ $t('uiNever') }}</span>
           </div>
         </v-tooltip>
       </template>
@@ -575,7 +544,7 @@ jeh runner start --config ./config.runner.json</pre
           >
             <template v-slot:activator="{ on, attrs }">
               <v-btn
-                :disabled="item.project_id == null && !isAdmin"
+                :disabled="!canEditRunner(item)"
                 class="mr-1"
                 icon
                 v-bind="attrs"
@@ -598,7 +567,7 @@ jeh runner start --config ./config.runner.json</pre
             icon
             class="mr-1"
             @click="askDeleteItem(item.id)"
-            :disabled="item.project_id == null && !isAdmin"
+            :disabled="!canEditRunner(item)"
           >
             <v-icon>mdi-delete</v-icon>
           </v-btn>
@@ -608,7 +577,7 @@ jeh runner start --config ./config.runner.json</pre
             icon
             class="mr-1"
             @click="editItem(item.id)"
-            :disabled="item.project_id == null && !isAdmin"
+            :disabled="!canEditRunner(item)"
           >
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
@@ -621,7 +590,7 @@ jeh runner start --config ./config.runner.json</pre
                 icon
                 class="mr-1"
                 @click="clearCache(item)"
-                :disabled="item.project_id == null && !isAdmin"
+                :disabled="!canEditRunner(item)"
               >
                 <v-icon>mdi-broom</v-icon>
               </v-btn>
@@ -632,9 +601,15 @@ jeh runner start --config ./config.runner.json</pre
 
             <div v-if="item.cleaning_requested" style="font-size: 12px; line-height: 1.2">
               <span v-if="item.touched < item.cleaning_requested">
-                Already requested {{ item.cleaning_requested | formatDate }}.
+                {{ $t('cleaningRequestedAt', {
+                  time: $options.filters.formatDate(item.cleaning_requested)
+                }) }}
               </span>
-              <span v-else> Last cleaned {{ item.cleaning_requested | formatDate }}. </span>
+              <span v-else>
+                {{ $t('lastCleanedAt', {
+                  time: $options.filters.formatDate(item.cleaning_requested)
+                }) }}
+              </span>
             </div>
           </v-tooltip>
         </div>
@@ -643,6 +618,7 @@ jeh runner start --config ./config.runner.json</pre
   </div>
 </template>
 <script>
+import { getErrorMessage } from '@/lib/error';
 import EventBus from '@/event-bus';
 import YesNoDialog from '@/components/YesNoDialog.vue';
 import ItemListPageBase from '@/components/ItemListPageBase';
@@ -701,13 +677,13 @@ export default {
 
     runnerRegisterEnvCommand() {
       const advancedOptions = this.advancedOptions
-        ? `JEH_RUNNER_CHECK_INTERVAL_SECONDS=${this.checkInterval} \\\n`
+        ? `TASKEXEC_RUNNER_CHECK_INTERVAL_SECONDS=${this.checkInterval} \\\n`
         : '';
-      return `JEH_WEB_ROOT=${this.webHost} \\
-JEH_RUNNER_REGISTRATION_TOKEN=${(this.newRunner || {}).registration_token} \\
-${advancedOptions}jeh runner register --config ./config.runner.json
+      return `TASKEXEC_WEB_ROOT=${this.webHost} \\
+TASKEXEC_RUNNER_REGISTRATION_TOKEN=${(this.newRunner || {}).registration_token} \\
+${advancedOptions}taskexec runner register --config ./config.runner.json
 
-${advancedOptions}jeh runner start --config ./config.runner.json`;
+${advancedOptions}taskexec runner start --config ./config.runner.json`;
     },
 
     runnerRegisterConfigContent() {
@@ -722,19 +698,19 @@ ${advancedOptions}jeh runner start --config ./config.runner.json`;
     },
 
     runnerRegisterConfigCommand() {
-      return `JEH_RUNNER_REGISTRATION_TOKEN=${(this.newRunner || {}).registration_token} \\
-jeh runner register --config ./config.runner.json
+      return `TASKEXEC_RUNNER_REGISTRATION_TOKEN=${(this.newRunner || {}).registration_token} \\
+taskexec runner register --config ./config.runner.json
 
-jeh runner start --config ./config.runner.json`;
+taskexec runner start --config ./config.runner.json`;
     },
 
     runnerRegisterDockerCommand() {
       const advancedOptions = this.advancedOptions
-        ? `-e JEH_RUNNER_CHECK_INTERVAL_SECONDS=${this.checkInterval} \\\n` : '';
+        ? `-e TASKEXEC_RUNNER_CHECK_INTERVAL_SECONDS=${this.checkInterval} \\\n` : '';
       return `docker run \\
--e JEH_WEB_ROOT=${this.webHost} \\
--e JEH_RUNNER_REGISTRATION_TOKEN=${(this.newRunner || {}).registration_token} \\
-${advancedOptions}-d impishmd/jeh:${this.version}-runner`;
+-e TASKEXEC_WEB_ROOT=${this.webHost} \\
+-e TASKEXEC_RUNNER_REGISTRATION_TOKEN=${(this.newRunner || {}).registration_token} \\
+${advancedOptions}-d impishmd/taskexec:${this.version}-runner`;
     },
 
     runnerConfigCommand() {
@@ -758,16 +734,16 @@ ${(this.newRunner || {}).token}
 ./
 EOF
 
-jeh runner setup --config ./config.runner.json < /tmp/config.runner.stdin`;
+taskexec runner setup --config ./config.runner.json < /tmp/config.runner.stdin`;
     },
 
     runnerEnvCommand() {
       const advancedOptions = this.advancedOptions
-        ? `JEH_RUNNER_CHECK_INTERVAL_SECONDS=${this.checkInterval} \\\n`
+        ? `TASKEXEC_RUNNER_CHECK_INTERVAL_SECONDS=${this.checkInterval} \\\n`
         : '';
-      return `JEH_WEB_ROOT=${this.webHost} \\
-${advancedOptions}JEH_RUNNER_TOKEN=${(this.newRunner || {}).token} \\
-jeh runner start --no-config`;
+      return `TASKEXEC_WEB_ROOT=${this.webHost} \\
+${advancedOptions}TASKEXEC_RUNNER_TOKEN=${(this.newRunner || {}).token} \\
+taskexec runner start --no-config`;
     },
 
     filteredItems() {
@@ -792,12 +768,12 @@ jeh runner start --no-config`;
 
     runnerDockerCommand() {
       const advancedOptions = this.advancedOptions
-        ? `-e JEH_RUNNER_CHECK_INTERVAL_SECONDS=${this.checkInterval} \\\n`
+        ? `-e TASKEXEC_RUNNER_CHECK_INTERVAL_SECONDS=${this.checkInterval} \\\n`
         : '';
       return `docker run \\
--e JEH_WEB_ROOT=${this.webHost} \\
--e JEH_RUNNER_TOKEN=${(this.newRunner || {}).token} \\
-${advancedOptions}-d impishmd/jeh:${this.version}-runner`;
+-e TASKEXEC_WEB_ROOT=${this.webHost} \\
+-e TASKEXEC_RUNNER_TOKEN=${(this.newRunner || {}).token} \\
+${advancedOptions}-d impishmd/taskexec:${this.version}-runner`;
     },
   },
 
@@ -843,7 +819,7 @@ ${advancedOptions}-d impishmd/jeh:${this.version}-runner`;
       } catch (e) {
         EventBus.$emit('i-snackbar', {
           color: 'error',
-          text: `Cannot clear cache: ${e.message}`,
+          text: this.$t('clearCacheFailed', { error: getErrorMessage(e) }),
         });
       }
     },
@@ -884,9 +860,14 @@ ${advancedOptions}-d impishmd/jeh:${this.version}-runner`;
       } catch (e) {
         EventBus.$emit('i-snackbar', {
           color: 'error',
-          text: `Cannot regenerate registration token: ${e.message}`,
+          text: this.$t('regenerateRunnerTokenFailed', { error: getErrorMessage(e) }),
         });
       }
+    },
+
+    canEditRunner(item) {
+      return this.can(this.USER_PERMISSIONS.manageProjectResources)
+        && (item.project_id != null || this.isAdmin);
     },
 
     getProjectIdOfItem(itemId) {

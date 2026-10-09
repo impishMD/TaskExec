@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>TaskExec Helm repository</title>
+<style>body{max-width:54rem;margin:4rem auto;padding:0 1.5rem;font:18px/1.6 system-ui,sans-serif;background:#10212a;color:#deeaed}a{color:#80d8bb}pre{padding:1.5rem;background:#1b303a;border-radius:1rem;overflow:auto}h1{line-height:1.2}</style></head>
+<body><h1>TaskExec Helm repository</h1><p>Deploy TaskExec to Kubernetes with Helm.</p>
+<pre>helm repo add taskexec https://impishmd.github.io/TaskExec
+helm repo update
+helm search repo taskexec/taskexec --versions</pre>
+<p>Create the credentials Secret and a values file using the installation guide before installing the chart.</p>
+<p><a href="https://github.com/impishMD/TaskExec/blob/develop/docs/en/helm.md">English installation guide</a> · <a href="https://github.com/impishMD/TaskExec/blob/develop/docs/ru/helm.md">Установка на русском</a> · <a href="index.yaml">Chart index</a> · <a href="https://github.com/impishMD/TaskExec">Source code</a></p></body></html>

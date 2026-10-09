@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/impishMD/jeh/pkg/debuglog"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/pkg/debuglog"
+	"github.com/impishMD/taskexec/util"
 	log "github.com/sirupsen/logrus"
 	lSyslog "github.com/sirupsen/logrus/hooks/syslog"
 )

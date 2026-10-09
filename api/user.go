@@ -11,24 +11,17 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/tz"
-	"github.com/impishMD/jeh/pro_interfaces"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/tz"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/util"
 	log "github.com/sirupsen/logrus"
 )
 
-type UserController struct {
-	subscriptionService pro_interfaces.SubscriptionService
-}
+type UserController struct{}
 
-func NewUserController(subscriptionService pro_interfaces.SubscriptionService) *UserController {
-	return &UserController{
-		subscriptionService: subscriptionService,
-	}
-}
+func NewUserController() *UserController { return &UserController{} }
 
 func (c *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 	if u, exists := helpers.GetOkFromContext(r, "_user"); exists {
@@ -38,16 +31,12 @@ func (c *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 
 	var user struct {
 		db.User
-		CanCreateProject      bool `json:"can_create_project"`
-		HasActiveSubscription bool `json:"has_active_subscription"`
+		CanCreateProject bool `json:"can_create_project"`
 	}
 
 	user.User = *helpers.GetFromContext(r, "user").(*db.User)
 	user.CanCreateProject = user.Admin || util.Config.NonAdminCanCreateProject
-	user.HasActiveSubscription = c.subscriptionService.HasActiveSubscription()
-	if !user.HasActiveSubscription {
-		user.Pro = false
-	}
+
 	helpers.WriteJSON(w, http.StatusOK, user)
 }
 
@@ -82,7 +71,7 @@ func linkLdapIdentity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !ldapProfileMatchesJEHUser(*ldapUser, *currentUser) {
+	if !ldapProfileMatchesTaskExecUser(*ldapUser, *currentUser) {
 		helpers.WriteErrorStatus(w, "LDAP directory profile does not match your account", http.StatusForbidden)
 		return
 	}

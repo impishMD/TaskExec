@@ -1,6 +1,6 @@
 package export
 
-import "github.com/impishMD/jeh/db"
+import "github.com/impishMD/taskexec/db"
 
 type ProjectExporter struct {
 	ValueMap[db.Project]

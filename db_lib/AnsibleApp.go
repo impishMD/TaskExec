@@ -9,10 +9,10 @@ import (
 	"path"
 	"strings"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/galaxy"
-	"github.com/impishMD/jeh/pkg/ssh"
-	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/galaxy"
+	"github.com/impishMD/taskexec/pkg/ssh"
+	"github.com/impishMD/taskexec/pkg/task_logger"
 )
 
 func getMD5Hash(filepath string) (string, error) {
@@ -71,6 +71,11 @@ func (t *AnsibleApp) SetLogger(logger task_logger.Logger) task_logger.Logger {
 }
 
 func (t *AnsibleApp) Run(args LocalAppRunningArgs) error {
+	for _, entry := range args.EnvironmentVars {
+		if strings.HasPrefix(entry, "TASKEXEC_WORKFLOW_RUN_ID=") {
+			return t.runWithWorkflowArtifacts(args)
+		}
+	}
 	// Use "default" key for backward compatibility
 	cliArgs := args.CliArgs["default"]
 	return t.Playbook.RunPlaybook(cliArgs, args.EnvironmentVars, args.Inputs, args.StopCh)

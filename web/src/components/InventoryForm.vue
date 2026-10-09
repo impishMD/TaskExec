@@ -203,13 +203,13 @@ export default {
       },
       inventoryTypes: [{
         id: 'static',
-        name: 'Static',
+        name: this.$t('staticInventory'),
       }, {
         id: 'static-yaml',
-        name: 'Static YAML',
+        name: this.$t('staticYamlInventory'),
       }, {
         id: 'file',
-        name: 'File',
+        name: this.$t('uiFile'),
       }],
       keys: null,
       repositories: null,

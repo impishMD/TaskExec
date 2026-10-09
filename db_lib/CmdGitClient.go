@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/impishMD/jeh/pkg/ssh"
+	"github.com/impishMD/taskexec/pkg/ssh"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/util"
 
 	log "github.com/sirupsen/logrus"
 )

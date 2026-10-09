@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 // loadRunnerTags fills the Tags slice on each runner using a single

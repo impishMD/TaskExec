@@ -1,8 +1,8 @@
 package db_lib
 
 import (
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/task_logger"
 )
 
 func CreateApp(template db.Template, repository db.Repository, inventory db.Inventory, logger task_logger.Logger) LocalApp {

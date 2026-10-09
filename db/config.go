@@ -3,7 +3,7 @@ package db
 import (
 	"strings"
 
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/util"
 )
 
 func ConvertFlatToNested(flatMap map[string]string) map[string]any {

@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-echo "---> Gen jeh config"
-cat << EOF > /jeh/.dredd/config.json
+echo "---> Gen taskexec config"
+cat << EOF > /taskexec/.dredd/config.json
 {
-  "dialect": "${JEH_DB_DIALECT}",
-  "${JEH_DB_DIALECT}": ${JEH_DB_CONFIG},
-  "access_key_encryption": "${JEH_ACCESS_KEY_ENCRYPTION}"
+  "dialect": "${TASKEXEC_DB_DIALECT}",
+  "${TASKEXEC_DB_DIALECT}": ${TASKEXEC_DB_CONFIG},
+  "access_key_encryption": "${TASKEXEC_ACCESS_KEY_ENCRYPTION}"
 }
 EOF
 
-echo "---> Waiting for jeh"
+echo "---> Waiting for taskexec"
 while ! nc -z server 3000; do
   sleep 1
 done

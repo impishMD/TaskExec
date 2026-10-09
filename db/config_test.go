@@ -3,7 +3,7 @@ package db
 import (
 	"testing"
 
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/util"
 )
 
 func TestConfig_assignMapToStruct(t *testing.T) {

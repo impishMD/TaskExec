@@ -9,18 +9,16 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/impishMD/jeh/db_lib"
-	"github.com/impishMD/jeh/pkg/jwt"
-	"github.com/impishMD/jeh/pkg/tz"
-	"github.com/impishMD/jeh/pro_interfaces"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/services/server"
-	"github.com/impishMD/jeh/services/tasks/hooks"
+	"github.com/impishMD/taskexec/db_lib"
+	"github.com/impishMD/taskexec/pkg/jwt"
+	"github.com/impishMD/taskexec/pkg/tz"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/services/server"
 
-	"github.com/impishMD/jeh/api/sockets"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/api/sockets"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/util"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -47,13 +45,11 @@ type TaskRunner struct {
 	// here, on the server, because a remote runner has no database.
 	HostConfigs []db.HostConfig
 
-	currentStage  *db.TaskStage
-	currentOutput *db.TaskOutput
-	currentState  any
+	ansibleOutput *ansibleOutput
 
-	users        []int
-	alert        bool
-	alertChat    *string
+	users []int
+	alert bool
+
 	pool         *TaskPool
 	keyInstaller db_lib.AccessKeyInstaller
 
@@ -64,7 +60,7 @@ type TaskRunner struct {
 	// dispatchFailed marks a task the server failed before handing it to the runner that polled it.
 	dispatchFailed bool
 
-	// job executes Ansible and returns stdout to JEH logs
+	// job executes Ansible and returns stdout to TaskExec logs
 	job Job
 
 	Username        string
@@ -150,10 +146,6 @@ func (t *TaskRunner) createTaskEvent() {
 	if t.Task.Status.IsFinished() {
 		desc += " finished with status " + strings.ToUpper(string(t.Task.Status))
 
-		hook := hooks.GetHook(t.Template.App)
-		if hook != nil {
-			go hook.End(t.pool.store, t.Task.ProjectID, t.Task.ID)
-		}
 	} else {
 		desc += " " + strings.ToUpper(string(t.Task.Status))
 	}
@@ -165,20 +157,6 @@ func (t *TaskRunner) createTaskEvent() {
 		ObjectType:  &objType,
 		ObjectID:    &t.Task.ID,
 		Description: &desc,
-	}
-
-	if err := t.pool.logWriteService.WriteTaskLog(pro_interfaces.TaskLogRecord{
-		ProjectID:    t.Task.ProjectID,
-		TemplateID:   t.Template.ID,
-		TemplateName: t.Template.Name,
-		TaskID:       t.Task.ID,
-		UserID:       t.Task.UserID,
-		Description:  &desc,
-		Username:     t.Username,
-		RunnerID:     t.Task.RunnerID,
-		Status:       t.Task.Status,
-	}); err != nil {
-		log.Error(err)
 	}
 
 	_, err := t.pool.store.CreateEvent(event)
@@ -257,7 +235,7 @@ func (t *TaskRunner) run() {
 	}
 
 	// For locally-executed tasks, mint a JWT and pass it to the LocalJob so it
-	// can be exposed to the playbook as JEH_JWT. Remote runners receive
+	// can be exposed to the playbook as TASKEXEC_JWT. Remote runners receive
 	// the JWT inside the JobData payload returned by the API.
 	if localJob, ok := t.job.(*LocalExecutor); ok {
 
@@ -372,6 +350,7 @@ func (t *TaskRunner) finishRun(actor audit.Actor) {
 	}
 
 	now := tz.Now()
+	t.pool.finishTaskLogs(t, now)
 	t.Task.End = &now
 	t.saveStatus()
 
@@ -480,7 +459,7 @@ func (t *TaskRunner) prepareError(err error, errMsg string) error {
 
 func (t *TaskRunner) populateTaskEnvironment() (err error) {
 
-	if t.Task.Environment == "" {
+	if t.Task.Environment == "" && t.Task.WorkflowRunID == nil {
 		return
 	}
 
@@ -494,6 +473,15 @@ func (t *TaskRunner) populateTaskEnvironment() (err error) {
 		return
 	}
 
+	if t.Task.WorkflowRunID != nil {
+		upstream, e := t.pool.GetWorkflowRunArtifacts(t.Task.ProjectID, *t.Task.WorkflowRunID, &t.Task.ID)
+		if e != nil {
+			return e
+		}
+		for k, v := range upstream {
+			tplEnvironment[k] = v
+		}
+	}
 	taskEnvironment := make(map[string]any)
 	if t.Task.Environment != "" {
 		err = json.Unmarshal([]byte(t.Task.Environment), &taskEnvironment)
@@ -539,6 +527,7 @@ func (t *TaskRunner) populateWorkflowDetails() error {
 
 	return nil
 }
+
 // nolint: gocyclo
 func (t *TaskRunner) populateDetails() error {
 	// get template
@@ -560,7 +549,6 @@ func (t *TaskRunner) populateDetails() error {
 	}
 
 	t.alert = project.Alert
-	t.alertChat = project.AlertChat
 
 	// get project users
 	projectUsers, err := t.pool.store.GetProjectUsers(t.Template.ProjectID, db.RetrieveQueryParams{})

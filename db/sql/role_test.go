@@ -3,7 +3,7 @@ package sql
 import (
 	"testing"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -104,4 +104,30 @@ func TestDeleteRole_SameScopeIsDeleted(t *testing.T) {
 func TestDeleteRole_MissingIsNotFound(t *testing.T) {
 	store := InitConfigCreateTestStore()
 	assert.ErrorIs(t, store.DeleteRole("nope", nil), db.ErrNotFound)
+}
+
+func TestCustomRole_TemplatePermissionsIncludeBaseAndTemplateGrant(t *testing.T) {
+	store, project, role := setupProjectRole(t)
+	user, err := store.CreateUser(db.UserWithPwd{User: db.User{Username: "custom", Name: "Custom", Email: "custom@example.com"}, Pwd: "verystrongpassword1"})
+	require.NoError(t, err)
+	_, err = store.CreateProjectUser(db.ProjectUser{ProjectID: project.ID, UserID: user.ID, Role: db.ProjectUserRole(role.Slug)})
+	require.NoError(t, err)
+	key, err := store.CreateAccessKey(db.AccessKey{ProjectID: &project.ID, Type: db.AccessKeyNone})
+	require.NoError(t, err)
+	repo, err := store.CreateRepository(db.Repository{ProjectID: project.ID, Name: "repo", GitURL: "https://example.com/repo.git", GitBranch: "main", SSHKeyID: key.ID})
+	require.NoError(t, err)
+	tpl, err := store.CreateTemplate(db.Template{ProjectID: project.ID, RepositoryID: repo.ID, Name: "test", Playbook: "test.yml"})
+	require.NoError(t, err)
+	permissions, err := store.GetTemplatePermission(project.ID, tpl.ID, user.ID)
+	require.NoError(t, err)
+	assert.Equal(t, db.CanRunProjectTasks, permissions, "custom role can launch tasks without an additional template grant")
+	_, err = store.CreateTemplateRole(db.TemplateRolePerm{ProjectID: project.ID, TemplateID: tpl.ID, RoleSlug: role.Slug, Permissions: db.CanManageProjectResources})
+	require.NoError(t, err)
+	permissions, err = store.GetTemplatePermission(project.ID, tpl.ID, user.ID)
+	require.NoError(t, err)
+	assert.Equal(t, db.CanRunProjectTasks|db.CanManageProjectResources, permissions)
+	templates, err := store.GetTemplatesWithPermissions(project.ID, user.ID, db.TemplateFilter{}, db.RetrieveQueryParams{})
+	require.NoError(t, err)
+	require.Len(t, templates, 1)
+	assert.Equal(t, permissions, *templates[0].Permissions, "list and detail must report the same additive permissions")
 }

@@ -3,8 +3,7 @@ package helpers
 import (
 	"net/http"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pro_interfaces"
+	"github.com/impishMD/taskexec/db"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -52,15 +51,4 @@ func EventLog(r *http.Request, action EventLogType, item EventLogItem) {
 		log.WithFields(logFields).Error("Failed to store event")
 	}
 
-	logWriter := GetFromContext(r, "log_writer").(pro_interfaces.LogWriteService)
-
-	if err := logWriter.WriteEventLog(pro_interfaces.EventLogRecord{
-		Action:        string(action),
-		ProjectID:     event.ProjectID,
-		UserID:        event.UserID,
-		IntegrationID: event.IntegrationID,
-		Description:   event.Description,
-	}); err != nil {
-		log.WithFields(logFields).Error("Failed to store event in log file")
-	}
 }

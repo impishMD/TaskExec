@@ -6,12 +6,12 @@ volumes:
 services:
   server:
     environment:
-      JEH_DB_DIALECT: postgres
-      JEH_DB_HOST: db
-      JEH_DB_PORT: 5432
-      JEH_DB_USER: ${POSTGRES_USERNAME:-jeh}
-      JEH_DB_PASS: ${POSTGRES_PASSWORD:-jeh}
-      JEH_DB: ${POSTGRES_DATABASE:-jeh}
+      TASKEXEC_DB_DIALECT: postgres
+      TASKEXEC_DB_HOST: db
+      TASKEXEC_DB_PORT: 5432
+      TASKEXEC_DB_USER: ${POSTGRES_USERNAME:-taskexec}
+      TASKEXEC_DB_PASS: ${POSTGRES_PASSWORD:-taskexec}
+      TASKEXEC_DB: ${POSTGRES_DATABASE:-taskexec}
     depends_on:
       - db
 
@@ -19,8 +19,8 @@ services:
     image: postgres:14.3
     restart: always
     environment:
-      POSTGRES_USER: ${POSTGRES_USERNAME:-jeh}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-jeh}
-      POSTGRES_DB: ${POSTGRES_DATABASE:-jeh}
+      POSTGRES_USER: ${POSTGRES_USERNAME:-taskexec}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-taskexec}
+      POSTGRES_DB: ${POSTGRES_DATABASE:-taskexec}
     volumes:
       - postgres:/var/lib/postgresql

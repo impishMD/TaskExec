@@ -1,36 +1,33 @@
 package api
 
 import (
-	"errors"
 	"net/http"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	proFeatures "github.com/impishMD/jeh/pro/pkg/features"
-	"github.com/impishMD/jeh/pro_interfaces"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/features"
+	"github.com/impishMD/taskexec/services/server"
+	"github.com/impishMD/taskexec/util"
 	log "github.com/sirupsen/logrus"
 )
 
-type SystemInfoController struct {
-	subscriptionService pro_interfaces.SubscriptionService
-}
+type SystemInfoController struct{}
 
 type SystemInfo struct {
-	Version           string                  `json:"version"`
-	Ansible           string                  `json:"ansible"`
-	WebHost           string                  `json:"web_host"`
-	UseRemoteRunner   bool                    `json:"use_remote_runner"`
-	AuthMethods       LoginAuthMethods        `json:"auth_methods"`
-	LoginWithPassword bool                    `json:"login_with_password"`
-	Features          pro_interfaces.Features `json:"features"`
-	SubscriptionState string                  `json:"subscription_state"`
-	GitClient         string                  `json:"git_client"`
-	ScheduleTimezone  string                  `json:"schedule_timezone"`
-	Teams             *util.TeamsConfig       `json:"teams"`
-	Roles             []db.Role               `json:"roles"`
-	BoltdbUsed        bool                    `json:"boltdb_used"`
-	JWT               SystemInfoJWT           `json:"jwt"`
+	Version           string            `json:"version"`
+	Ansible           string            `json:"ansible"`
+	WebHost           string            `json:"web_host"`
+	UseRemoteRunner   bool              `json:"use_remote_runner"`
+	AuthMethods       LoginAuthMethods  `json:"auth_methods"`
+	LoginWithPassword bool              `json:"login_with_password"`
+	Features          features.Features `json:"features"`
+
+	GitClient        string            `json:"git_client"`
+	ScheduleTimezone string            `json:"schedule_timezone"`
+	Teams            *util.TeamsConfig `json:"teams"`
+	Roles            []db.Role         `json:"roles"`
+	BoltdbUsed       bool              `json:"boltdb_used"`
+	JWT              SystemInfoJWT     `json:"jwt"`
 }
 
 // SystemInfoJWT exposes the global JWT configuration for the WebUI.
@@ -39,11 +36,7 @@ type SystemInfoJWT struct {
 	MaxTTL  string `json:"max_ttl,omitempty"`
 }
 
-func NewSystemInfoController(subscriptionService pro_interfaces.SubscriptionService) *SystemInfoController {
-	return &SystemInfoController{
-		subscriptionService,
-	}
-}
+func NewSystemInfoController() *SystemInfoController { return &SystemInfoController{} }
 
 func (c *SystemInfoController) GetSystemInfo(w http.ResponseWriter, r *http.Request) {
 	user := helpers.GetFromContext(r, "user").(*db.User)
@@ -54,10 +47,6 @@ func (c *SystemInfoController) GetSystemInfo(w http.ResponseWriter, r *http.Requ
 		authMethods.Totp = &LoginTotpAuthMethod{
 			AllowRecovery: util.Config.Mfa.Totp.AllowRecovery,
 		}
-	}
-
-	if util.Config.Mfa.Email.Enabled {
-		authMethods.Email = &LoginEmailAuthMethod{}
 	}
 
 	timezone := util.Config.Schedule.Timezone
@@ -76,36 +65,19 @@ func (c *SystemInfoController) GetSystemInfo(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	var plan string
-
-	token, err := c.subscriptionService.GetToken()
-
-	switch {
-	case errors.Is(err, db.ErrNotFound):
-		plan = ""
-	case err != nil:
-		log.WithFields(log.Fields{
-			"context": "system_info",
-			"user_id": user.ID,
-		}).WithError(err).Error("Failed to get subscription plan")
-		plan = ""
-	default:
-		if token.State == "expired" {
-			plan = ""
-		} else {
-			plan = token.Plan
-		}
+	settings, err := server.GetServerSettings(helpers.Store(r))
+	if err != nil {
+		writeServerSettingsError(w, err)
+		return
 	}
-
 	body := SystemInfo{
 		Version:           util.Version(),
 		Ansible:           util.AnsibleVersion(),
 		WebHost:           util.Config.WebHost,
-		UseRemoteRunner:   util.Config.IsUseRemoteRunner(),
+		UseRemoteRunner:   settings.UseRemoteRunner,
 		AuthMethods:       authMethods,
 		LoginWithPassword: !util.Config.PasswordLoginDisable,
-		Features:          proFeatures.GetFeatures(user, plan),
-		SubscriptionState: token.State,
+		Features:          features.Available(),
 		GitClient:         util.Config.GitClientId,
 		ScheduleTimezone:  timezone,
 		Teams:             util.Config.Teams,

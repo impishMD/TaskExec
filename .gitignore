@@ -34,7 +34,7 @@ api/public/**/*
 node_modules/
 
 /.idea/
-/jeh.iml
+/taskexec.iml
 /bin/
 
 /vendor/

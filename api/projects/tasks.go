@@ -9,12 +9,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/common_errors"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/services/tasks"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/common_errors"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/services/tasks"
+	"github.com/impishMD/taskexec/util"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -86,11 +86,6 @@ func (c *TaskController) AddTask(w http.ResponseWriter, r *http.Request) {
 		project.ID,
 		tpl.App.NeedTaskAlias(),
 	)
-
-	if errors.Is(err, common_errors.ErrInvalidSubscription) {
-		helpers.WriteErrorStatus(w, "No active subscription available.", http.StatusForbidden)
-		return
-	}
 
 	if err != nil {
 		log.WithFields(log.Fields{

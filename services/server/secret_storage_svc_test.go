@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/db/sql"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/db/sql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -43,7 +43,7 @@ func (f *fakeStorageKeyService) GetAll(int, db.GetAccessKeyOptions, db.RetrieveQ
 	return f.keys, nil
 }
 
-func (f *fakeStorageKeyService) Delete(_ int, keyID int) error {
+func (f *fakeStorageKeyService) Delete(_ int, keyID int, _ ...bool) error {
 	return f.deleteErr[keyID]
 }
 

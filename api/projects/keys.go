@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/impishMD/jeh/services/server"
+	"github.com/impishMD/taskexec/services/server"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/services/audit"
 )
 
 type KeyController struct {
@@ -178,15 +178,6 @@ func (c *KeyController) UpdateKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if oldKey.Synchronized {
-		if key.Name != oldKey.Name || key.Type != oldKey.Type {
-			helpers.WriteJSON(w, http.StatusBadRequest, map[string]string{
-				"error": "Name and type of synchronized key cannot be changed",
-			})
-			return
-		}
-	}
-
 	// Plain cannot be passed via a request
 	key.Plain = nil
 	key.IgnorePlain = true
@@ -223,9 +214,9 @@ func (c *KeyController) UpdateKey(w http.ResponseWriter, r *http.Request) {
 		Description: fmt.Sprintf("Access Key %s updated", key.Name),
 	})
 
-	// The type is stored only together with the secret.
+	// Reference-only edits can change the interpretation type without a write.
 	storedType := oldKey.Type
-	if key.OverrideSecret {
+	if key.OverrideSecret || key.ReferenceOnly {
 		storedType = key.Type
 	}
 
@@ -243,7 +234,7 @@ func (c *KeyController) UpdateKey(w http.ResponseWriter, r *http.Request) {
 func (c *KeyController) RemoveKey(w http.ResponseWriter, r *http.Request) {
 	key := helpers.GetFromContext(r, "accessKey").(db.AccessKey)
 
-	err := c.accessKeyService.Delete(*key.ProjectID, key.ID)
+	err := c.accessKeyService.Delete(*key.ProjectID, key.ID, r.URL.Query().Get("reference_only") == "true")
 	if errors.Is(err, db.ErrInvalidOperation) {
 		helpers.WriteJSON(w, http.StatusBadRequest, map[string]any{
 			"error": "Access Key is in use by one or more templates",

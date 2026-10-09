@@ -80,7 +80,7 @@
               item-value="slug"
               item-text="title"
               v-model="view.type"
-              label="Type"
+              :label="$t('type')"
               outlined
               dense
               @change="saveView(view.id)"
@@ -96,7 +96,7 @@
                 item-value="name"
                 item-text="title"
                 v-model="view.sort_column"
-                label="Sort by"
+                :label="$t('uiSortBy')"
                 outlined
                 dense
                 hide-details
@@ -105,7 +105,7 @@
 
               <v-checkbox
                 hide-details
-                label="Reverse"
+                :label="$t('uiReverse')"
                 v-model="view.sort_reverse"
                 class="mt-0 pt-0"
                 @change="saveView(view.id)"
@@ -115,7 +115,7 @@
 
             <v-checkbox
               hide-details
-              label="Hidden"
+              :label="$t('uiHidden')"
               v-model="view.hidden"
               @change="saveView(view.id)"
             />
@@ -169,14 +169,14 @@ export default {
       activeViewId: null,
       viewTypes: [{
         slug: '',
-        title: 'Custom',
+        title: this.$t('uiCustom'),
       }, {
         slug: 'all',
-        title: 'All',
+        title: this.$t('all'),
       }],
       sortableColumns: [{
         name: 'name',
-        title: 'Name',
+        title: this.$t('name'),
       }],
     };
   },

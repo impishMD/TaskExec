@@ -1,0 +1,12 @@
+fullnameOverride: taskexec-test
+existingSecret: taskexec-test
+image:
+  repository: taskexec
+  tag: helm-ci
+  pullPolicy: Never
+persistence:
+  size: 1Gi
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi

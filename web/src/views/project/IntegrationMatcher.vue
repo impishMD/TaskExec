@@ -2,8 +2,8 @@
   <div v-if="items != null">
     <EditDialog
       v-model="editDialog"
-      :save-button-text="itemId === 'new' ? 'Create' : 'Save'"
-      :title="`${itemId === 'new' ? 'New' : 'Edit'} Matcher`"
+      :save-button-text="itemId === 'new' ? $t('create') : $t('save')"
+      :title="itemId === 'new' ? $t('newMatcher') : $t('editMatcher')"
       :max-width="450"
       :transition="false"
       @save="loadItems"
@@ -22,28 +22,28 @@
     </EditDialog>
 
     <ObjectRefsDialog
-      object-title="matcher"
+      :object-title="$t('matcher')"
       :object-refs="itemRefs"
       :integration-id="integrationId"
       v-model="itemRefsDialog"
     />
 
     <YesNoDialog
-      title="Delete Integration Matcher"
-      text="Are you sure you want to delete this Integration Matcher?"
+      :title="$t('uiDeleteIntegrationMatcher')"
+      :text="$t('askDeleteMatcher')"
       v-model="deleteItemDialog"
       @yes="deleteItem(itemId)"
     />
 
     <v-toolbar flat>
       <v-app-bar-nav-icon @click="showDrawer()"></v-app-bar-nav-icon>
-      <v-toolbar-title>Matcher</v-toolbar-title>
+      <v-toolbar-title>{{ $t('matcher') }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn
         v-if="can(USER_PERMISSIONS.manageProjectResources)"
         color="primary"
         @click="editItem('new')"
-        >New Matcher</v-btn
+        >{{ $t('newMatcher') }}</v-btn
       >
     </v-toolbar>
 
@@ -52,13 +52,13 @@
         {{ item.name }}
       </template>
       <template v-slot:item.match_type="{ item }">
-        <code>{{ item.match_type }}</code>
+        {{ integrationValueTitle(item.match_type) }}
       </template>
       <template v-slot:item.method="{ item }">
-        <code>{{ item.method }}</code>
+        {{ integrationValueTitle(item.method) }}
       </template>
       <template v-slot:item.body_data_type="{ item }">
-        {{ item.body_data_type || 'N/A' }}
+        {{ integrationValueTitle(item.body_data_type) }}
       </template>
       <template v-slot:item.key="{ item }">
         <code>{{ item.key }}</code>
@@ -82,12 +82,13 @@
   </div>
 </template>
 <script>
+import DisplayLabelsMixin from '@/components/DisplayLabelsMixin';
 import ItemListPageBase from '@/components/ItemListPageBase';
 
 import IntegrationMatcherForm from '@/components/IntegrationMatcherForm.vue';
 
 export default {
-  mixins: [ItemListPageBase],
+  mixins: [DisplayLabelsMixin, ItemListPageBase],
   components: { IntegrationMatcherForm },
   computed: {
     // projectId() {
@@ -110,32 +111,32 @@ export default {
     getHeaders() {
       return [
         {
-          text: 'Name',
+          text: this.$t('name'),
           value: 'name',
           sortable: true,
         },
         {
-          text: 'Match Type',
+          text: this.$t('matchType'),
           value: 'match_type',
           sortable: true,
         },
         {
-          text: 'Body Data Type',
+          text: this.$t('matchBodyDataType'),
           value: 'body_data_type',
           sortable: false,
         },
         {
-          text: 'Key',
+          text: this.$t('matchKey'),
           value: 'key',
           sortable: true,
         },
         {
-          text: 'Method',
+          text: this.$t('uiMethod'),
           value: 'method',
           sortable: true,
         },
         {
-          text: 'Value',
+          text: this.$t('matchValue'),
           value: 'value',
           sortable: true,
         },

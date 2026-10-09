@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/impishMD/jeh/pkg/jwt"
+	"github.com/impishMD/taskexec/pkg/jwt"
 )
 
 // OptionStore is the minimal interface required to load and persist the JWT

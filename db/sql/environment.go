@@ -1,7 +1,7 @@
 package sql
 
 import (
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 func (d *SqlDb) GetEnvironment(projectID int, environmentID int) (environment db.Environment, err error) {
@@ -10,7 +10,7 @@ func (d *SqlDb) GetEnvironment(projectID int, environmentID int) (environment db
 		return
 	}
 
-	err = d.fillEnvironmentSync(&environment)
+	err = d.fillEnvironmentBindings(&environment)
 	return
 }
 
@@ -57,7 +57,7 @@ func (d *SqlDb) GetEnvironments(projectID int, params db.RetrieveQueryParams) ([
 	}
 
 	for i := range environments {
-		if err = d.fillEnvironmentSync(&environments[i]); err != nil {
+		if err = d.fillEnvironmentBindings(&environments[i]); err != nil {
 			return environments, err
 		}
 	}
@@ -66,59 +66,47 @@ func (d *SqlDb) GetEnvironments(projectID int, params db.RetrieveQueryParams) ([
 }
 
 func (d *SqlDb) UpdateEnvironment(env db.Environment) error {
-	err := env.Validate()
-
+	if err := env.Validate(); err != nil {
+		return err
+	}
+	tx, err := d.Sql().Begin()
 	if err != nil {
 		return err
 	}
-
-	_, err = d.exec(
-		"update project__environment set name=?, json=?, env=?, password=? where id=?",
-		env.Name,
-		env.JSON,
-		env.ENV,
-		env.Password,
-		env.ID)
-
-	if err != nil {
+	defer func() { _ = tx.Rollback() }()
+	res, err := d.execTx(tx, "update project__environment set name=?, json=?, env=?, password=? where id=? and project_id=?", env.Name, env.JSON, env.ENV, env.Password, env.ID, env.ProjectID)
+	if err = validateMutationResult(res, err); err != nil {
 		return err
 	}
-
-	return d.saveEnvironmentSync(env)
+	if err = d.saveEnvironmentBindings(tx, env); err != nil {
+		return err
+	}
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (d *SqlDb) CreateEnvironment(env db.Environment) (newEnv db.Environment, err error) {
-	err = env.Validate()
-
+	if err = env.Validate(); err != nil {
+		return
+	}
+	tx, err := d.Sql().Begin()
 	if err != nil {
 		return
 	}
-
-	insertID, err := d.insert(
-		"id",
-		"insert into project__environment "+
-			"(project_id, name, json, env, password, secret_storage_id, secret_storage_key_prefix) values "+
-			"(?, ?, ?, ?, ?, ?, ?)",
-		env.ProjectID,
-		env.Name,
-		env.JSON,
-		env.ENV,
-		env.Password,
-		env.SecretStorageID,
-		env.SecretStorageKeyPrefix)
-
-	if err != nil {
+	defer func() { _ = tx.Rollback() }()
+	env.ID = 0
+	if err = tx.Insert(&env); err != nil {
 		return
 	}
-
+	if err = d.saveEnvironmentBindings(tx, env); err != nil {
+		return
+	}
+	if err = tx.Commit(); err != nil {
+		return
+	}
 	newEnv = env
-	newEnv.ID = insertID
-
-	if err = d.saveEnvironmentSync(newEnv); err != nil {
-		return
-	}
-
-	err = d.fillEnvironmentSync(&newEnv)
 	return
 }
 
@@ -146,46 +134,4 @@ func (d *SqlDb) GetEnvironmentSecrets(projectID int, environmentID int) (keys []
 	_, err = d.selectAll(&keys, query, args...)
 
 	return
-}
-
-func (d *SqlDb) fillEnvironmentSync(env *db.Environment) error {
-	sync, err := d.GetEnvironmentSecretSync(env.ID)
-	if err == db.ErrNotFound {
-		env.SyncEnabled = false
-		env.SyncInterval = 0
-		env.LastSyncedAt = nil
-		env.LastSyncFailedAt = nil
-		env.SyncPaths = []db.SecretSyncPath{}
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-	env.SyncEnabled = sync.SyncEnabled
-	env.SyncInterval = sync.SyncInterval
-	env.LastSyncedAt = sync.LastSyncedAt
-	env.LastSyncFailedAt = sync.LastSyncFailedAt
-	env.SyncPaths = sync.Paths
-	if env.SyncPaths == nil {
-		env.SyncPaths = []db.SecretSyncPath{}
-	}
-	return nil
-}
-
-// saveEnvironmentSync persists sync settings for an environment. Syncs
-// require a linked SecretStorage; without one, any pending sync row is
-// removed.
-func (d *SqlDb) saveEnvironmentSync(env db.Environment) error {
-	envID := env.ID
-	sync := db.SecretSync{
-		ProjectID:     env.ProjectID,
-		EnvironmentID: &envID,
-	}
-	if env.SecretStorageID != nil {
-		sync.StorageID = *env.SecretStorageID
-		sync.SyncEnabled = env.SyncEnabled
-		sync.SyncInterval = env.SyncInterval
-		sync.Paths = env.SyncPaths
-	}
-	return d.SaveSecretSync(sync)
 }

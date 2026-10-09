@@ -1,7 +1,7 @@
 package project
 
 import (
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 type BackupDB struct {
@@ -31,8 +31,8 @@ type BackupDB struct {
 	// store is the main store every entity restores into. Held here so Restore
 	// implementations read it from BackupDB instead of taking it as a parameter.
 	store db.Store
-	// workflowStore persists workflow templates. Workflows are a Pro feature
-	// living outside db.Store (see db.WorkflowManager), so it is injected
+	// workflowStore persists workflow templates. Workflows live
+	// outside db.Store (see db.WorkflowManager), so it is injected
 	// separately rather than reached through store.
 	workflowStore db.WorkflowManager
 }
@@ -61,6 +61,20 @@ type BackupMeta struct {
 
 type BackupEnvironment struct {
 	db.Environment
+	Bindings []BackupKeyBinding `backup:"key_bindings"`
+	Sources  []BackupKeySource  `backup:"key_sources"`
+}
+
+type BackupKeySource struct {
+	Prefix string `backup:"prefix"`
+	Key    string `backup:"key"`
+}
+
+type BackupKeyBinding struct {
+	Name  string                   `backup:"name"`
+	Type  db.EnvironmentSecretType `backup:"type"`
+	Key   string                   `backup:"key"`
+	Field *string                  `backup:"field"`
 }
 
 type BackupAccessKey struct {

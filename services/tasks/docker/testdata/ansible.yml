@@ -1,0 +1,9 @@
+- hosts: all
+  gather_facts: false
+  tasks:
+    - name: Check task variables
+      ansible.builtin.assert:
+        that: lookup('env', 'CONTAINER_TEST_SECRET') == 'fixture-only-secret'
+    - name: Show result
+      ansible.builtin.debug:
+        msg: CONTAINER_ANSIBLE_SUCCESS

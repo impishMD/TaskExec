@@ -3,10 +3,10 @@ package metrics
 import (
 	"net/http"
 
+	"github.com/impishMD/taskexec/pkg/task_logger"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/impishMD/jeh/pkg/task_logger"
 )
 
 type Metrics struct {
@@ -26,12 +26,12 @@ func NewMetrics() *Metrics {
 	)
 
 	tasksRunning := prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "jeh_tasks_running",
+		Name: "taskexec_tasks_running",
 		Help: "Number of tasks currently running.",
 	})
 
 	tasksTotal := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "jeh_tasks_total",
+		Name: "taskexec_tasks_total",
 		Help: "Total number of tasks that finished, by outcome.",
 	}, []string{"status"})
 
@@ -75,7 +75,7 @@ func (m *Metrics) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	m.handler.ServeHTTP(w, r)
 }
 
-// Register adds collectors owned by other packages, such as the Pro audit exporter.
+// Register adds collectors owned by other packages.
 func (m *Metrics) Register(collectors ...prometheus.Collector) error {
 	if m == nil {
 		return nil

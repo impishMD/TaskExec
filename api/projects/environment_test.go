@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 type mockAccessKeyRepo struct {
@@ -51,7 +51,7 @@ func (m *mockAccessKeyService) Update(key db.AccessKey) error {
 func (m *mockAccessKeyService) GetAll(int, db.GetAccessKeyOptions, db.RetrieveQueryParams) ([]db.AccessKey, error) {
 	return nil, nil
 }
-func (m *mockAccessKeyService) Delete(_ int, keyID int) error {
+func (m *mockAccessKeyService) Delete(_ int, keyID int, _ ...bool) error {
 	m.deleted = append(m.deleted, keyID)
 	return nil
 }
@@ -218,6 +218,6 @@ type mockAccessKeyServiceWithDeleteError struct {
 	deleteErr error
 }
 
-func (m *mockAccessKeyServiceWithDeleteError) Delete(_ int, _ int) error {
+func (m *mockAccessKeyServiceWithDeleteError) Delete(_ int, _ int, _ ...bool) error {
 	return m.deleteErr
 }

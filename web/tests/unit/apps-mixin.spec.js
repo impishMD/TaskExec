@@ -1,3 +1,4 @@
+import en from '@/lang/en';
 import './setup';
 import { expect } from 'chai';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
@@ -21,7 +22,7 @@ function mountHost(apps = backendApps) {
     },
     render: (h) => h('div'),
   };
-  return shallowMount(Host, { localVue, vuetify: new Vuetify() });
+  return shallowMount(Host, { localVue, vuetify: new Vuetify(), mocks: { $t: (key, values = {}) => (en[key] || key).replace(/\{(\w+)\}/g, (_, k) => values[k]) } });
 }
 
 async function mountLoaded(apps) {
@@ -53,7 +54,7 @@ describe('AppsMixin', () => {
 
     it('uses built-in long and short titles', async () => {
       const wrapper = await mountLoaded();
-      expect(wrapper.vm.getAppTitle('terraform')).to.equal('Terraform Code');
+      expect(wrapper.vm.getAppTitle('terraform')).to.equal('Terraform code');
       expect(wrapper.vm.getAppTitle('terraform', true)).to.equal('Terraform');
     });
 

@@ -10,8 +10,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/impishMD/jeh/pkg/tz"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/pkg/tz"
+	"github.com/impishMD/taskexec/util"
 )
 
 const (

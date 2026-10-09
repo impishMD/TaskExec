@@ -4,9 +4,9 @@ import (
 	"database/sql"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/common_errors"
-	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/common_errors"
+	"github.com/impishMD/taskexec/pkg/tz"
 )
 
 func (d *SqlDb) GetAccessKey(projectID int, accessKeyID int) (key db.AccessKey, err error) {
@@ -15,7 +15,27 @@ func (d *SqlDb) GetAccessKey(projectID int, accessKeyID int) (key db.AccessKey, 
 }
 
 func (d *SqlDb) GetAccessKeyRefs(projectID int, keyID int) (db.ObjectReferrers, error) {
-	return d.getObjectRefs(projectID, db.AccessKeyProps, keyID)
+	refs, err := d.getObjectRefs(projectID, db.AccessKeyProps, keyID)
+	if err != nil {
+		return refs, err
+	}
+	// Backend aliases use a credential indirectly through their workspace.
+	// Report that reference before a writable external secret can be deleted.
+	var workspaces []db.ObjectReferrer
+	_, err = d.selectAll(&workspaces, "select distinct i.id, i.name from project__inventory i join project__terraform_inventory_alias a on a.inventory_id=i.id and a.project_id=i.project_id where a.project_id=? and a.auth_key_id=?", projectID, keyID)
+	for _, workspace := range workspaces {
+		found := false
+		for _, existing := range refs.Inventories {
+			found = found || existing.ID == workspace.ID
+		}
+		if !found {
+			refs.Inventories = append(refs.Inventories, workspace)
+		}
+	}
+	if err == nil {
+		_, err = d.selectAll(&refs.Environments, "select distinct e.id, e.name from project__environment e join project__environment_key b on b.environment_id=e.id where e.project_id=? and b.key_id=?", projectID, keyID)
+	}
+	return refs, err
 }
 
 func (d *SqlDb) GetAccessKeys(projectID int, options db.GetAccessKeyOptions, params db.RetrieveQueryParams) (keys []db.AccessKey, err error) {
@@ -65,7 +85,11 @@ func (d *SqlDb) GetAccessKeys(projectID int, options db.GetAccessKeyOptions, par
 }
 
 func (d *SqlDb) UpdateAccessKey(key db.AccessKey) error {
-	err := key.Validate(key.OverrideSecret)
+	err := d.validateSecretBindingName(key)
+	if err != nil {
+		return err
+	}
+	err = key.Validate(key.OverrideSecret)
 
 	if err != nil {
 		return err
@@ -76,6 +100,20 @@ func (d *SqlDb) UpdateAccessKey(key db.AccessKey) error {
 	// accepted and the mapping fails when a task runs, far from the edit.
 	if key.OverrideSecret && key.ProjectID != nil {
 		if err = d.verifyHostConfigsAcceptKey(key); err != nil {
+			return err
+		}
+	}
+	tx, err := d.Sql().Begin()
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+	_, err = d.execTx(tx, "update access_key set name=name where id=? and project_id=?", key.ID, key.ProjectID)
+	if err != nil {
+		return err
+	}
+	if key.OverrideSecret && key.ProjectID != nil {
+		if err = d.verifyVariableBindingsAcceptKey(tx, key); err != nil {
 			return err
 		}
 	}
@@ -92,12 +130,13 @@ func (d *SqlDb) UpdateAccessKey(key db.AccessKey) error {
 	}
 
 	if key.OverrideSecret {
-		query += ", type=?, secret=?, source_storage_id=?, source_storage_key=?, source_storage_type=?"
+		query += ", type=?, secret=?, source_storage_id=?, source_storage_key=?, source_storage_type=?, source_mapping=?"
 		args = append(args, key.Type)
 		args = append(args, key.Secret)
 		args = append(args, key.SourceStorageID)
 		args = append(args, key.SourceStorageKey)
 		args = append(args, key.SourceStorageType)
+		args = append(args, key.SourceMapping)
 	}
 
 	query += " where id=?"
@@ -106,12 +145,19 @@ func (d *SqlDb) UpdateAccessKey(key db.AccessKey) error {
 	query += " and project_id=?"
 	args = append(args, key.ProjectID)
 
-	res, err = d.exec(query, args...)
+	res, err = d.execTx(tx, query, args...)
 
-	return validateMutationResult(res, err)
+	if err = validateMutationResult(res, err); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 func (d *SqlDb) CreateAccessKey(key db.AccessKey) (newKey db.AccessKey, err error) {
+
+	if err = d.validateSecretBindingName(key); err != nil {
+		return
+	}
 
 	var insertID int
 
@@ -129,10 +175,11 @@ func (d *SqlDb) CreateAccessKey(key db.AccessKey) (newKey db.AccessKey, err erro
 				"source_storage_id, "+
 				"source_storage_key, "+
 				"source_storage_type, "+
+				"source_mapping, "+
 				"synchronized, "+
 				"task_id, "+
 				"expire_at) "+
-				"values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				"values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			key.Name,
 			key.Type,
 			key.ProjectID,
@@ -143,6 +190,7 @@ func (d *SqlDb) CreateAccessKey(key db.AccessKey) (newKey db.AccessKey, err erro
 			key.SourceStorageID,
 			key.SourceStorageKey,
 			key.SourceStorageType,
+			key.SourceMapping,
 			key.Synchronized,
 			key.TaskID,
 			key.ExpireAt,
@@ -162,10 +210,11 @@ func (d *SqlDb) CreateAccessKey(key db.AccessKey) (newKey db.AccessKey, err erro
 				"source_storage_id, "+
 				"source_storage_key, "+
 				"source_storage_type, "+
+				"source_mapping, "+
 				"synchronized, "+
 				"task_id, "+
 				"expire_at) "+
-				"values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				"values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			key.Name,
 			key.Type,
 			key.ProjectID,
@@ -177,6 +226,7 @@ func (d *SqlDb) CreateAccessKey(key db.AccessKey) (newKey db.AccessKey, err erro
 			key.SourceStorageID,
 			key.SourceStorageKey,
 			key.SourceStorageType,
+			key.SourceMapping,
 			key.Synchronized,
 			key.TaskID,
 			key.ExpireAt,
@@ -194,6 +244,13 @@ func (d *SqlDb) CreateAccessKey(key db.AccessKey) (newKey db.AccessKey, err erro
 }
 
 func (d *SqlDb) DeleteAccessKey(projectID int, accessKeyID int) error {
+	refs, err := d.GetAccessKeyRefs(projectID, accessKeyID)
+	if err != nil {
+		return err
+	}
+	if len(refs.Environments) > 0 {
+		return db.ErrInvalidOperation
+	}
 	return d.deleteObject(projectID, db.AccessKeyProps, accessKeyID)
 }
 

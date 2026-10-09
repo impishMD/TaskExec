@@ -4,7 +4,7 @@
 package cmd
 
 import (
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/util"
 	log "github.com/sirupsen/logrus"
 )
 

@@ -14,15 +14,15 @@
 
     <v-text-field
         v-model="id"
-        :label="$t('ID')"
-        :rules="[v => !!v || $t('id_required')]"
+        :label="$t('uiID')"
+        :rules="[v => !!v || $t('uiIDIsRequired')]"
         required
         :disabled="formSaving"
     ></v-text-field>
 
     <v-text-field
         v-model="item.icon"
-        :label="$t('Icon')"
+        :label="$t('uiIcon')"
         :disabled="formSaving"
     ></v-text-field>
 
@@ -34,14 +34,14 @@
 
     <v-text-field
         v-model="item.path"
-        :label="$t('Path')"
+        :label="$t('path')"
         :disabled="formSaving"
     ></v-text-field>
 
     <v-text-field
       type="number"
       v-model.number="item.priority"
-      :label="$t('Priority')"
+      :label="$t('uiPriority')"
       :disabled="formSaving"
     ></v-text-field>
 
@@ -49,7 +49,7 @@
 
     <v-checkbox
         v-model="item.active"
-        :label="$t('Active')"
+        :label="$t('active2')"
     ></v-checkbox>
 
   </v-form>

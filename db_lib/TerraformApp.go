@@ -8,13 +8,14 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+	"sync"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/util"
 )
 
 type TerraformApp struct {
@@ -29,9 +30,21 @@ type TerraformApp struct {
 }
 
 type terraformReader struct {
+	mu     sync.RWMutex
 	EOF    bool
 	status task_logger.TaskStatus
 	logger task_logger.Logger
+}
+
+func (r *terraformReader) getStatus() task_logger.TaskStatus {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.status
+}
+func (r *terraformReader) setStatus(status task_logger.TaskStatus) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.status = status
 }
 
 func (r *terraformReader) Read(p []byte) (n int, err error) {
@@ -39,23 +52,23 @@ func (r *terraformReader) Read(p []byte) (n int, err error) {
 		return 0, io.EOF
 	}
 
-	if r.status != task_logger.TaskWaitingConfirmation {
+	if r.getStatus() != task_logger.TaskWaitingConfirmation {
 		time.Sleep(time.Second * 3)
 		return 0, nil
 	}
 
 	for {
 		time.Sleep(time.Second * 3)
-		if r.status.IsFinished() ||
-			r.status == task_logger.TaskConfirmed ||
-			r.status == task_logger.TaskRejected {
+		if r.getStatus().IsFinished() ||
+			r.getStatus() == task_logger.TaskConfirmed ||
+			r.getStatus() == task_logger.TaskRejected {
 			break
 		}
 	}
 
 	r.EOF = true
 
-	switch r.status {
+	switch r.getStatus() {
 	case task_logger.TaskConfirmed:
 		copy(p, "yes\n")
 		r.logger.SetStatus(task_logger.TaskRunningStatus)
@@ -124,7 +137,7 @@ func (t *TerraformApp) GetFullPath() string {
 
 func (t *TerraformApp) SetLogger(logger task_logger.Logger) task_logger.Logger {
 	logger.AddStatusListener(func(status task_logger.TaskStatus) {
-		t.reader.status = status
+		t.reader.setStatus(status)
 	})
 
 	t.reader.logger = logger
@@ -148,7 +161,7 @@ func (t *TerraformApp) init(environmentVars []string, keyInstaller AccessKeyInst
 		}
 	}()
 
-	args := []string{"init", "-lock=false"}
+	args := []string{"init"}
 
 	if params.Upgrade {
 		args = append(args, "-upgrade")
@@ -274,16 +287,23 @@ func (t *TerraformApp) InstallRequirementsWithInitArgs(args LocalAppInstallingAr
 	p := args.Params.(*db.TerraformTaskParams)
 
 	if tpl.OverrideBackend {
-		t.backendFilename = "backend.tf"
+		if err = tpl.ValidateBackendFilename(); err != nil {
+			return
+		}
+		backendFilename := "backend.tf"
 		if tpl.BackendFilename != "" {
-			t.backendFilename = tpl.BackendFilename
+			backendFilename = tpl.BackendFilename
 		}
 
-		backendFile := path.Join(t.GetFullPath(), t.backendFilename)
+		backendFile := path.Join(t.GetFullPath(), backendFilename)
+		if info, statErr := os.Lstat(backendFile); statErr == nil && info.Mode()&os.ModeSymlink != 0 {
+			return errors.New("backend file must not be a symbolic link")
+		}
 		err = os.WriteFile(backendFile, []byte("terraform {\n  backend \"http\" {\n  }\n}\n"), 0644)
 		if err != nil {
 			return
 		}
+		t.backendFilename = backendFilename
 	}
 
 	if err = t.init(args.EnvironmentVars, args.Installer, p, initArgs); err != nil {
@@ -307,7 +327,7 @@ func (t *TerraformApp) InstallRequirementsWithInitArgs(args LocalAppInstallingAr
 }
 
 func (t *TerraformApp) Plan(args []string, environmentVars []string, inputs map[string]string, stopCh <-chan struct{}) error {
-	planArgs := []string{"plan", "-lock=false"}
+	planArgs := []string{"plan"}
 	planArgs = append(planArgs, args...)
 	cmd := t.makeCmd(t.Name, planArgs, environmentVars)
 	cmd.WaitDelay = 250 * time.Millisecond
@@ -331,7 +351,7 @@ func (t *TerraformApp) Plan(args []string, environmentVars []string, inputs map[
 }
 
 func (t *TerraformApp) Apply(args []string, environmentVars []string, inputs map[string]string, stopCh <-chan struct{}) error {
-	applyArgs := []string{"apply", "-auto-approve", "-lock=false"}
+	applyArgs := []string{"apply", "-auto-approve"}
 	applyArgs = append(applyArgs, args...)
 	cmd := t.makeCmd(t.Name, applyArgs, environmentVars)
 	cmd.WaitDelay = 250 * time.Millisecond
@@ -396,16 +416,20 @@ func (t *TerraformApp) Run(args LocalAppRunningArgs) error {
 	t.Logger.SetStatus(task_logger.TaskWaitingConfirmation)
 
 	for {
-		time.Sleep(time.Second * 3)
-		if t.reader.status.IsFinished() ||
-			t.reader.status == task_logger.TaskConfirmed ||
-			t.reader.status == task_logger.TaskRejected ||
-			t.reader.status == task_logger.TaskStoppingStatus {
+		select {
+		case <-args.StopCh:
+			return nil
+		case <-time.After(100 * time.Millisecond):
+		}
+		if t.reader.getStatus().IsFinished() ||
+			t.reader.getStatus() == task_logger.TaskConfirmed ||
+			t.reader.getStatus() == task_logger.TaskRejected ||
+			t.reader.getStatus() == task_logger.TaskStoppingStatus {
 			break
 		}
 	}
 
-	switch t.reader.status {
+	switch t.reader.getStatus() {
 	case task_logger.TaskRejected:
 		t.Logger.SetStatus(task_logger.TaskFailStatus)
 	case task_logger.TaskConfirmed:

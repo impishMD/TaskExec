@@ -50,35 +50,45 @@ export default {
     sections() {
       return [{
         slug: 'templates',
-        title: 'Templates',
+        title: this.$t('uiTemplates'),
         icon: 'check-all',
       }, {
+        slug: 'workflows',
+        title: this.$t('workflows'),
+        icon: 'sitemap',
+      }, {
         slug: 'inventories',
-        title: 'Inventories',
+        title: this.$t('uiInventories'),
         icon: 'monitor-multiple',
       }, {
         slug: 'repositories',
-        title: 'Repositories',
+        title: this.$t('repositories'),
         icon: 'git',
       }, {
         slug: 'integrations',
-        title: 'Integrations',
+        title: this.$t('integrations'),
         icon: 'connection',
       }, {
         slug: 'access_keys',
         pageless: true,
         path: 'keys',
-        title: 'Access Keys',
+        title: this.$t('uiAccessKeys'),
         icon: 'key-change',
       }, {
+        slug: 'environments',
+        path: 'environment',
+        pageless: true,
+        title: this.$t('environment'),
+        icon: 'code-braces',
+      }, {
         slug: 'schedules',
-        title: 'Schedules',
+        title: this.$t('uiSchedules'),
         icon: 'clock-outline',
       }, {
         slug: 'host_configs',
         path: 'host_config',
         pageless: true,
-        title: 'Host config',
+        title: this.$t('hostConfig'),
         icon: 'server-network',
       }].filter((s) => (this.objectRefs[s.slug] || []).length > 0);
     },

@@ -16,7 +16,7 @@
       :rules="[v => !!v || $t('inventory_required')]"
       :items="items"
       v-model="itemId"
-      label="Workspace"
+      :label="$t('uiWorkspace')"
       item-value="id"
       item-text="name"
     />

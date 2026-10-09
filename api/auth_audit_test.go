@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/services/audit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -106,7 +106,7 @@ func TestGetUserMiddleware_RecordsDenialOnChanges(t *testing.T) {
 
 	router := mux.NewRouter()
 	ok := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNoContent) })
-	router.Handle("/api/users/{user_id}", NewUsersController(nil).GetUserMiddleware(ok)).Methods(http.MethodPut, http.MethodGet)
+	router.Handle("/api/users/{user_id}", NewUsersController().GetUserMiddleware(ok)).Methods(http.MethodPut, http.MethodGet)
 
 	tests := []struct {
 		method     string
@@ -148,7 +148,7 @@ func TestCsrfProtectionMiddleware_RecordsBlock(t *testing.T) {
 	}))).Methods(http.MethodPost)
 
 	r := httptest.NewRequest(http.MethodPost, "/api/project/1/keys", nil)
-	r.Host = "jeh.example.com"
+	r.Host = "taskexec.example.com"
 	r.Header.Set("Origin", "https://attacker.example")
 	r, rec := withAuditRecorder(r)
 	w := httptest.NewRecorder()

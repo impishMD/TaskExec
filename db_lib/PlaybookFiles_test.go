@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -210,7 +210,7 @@ func TestFindRepositoryFiles(t *testing.T) {
 			// Half a name while typing must not be an error.
 			name: "a directory which does not exist yields nothing",
 			app:  db.AppTerraform,
-			dir:  "pro/",
+			dir:  "private/",
 			setup: func(t *testing.T, root string) {
 				writeFile(t, root, "prod/eu/main.tf")
 			},

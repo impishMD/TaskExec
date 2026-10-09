@@ -18,19 +18,21 @@
 
     <div v-if="integration.searchable" class="px-4">
       <v-alert type="info" text class="d-inline-block">
-        Matchers allow the integration to be found by a project alias.
+        {{ $t('uiMatchersAllowTheIntegrationToBeFoundByAProjectAlias') }}
       </v-alert>
     </div>
 
     <div v-else class="px-4 pb-6">
-      <div class="mb-3 pl-1" v-if="(aliases || []).length === 0">There is no aliases.</div>
+      <div class="mb-3 pl-1" v-if="(aliases || []).length === 0">
+        {{ $t('uiThereIsNoAliases') }}
+      </div>
 
       <div v-else v-for="alias of aliases || []" :key="alias.id">
         <code class="mr-2">{{ alias.url }}</code>
 
         <CopyClipboardButton
           :text="alias.url"
-          success-message="The alias URL  has been copied to the clipboard."
+          :success-message="$t('aliasUrlCopied')"
         />
 
         <v-btn

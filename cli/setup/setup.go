@@ -8,7 +8,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/util"
 )
 
 const interactiveSetupBlurb = `
@@ -17,13 +17,13 @@ Hello! You will now be guided through a setup to:
 1. Set up configuration for a MySQL/MariaDB database
 2. Set up a path for your playbooks (auto-created)
 3. Run database Migrations
-4. Set up initial jeh user & password
+4. Set up initial taskexec user & password
 
 `
 
 func InteractiveRunnerSetup(conf *util.ConfigType) {
 
-	askValue("JEH server URL", "", &conf.WebHost)
+	askValue("TaskExec server URL", "", &conf.WebHost)
 
 	conf.Runner = &util.RunnerConfig{}
 
@@ -105,23 +105,17 @@ func InteractiveSetup(conf *util.ConfigType) {
 		panic("Unsupported database dialect")
 	}
 
-	defaultPlaybookPath := filepath.Join(os.TempDir(), "jeh")
+	defaultPlaybookPath := filepath.Join(os.TempDir(), "taskexec")
 	askValue("Playbook path", defaultPlaybookPath, &conf.TmpPath)
 	conf.TmpPath = filepath.Clean(conf.TmpPath)
 
-	askValue("Public URL (optional, example: https://example.com/jeh)", "", &conf.WebHost)
+	askValue("Public URL (optional, example: https://example.com/taskexec)", "", &conf.WebHost)
 
 	askConfirmation("Enable email alerts?", false, &conf.EmailAlert)
 	if conf.EmailAlert {
 		askValue("Mail server host", "localhost", &conf.EmailHost)
 		askValue("Mail server port", "25", &conf.EmailPort)
-		askValue("Mail sender address", "jeh@localhost", &conf.EmailSender)
-	}
-
-	askConfirmation("Enable telegram alerts?", false, &conf.TelegramAlert)
-	if conf.TelegramAlert {
-		askValue("Telegram bot token (you can get it from @BotFather)", "", &conf.TelegramToken)
-		askValue("Telegram chat ID", "", &conf.TelegramChat)
+		askValue("Mail sender address", "taskexec@localhost", &conf.EmailSender)
 	}
 
 	askConfirmation("Enable slack alerts?", false, &conf.SlackAlert)
@@ -164,7 +158,7 @@ func scanMySQL(conf *util.ConfigType) {
 	askValue("db Hostname", "127.0.0.1:3306", &conf.MySQL.Hostname)
 	askValue("db User", "root", &conf.MySQL.Username)
 	askValue("db Password", "", &conf.MySQL.Password)
-	askValue("db Name", "jeh", &conf.MySQL.DbName)
+	askValue("db Name", "taskexec", &conf.MySQL.DbName)
 }
 
 func scanPostgres(conf *util.ConfigType) {
@@ -172,7 +166,7 @@ func scanPostgres(conf *util.ConfigType) {
 	askValue("db Hostname", "127.0.0.1:5432", &conf.Postgres.Hostname)
 	askValue("db User", "root", &conf.Postgres.Username)
 	askValue("db Password", "", &conf.Postgres.Password)
-	askValue("db Name", "jeh", &conf.Postgres.DbName)
+	askValue("db Name", "taskexec", &conf.Postgres.DbName)
 	if conf.Postgres.Options == nil {
 		conf.Postgres.Options = make(map[string]string)
 	}
@@ -210,9 +204,9 @@ func SaveConfig(config IConfig, defaultFilename string, requiredConfigPath strin
 			configDirectory, err = os.UserConfigDir()
 			if err != nil {
 				// Final fallback
-				configDirectory = "/etc/jeh"
+				configDirectory = "/etc/taskexec"
 			}
-			configDirectory = filepath.Join(configDirectory, "jeh")
+			configDirectory = filepath.Join(configDirectory, "taskexec")
 		}
 
 		askValue("Config output directory", configDirectory, &configDirectory)

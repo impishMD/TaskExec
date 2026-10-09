@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/services/server"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/services/alerting"
+	"github.com/impishMD/taskexec/services/server"
+	"github.com/impishMD/taskexec/util"
 	"github.com/spf13/cobra"
 )
 
@@ -27,13 +28,14 @@ func init() {
 type accessKeyBackupEntry struct {
 	ProjectID int    `json:"project_id"`
 	KeyID     int    `json:"key_id"`
+	Channel   string `json:"channel,omitempty"`
 	Secret    string `json:"secret"`
 }
 
 var vaultRekeyCmd = &cobra.Command{
 	Use:   "rekey",
 	Short: "Re-encrypt all stored secrets under the active encryption key",
-	Long: "Re-encrypt all locally stored secrets (access keys and the JWT signing key)\n" +
+	Long: "Re-encrypt all locally stored secrets (access keys, alert credentials and the JWT signing key)\n" +
 		"under the active key, stamping its key id into each value.\n\n" +
 		"Zero-downtime rotation:\n" +
 		"  1. Add a new key to the keyset (a file in keys_folder, or a keys: entry) and\n" +
@@ -65,6 +67,10 @@ var vaultRekeyCmd = &cobra.Command{
 		}
 
 		if err := encryptionService.RekeyAccessKeys(targetVaultArgs.oldKey); err != nil {
+			panic(err)
+		}
+
+		if err := (alerting.Service{Store: store}).Rekey(targetVaultArgs.oldKey); err != nil {
 			panic(err)
 		}
 
@@ -141,6 +147,15 @@ func backupAccessKeys(store db.Store, path string) (err error) {
 		return err
 	}
 
+	channels, err := store.GetAlertChannelsWithSecrets()
+	if err != nil {
+		return err
+	}
+	for _, c := range channels {
+		if err = enc.Encode(accessKeyBackupEntry{ProjectID: c.ProjectID, Channel: c.Channel, Secret: c.Secret}); err != nil {
+			return err
+		}
+	}
 	return w.Flush()
 }
 
@@ -171,6 +186,22 @@ func rollbackAccessKeys(store db.Store, encryptionService server.AccessKeyEncryp
 		var entry accessKeyBackupEntry
 		if err := json.Unmarshal(line, &entry); err != nil {
 			return err
+		}
+
+		if entry.Channel != "" {
+			channel, err := store.GetAlertChannel(entry.ProjectID, entry.Channel)
+			if err != nil {
+				return err
+			}
+			// A deleted channel must not be recreated by credential rollback.
+			if channel.Secret == "" {
+				continue
+			}
+			channel.Secret = entry.Secret
+			if err := store.SetAlertChannel(channel); err != nil {
+				return err
+			}
+			continue
 		}
 
 		key, ok := current[entry.KeyID]

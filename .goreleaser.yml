@@ -1,45 +1,46 @@
 version: 2
-project_name: jeh
+project_name: taskexec
 before:
   hooks:
     - make frontend
 builds:
-  - id: jeh
-    binary: jeh
+  - id: taskexec
+    binary: taskexec
     main: ./cli
     env: [CGO_ENABLED=0]
     tags: [netgo]
     flags: [-trimpath]
     ldflags:
-      - -s -w -X github.com/impishMD/jeh/util.Ver=v{{ .Version }} -X github.com/impishMD/jeh/util.Commit={{ .ShortCommit }} -X github.com/impishMD/jeh/util.Date={{ .Date }}
+      - -s -w -X github.com/impishMD/taskexec/util.Ver=v{{ .Version }} -X github.com/impishMD/taskexec/util.Commit={{ .ShortCommit }} -X github.com/impishMD/taskexec/util.Date={{ .Date }}
     goos: [linux, darwin]
     goarch: [amd64, arm64]
 archives:
   - formats: [tar.gz]
-    name_template: 'jeh_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    name_template: 'taskexec_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
     files:
       - LICENSE
       - NOTICE
       - THIRD-PARTY-LICENSES.md
       - README.md
       - docs/**/*
+      - charts/taskexec/**/*
       - deployment/systemd/*
       - compose.yaml
       - .env.example
 source:
   enabled: true
-  name_template: 'jeh_{{ .Version }}_source'
+  name_template: 'taskexec_{{ .Version }}_source'
 checksum:
   name_template: checksums.txt
 snapshot:
-  version_template: '{{ if .Env.JEH_SNAPSHOT_VERSION }}{{ .Env.JEH_SNAPSHOT_VERSION }}{{ else }}{{ .Version }}-dev{{ end }}'
+  version_template: '{{ if .Env.TASKEXEC_SNAPSHOT_VERSION }}{{ .Env.TASKEXEC_SNAPSHOT_VERSION }}{{ else }}{{ .Version }}-dev{{ end }}'
 nfpms:
-  - id: jeh
-    package_name: jeh
-    file_name_template: 'jeh_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
-    homepage: https://github.com/impishMD/jeh
+  - id: taskexec
+    package_name: taskexec
+    file_name_template: 'taskexec_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    homepage: https://github.com/impishMD/TaskExec
     maintainer: impishMD <impishmd@users.noreply.github.com>
-    description: Job Executor Hub — automation for Ansible, Terraform, OpenTofu and scripts.
+    description: TaskExec — automation for Ansible, Terraform, OpenTofu and scripts.
     license: MIT
     formats: [deb, rpm]
     bindir: /usr/bin
@@ -50,14 +51,14 @@ nfpms:
       deb:
         dependencies: [git, openssh-client, passwd]
     contents:
-      - src: deployment/systemd/jeh.service
-        dst: /usr/lib/systemd/system/jeh.service
+      - src: deployment/systemd/taskexec.service
+        dst: /usr/lib/systemd/system/taskexec.service
       - src: LICENSE
-        dst: /usr/share/licenses/jeh/LICENSE
+        dst: /usr/share/licenses/taskexec/LICENSE
       - src: NOTICE
-        dst: /usr/share/licenses/jeh/NOTICE
+        dst: /usr/share/licenses/taskexec/NOTICE
       - src: THIRD-PARTY-LICENSES.md
-        dst: /usr/share/licenses/jeh/THIRD-PARTY-LICENSES.md
+        dst: /usr/share/licenses/taskexec/THIRD-PARTY-LICENSES.md
     scripts:
       preinstall: deployment/packaging/preinstall.sh
       postinstall: deployment/packaging/postinstall.sh

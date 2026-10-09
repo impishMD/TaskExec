@@ -48,17 +48,17 @@ export default {
   data() {
     return {
       dateRanges: [{
-        text: 'Past week',
+        text: this.$t('uiPastWeek'),
         value: 'last_week',
       }, {
-        text: 'Past month',
+        text: this.$t('uiPastMonth'),
         value: 'last_month',
       }, {
-        text: 'Past year',
+        text: this.$t('uiPastYear'),
         value: 'last_year',
       }],
       users: [{
-        text: 'All users',
+        text: this.$t('uiAllUsers'),
         value: null,
       }],
 

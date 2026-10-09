@@ -9,10 +9,10 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/services/audit/audittest"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/services/audit/audittest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -45,7 +45,7 @@ func TestAddUser_IsRecorded(t *testing.T) {
 		`{"username":"carol","name":"Carol","email":"carol@example.com","password":"verystrongpassword1"}`, admin, db.User{})
 	w := httptest.NewRecorder()
 
-	NewUsersController(nil).AddUser(w, r)
+	NewUsersController().AddUser(w, r)
 
 	require.Equal(t, http.StatusCreated, w.Code)
 	var created db.User
@@ -63,7 +63,7 @@ func TestUpdateUser_RecordsChangedFields(t *testing.T) {
 	r, rec := userRequest(store, http.MethodPut, "/api/users/2",
 		`{"username":"bob","name":"Robert","email":"bob@example.com","admin":true}`, admin, target)
 
-	NewUsersController(nil).UpdateUser(httptest.NewRecorder(), r)
+	NewUsersController().UpdateUser(httptest.NewRecorder(), r)
 
 	assert.Equal(t, audit.UserUpdateMetadata{Fields: []string{"name", "admin"}, Admin: &audit.BoolChange{Old: false, New: true}},
 		onlyEvent(t, rec, audit.IAMUserUpdate).Event.Metadata)
@@ -76,7 +76,7 @@ func TestUpdateUser_PasswordInBodyIsAdminReset(t *testing.T) {
 	r, rec := userRequest(store, http.MethodPut, "/api/users/2",
 		`{"username":"bob","name":"bob","email":"bob@example.com","password":"anotherpassword2"}`, admin, target)
 
-	NewUsersController(nil).UpdateUser(httptest.NewRecorder(), r)
+	NewUsersController().UpdateUser(httptest.NewRecorder(), r)
 
 	kinds, err := rec.Kinds()
 	require.NoError(t, err)
@@ -106,7 +106,7 @@ func TestUpdateUserPassword_IsRecorded(t *testing.T) {
 			}
 			r, rec := userRequest(store, http.MethodPost, "/api/users/1/password", tt.body, editor, target)
 
-			NewUsersController(nil).UpdateUserPassword(httptest.NewRecorder(), r)
+			NewUsersController().UpdateUserPassword(httptest.NewRecorder(), r)
 
 			got := onlyEvent(t, rec, tt.wantKind)
 			assert.Equal(t, tt.wantReason, got.Event.Reason)
@@ -123,7 +123,7 @@ func TestDeleteUser_IsRecorded(t *testing.T) {
 	target := createUserOptionsTestUser(t, store, "bob")
 	r, rec := userRequest(store, http.MethodDelete, "/api/users/2", "", admin, target)
 
-	NewUsersController(nil).DeleteUser(httptest.NewRecorder(), r)
+	NewUsersController().DeleteUser(httptest.NewRecorder(), r)
 
 	assert.Equal(t, audit.UserTarget(target.ID, "bob"), onlyEvent(t, rec, audit.IAMUserDelete).Event.Target)
 }
@@ -133,7 +133,7 @@ func TestTotpLifecycle_IsRecorded(t *testing.T) {
 	user := createUserOptionsTestUser(t, store, "alice")
 
 	r, rec := userRequest(store, http.MethodPost, "/api/users/1/2fas/totp", "", user, user)
-	NewUsersController(nil).EnableTotp(httptest.NewRecorder(), r)
+	NewUsersController().EnableTotp(httptest.NewRecorder(), r)
 	onlyEvent(t, rec, audit.IAMMFAEnable)
 
 	user, err := store.GetUser(user.ID)
@@ -141,11 +141,11 @@ func TestTotpLifecycle_IsRecorded(t *testing.T) {
 	require.NotNil(t, user.Totp)
 
 	r, rec = userRequest(store, http.MethodGet, "/api/users/1/2fas/totp/1/qr", "", user, user)
-	NewUsersController(nil).TotpQr(httptest.NewRecorder(), r)
+	NewUsersController().TotpQr(httptest.NewRecorder(), r)
 	onlyEvent(t, rec, audit.IAMMFAViewQR)
 
 	r, rec = userRequest(store, http.MethodDelete, "/api/users/1/2fas/totp/1", "", user, user)
-	NewUsersController(nil).DisableTotp(httptest.NewRecorder(), mux.SetURLVars(r, map[string]string{"totp_id": "1"}))
+	NewUsersController().DisableTotp(httptest.NewRecorder(), mux.SetURLVars(r, map[string]string{"totp_id": "1"}))
 	onlyEvent(t, rec, audit.IAMMFADisable)
 }
 
@@ -156,12 +156,12 @@ func TestDeleteUserIdentity_IsRecorded(t *testing.T) {
 	require.NoError(t, err)
 
 	r, rec := userRequest(store, http.MethodDelete, "/api/users/1/identities/oidc/corp", "", user, user)
-	NewUsersController(nil).DeleteUserIdentity(httptest.NewRecorder(), mux.SetURLVars(r, map[string]string{"type": "oidc", "provider": "corp"}))
+	NewUsersController().DeleteUserIdentity(httptest.NewRecorder(), mux.SetURLVars(r, map[string]string{"type": "oidc", "provider": "corp"}))
 	assert.Equal(t, audit.AuthMethodMetadata{Method: audit.LoginMethodOIDC, Provider: "corp"}, onlyEvent(t, rec, audit.IAMExternalIdentityUnlink).Event.Metadata)
 
 	r, rec = userRequest(store, http.MethodDelete, "/api/users/1/identities/oidc/none", "", user, user)
 	w := httptest.NewRecorder()
-	NewUsersController(nil).DeleteUserIdentity(w, mux.SetURLVars(r, map[string]string{"type": "oidc", "provider": "none"}))
+	NewUsersController().DeleteUserIdentity(w, mux.SetURLVars(r, map[string]string{"type": "oidc", "provider": "none"}))
 	assert.Equal(t, http.StatusNoContent, w.Code)
 	assert.Empty(t, rec.All())
 }
@@ -268,7 +268,7 @@ func TestDisableTotp_UnknownIDRecordsNothing(t *testing.T) {
 
 	r, rec := userRequest(store, http.MethodDelete, "/api/users/1/2fas/totp/999", "", user, user)
 	w := httptest.NewRecorder()
-	NewUsersController(nil).DisableTotp(w, mux.SetURLVars(r, map[string]string{"totp_id": "999"}))
+	NewUsersController().DisableTotp(w, mux.SetURLVars(r, map[string]string{"totp_id": "999"}))
 
 	assert.Equal(t, http.StatusNoContent, w.Code, "the response does not change")
 	assert.Empty(t, rec.All())
@@ -288,7 +288,7 @@ func TestDeleteUserIdentity_UnlinkedByAnotherRequestRecordsNothing(t *testing.T)
 
 	r, rec := userRequest(concurrentIdentityUnlink{Store: store}, http.MethodDelete, "/api/users/1/identities/oidc/corp", "", user, user)
 	w := httptest.NewRecorder()
-	NewUsersController(nil).DeleteUserIdentity(w, mux.SetURLVars(r, map[string]string{"type": "oidc", "provider": "corp"}))
+	NewUsersController().DeleteUserIdentity(w, mux.SetURLVars(r, map[string]string{"type": "oidc", "provider": "corp"}))
 
 	assert.Equal(t, http.StatusNoContent, w.Code)
 	assert.Empty(t, rec.All())
@@ -307,12 +307,11 @@ func TestSetOption_RecordsKeyOnly(t *testing.T) {
 }
 
 func TestUserUpdateMetadata(t *testing.T) {
-	before := db.User{Username: "a", Name: "A", Email: "a@x", Pro: true}
+	before := db.User{Username: "a", Name: "A", Email: "a@x"}
 	after := db.UserWithPwd{User: db.User{Username: "b", Name: "A", Email: "b@x", Alert: true, Admin: true}, Pwd: "p"}
 	assert.Equal(t, audit.UserUpdateMetadata{
-		Fields: []string{"username", "email", "alert", "admin", "pro", "password"},
+		Fields: []string{"username", "email", "alert", "admin", "password"},
 		Admin:  &audit.BoolChange{Old: false, New: true},
-		Pro:    &audit.BoolChange{Old: true, New: false},
 	}, userUpdateMetadata(before, after))
 	assert.Equal(t, audit.UserUpdateMetadata{Fields: []string{}}, userUpdateMetadata(before, db.UserWithPwd{User: before}))
 }
@@ -327,7 +326,6 @@ func TestUsers_SelfEscalationIsDenied(t *testing.T) {
 	}{
 		{"create a user", http.MethodPost, `{"username":"carol","name":"Carol","email":"carol@example.com","password":"verystrongpassword1","admin":true}`, false, (*UsersController).AddUser},
 		{"make self admin", http.MethodPut, `{"username":"bob","name":"bob","email":"bob@example.com","admin":true}`, true, (*UsersController).UpdateUser},
-		{"make self pro", http.MethodPut, `{"username":"bob","name":"bob","email":"bob@example.com","pro":true}`, true, (*UsersController).UpdateUser},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -340,7 +338,7 @@ func TestUsers_SelfEscalationIsDenied(t *testing.T) {
 			r, rec := userRequest(store, tt.method, "/api/users", tt.body, bob, target)
 			w := httptest.NewRecorder()
 
-			tt.handler(NewUsersController(nil), w, r)
+			tt.handler(NewUsersController(), w, r)
 
 			assert.Equal(t, http.StatusUnauthorized, w.Code, "the response does not change")
 			got := onlyEvent(t, rec, audit.AuthAuthorizationDeny)
@@ -357,7 +355,7 @@ func TestUpdateUser_EventsNameTheUserAlike(t *testing.T) {
 	r, rec := userRequest(store, http.MethodPut, "/api/users/2",
 		`{"username":"robert","name":"bob","email":"bob@example.com","password":"anotherpassword2"}`, admin, target)
 
-	NewUsersController(nil).UpdateUser(httptest.NewRecorder(), r)
+	NewUsersController().UpdateUser(httptest.NewRecorder(), r)
 
 	require.Len(t, rec.All(), 2)
 	for _, recorded := range rec.All() {

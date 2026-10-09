@@ -14,9 +14,9 @@ project selection screen with a valid session.
 
 ## Preconditions
 
-* JEH instance freshly started with environment variables
-  `JEH_ADMIN=admin`, `JEH_ADMIN_PASSWORD=changeme`,
-  `JEH_ADMIN_NAME=Admin`, `JEH_ADMIN_EMAIL=admin@localhost`.
+* TaskExec instance freshly started with environment variables
+  `TASKEXEC_ADMIN=admin`, `TASKEXEC_ADMIN_PASSWORD=changeme`,
+  `TASKEXEC_ADMIN_NAME=Admin`, `TASKEXEC_ADMIN_EMAIL=admin@localhost`.
 * The instance is reachable at `http://localhost:3000`.
 * No browser cookies/local storage from a prior session.
 
@@ -40,7 +40,7 @@ project selection screen with a valid session.
   project exists) within 2 seconds.
 * The top navigation shows the admin avatar and the "Settings"/"Users" menu
   entries that are admin-only.
-* A `jeh` session cookie is present, has `HttpOnly` set, and `Secure` when
+* A `taskexec` session cookie is present, has `HttpOnly` set, and `Secure` when
   served over HTTPS.
 * `GET /api/user` returns 200 with `"admin": true` and the configured email.
 

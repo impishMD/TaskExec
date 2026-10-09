@@ -4,16 +4,27 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	pro "github.com/impishMD/jeh/pro/services/server"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/services/server"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/services/server"
 )
 
 type SecretStorageController struct {
 	secretRepo           db.SecretStorageRepository
 	secretStorageService server.SecretStorageService
+}
+
+func publicSecretStorage(storage db.SecretStorage) db.SecretStorage {
+	// Historical providers could keep credentials in provider-specific params.
+	// Keep their rows visible for cleanup without exposing those parameters.
+	if storage.Type != db.SecretStorageTypeVault {
+		storage.Params = nil
+		storage.Credentials = nil
+		storage.Secret = ""
+		storage.SourceStorageType = nil
+	}
+	return storage
 }
 
 func SecretStorageMiddleware(next http.Handler) http.Handler {
@@ -41,18 +52,14 @@ func SecretStorageMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if len(keys) == 0 {
-			if pro.StorageRequiresSecret(storage) {
-				helpers.WriteErrorStatus(w, "Access key not found", http.StatusNotFound)
-				return
-			}
-		} else {
-			if keys[0].SourceStorageKey != nil {
+		if len(keys) > 0 {
+			if keys[0].SourceStorageKey != nil && keys[0].IsNativelyReadOnly() {
 				storage.Secret = *keys[0].SourceStorageKey
 			}
 
 			storage.SourceStorageType = keys[0].SourceStorageType
 		}
+		storage = publicSecretStorage(storage)
 
 		r = helpers.SetContextValue(r, "secretStorage", storage)
 		next.ServeHTTP(w, r)
@@ -86,14 +93,25 @@ func (c *SecretStorageController) GetSecretStorages(w http.ResponseWriter, r *ht
 	storages, err := c.secretStorageService.GetSecretStorages(project.ID)
 	if err != nil {
 		helpers.WriteError(w, err)
+		return
 	}
 
+	for i := range storages {
+		storages[i] = publicSecretStorage(storages[i])
+	}
 	helpers.WriteJSON(w, http.StatusOK, storages)
 }
 
 func (c *SecretStorageController) GetSecretStorage(w http.ResponseWriter, r *http.Request) {
 	storage := helpers.GetFromContext(r, "secretStorage").(db.SecretStorage)
-
+	if storage.Type == db.SecretStorageTypeVault {
+		var err error
+		storage, err = c.secretStorageService.GetSecretStorage(storage.ProjectID, storage.ID)
+		if err != nil {
+			helpers.WriteError(w, err)
+			return
+		}
+	}
 	helpers.WriteJSON(w, http.StatusOK, storage)
 }
 
@@ -140,6 +158,8 @@ func (c *SecretStorageController) Update(w http.ResponseWriter, r *http.Request)
 		Metadata:  audit.SecretStorageMetadata{Type: string(storage.Type)},
 	})
 
+	storage.Secret = ""
+	storage.Credentials = nil
 	helpers.WriteJSON(w, http.StatusOK, storage)
 }
 
@@ -180,6 +200,8 @@ func (c *SecretStorageController) Add(w http.ResponseWriter, r *http.Request) {
 		Metadata:  audit.SecretStorageMetadata{Type: string(newStorage.Type)},
 	})
 
+	newStorage.Secret = ""
+	newStorage.Credentials = nil
 	helpers.WriteJSON(w, http.StatusCreated, newStorage)
 }
 
@@ -203,53 +225,19 @@ func (c *SecretStorageController) Remove(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (c *SecretStorageController) SyncSecrets(w http.ResponseWriter, r *http.Request) {
-	oldStorage := helpers.GetFromContext(r, "secretStorage").(db.SecretStorage)
-
+func (c *SecretStorageController) TestAuthentication(w http.ResponseWriter, r *http.Request) {
+	project := helpers.GetFromContext(r, "project").(db.Project)
 	var storage db.SecretStorage
 	if !helpers.Bind(w, r, &storage) {
 		return
 	}
-
-	if storage.ID != oldStorage.ID {
-		helpers.WriteJSON(w, http.StatusBadRequest, map[string]string{
-			"error": "Secret storage id in URL and in body must be the same",
-		})
+	if storage.ProjectID != project.ID {
+		helpers.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "Project ID in body and URL must be the same"})
 		return
 	}
-
-	if storage.ProjectID != oldStorage.ProjectID {
-		helpers.WriteJSON(w, http.StatusBadRequest, map[string]string{
-			"error": "You can not move secret storage to other project",
-		})
+	if err := c.secretStorageService.TestVaultAuthentication(r.Context(), storage); err != nil {
+		helpers.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
-
-	sync, err := helpers.Store(r).GetStorageSecretSync(storage.ID)
-	if err != nil {
-		helpers.WriteError(w, err)
-		return
-	}
-
-	err = c.secretStorageService.SyncSecrets(sync)
-	if err != nil {
-		helpers.WriteError(w, err)
-		return
-	}
-
-	helpers.EventLog(r, helpers.EventLogUpdate, helpers.EventLogItem{
-		UserID:      helpers.UserFromContext(r).ID,
-		ProjectID:   oldStorage.ProjectID,
-		ObjectType:  db.EventSchedule,
-		ObjectID:    oldStorage.ID,
-		Description: fmt.Sprintf("Secret storage with ID %d has been synced", storage.ID),
-	})
-
-	helpers.Audit(r).Record(r.Context(), audit.Event{
-		Kind:      audit.SecretStorageSync,
-		Target:    audit.ResourceTarget(audit.TargetSecretStorage, oldStorage.ID, oldStorage.Name),
-		ProjectID: oldStorage.ProjectID,
-	})
-
-	helpers.WriteJSON(w, http.StatusOK, storage)
+	helpers.WriteJSON(w, http.StatusOK, map[string]bool{"authenticated": true})
 }

@@ -7,8 +7,8 @@ WORKDIR /usr/local
 # hadolint ignore=DL4006
 RUN curl -sL https://taskfile.dev/install.sh | sh
 
-WORKDIR /go/src/jeh
-COPY . /go/src/jeh
+WORKDIR /go/src/taskexec
+COPY . /go/src/taskexec
 
 RUN --mount=type=cache,target=/go/pkg \
     go mod download -x
@@ -24,8 +24,8 @@ RUN apk add --no-cache -U \
     bash git go
 
 COPY --from=golang /go/bin/goodman /root/go/bin/goodman
-COPY --from=golang /go/src/jeh /jeh
-WORKDIR /jeh
+COPY --from=golang /go/src/taskexec /taskexec
+WORKDIR /taskexec
 
 COPY deployment/docker/dredd/entrypoint /usr/local/bin
 ENTRYPOINT ["/usr/local/bin/entrypoint"]

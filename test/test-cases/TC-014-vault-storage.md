@@ -11,11 +11,11 @@
 
 A project can use HashiCorp Vault as a secret storage backend. Secrets fetched
 from Vault are surfaced as access keys without being persisted in plaintext in
-the JEH database.
+the TaskExec database.
 
 ## Preconditions
 
-* Vault dev server reachable from JEH at `http://vault:8200`.
+* Vault dev server reachable from TaskExec at `http://vault:8200`.
 * AppRole or token with read access to `secret/data/qa/*`.
 * A secret stored at `secret/data/qa/db_password` with key `password = s3cret`.
 * Project `Infra QA`.
@@ -34,16 +34,18 @@ the JEH database.
 1. Navigate to **Secret Storages → New Storage** in project `Infra QA`.
 2. Select type **HashiCorp Vault**, fill the address and token, save.
 3. Open **Key Store → New Key**, choose **Source: Vault**, point at
-   `secret/data/qa/db_password`, field `password`, save as key
+   `qa/db_password` relative to mount `secret`, choose **String**, load fields and select
+   `password`, save as key
    `db-password-vault`.
-4. Use the key as a variable in a template (e.g. echo it via Bash app — not
-   the value but its name binding).
+4. In a variable group, open **Keys**, bind the key as `db_password` targeting extra
+   variables, inspect the fresh preview, and attach the group to an Ansible template.
+   Use an assertion with `no_log: true` to verify `db_password` without printing it.
 5. Disable the Vault server temporarily, re-run the task.
 
 ## Expected results
 
 * Step 2: storage saved; the token field is not displayed after save.
-* Step 3: the key is created and marked as `Synchronized` / sourced from Vault;
+* Step 3: the key is sourced from Vault (manual keys are not synchronized);
   the `plain` column in the database is null/empty (verify via SQL on
   `access_key` table).
 * Step 4: task succeeds; the value is rendered correctly when used.

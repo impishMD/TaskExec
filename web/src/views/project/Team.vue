@@ -37,7 +37,10 @@
       </v-btn>
     </v-toolbar>
 
-    <TeamMenu v-if="isPro" :project-id="projectId" :system-info="systemInfo" />
+    <TeamMenu
+      v-if="systemInfo.features.custom_roles_management"
+      :project-id="projectId" :system-info="systemInfo"
+    />
 
     <v-divider style="margin-top: -1px" />
 
@@ -97,12 +100,10 @@ export default {
 
   computed: {
     userRoles() {
-      return [...USER_ROLES, ...this.roles];
+      return [
+        ...USER_ROLES.map((role) => ({ ...role, name: this.$t(role.titleKey) })), ...this.roles];
     },
 
-    isPro() {
-      return (process.env.VUE_APP_BUILD_TYPE || '').startsWith('pro_');
-    },
   },
 
   async created() {

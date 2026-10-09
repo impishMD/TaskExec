@@ -3,8 +3,9 @@
     <EditDialog
       v-model="editDialog"
       :save-button-text="itemId === 'new' ? $t('create') : $t('save')"
-      :title="`${itemId === 'new' ? $t('nnew') : $t('edit')} Key`"
-      :max-width="450"
+      :title="itemId === 'new' ? $t('newKey') : $t('editKey')"
+      :max-width="560"
+      content-class="KeyDialog"
       @save="loadItemsAndShowPublicKey($event)"
     >
       <template v-slot:form="{ onSave, onError, needSave, needReset }">
@@ -24,7 +25,7 @@
       :max-width="700"
       v-model="createdPublicKeyDialog"
       :save-button-text="null"
-      title="Generated SSH Public Key"
+      :title="$t('uiGeneratedSSHPublicKey')"
       hide-buttons
     >
       <template v-slot:form="{}">
@@ -53,7 +54,7 @@
     </EditDialog>
 
     <ObjectRefsDialog
-      object-title="access key"
+      :object-title="$t('accessKey')"
       :object-refs="itemRefs"
       :project-id="projectId"
       v-model="itemRefsDialog"
@@ -77,7 +78,7 @@
       >{{ $t('newKey') }}</v-btn>
     </v-toolbar>
 
-    <KeyStoreMenu v-if="isPro" :project-id="projectId" />
+    <KeyStoreMenu v-if="systemInfo.features.secret_storage_management" :project-id="projectId" />
     <v-divider v-else />
 
     <v-data-table
@@ -97,14 +98,9 @@
           style="font-weight: bold;"
           class="ml-2"
         >{{ $t('empty') }}</v-chip>
-        <v-chip
-          v-if="item.synchronized"
-          x-small
-          class="ml-2"
-        >{{ $t('synchronized') }}</v-chip>
       </template>
       <template v-slot:item.type="{ item }">
-        <code>{{ item.type }}</code>
+        {{ keyTypeTitle(item.type) }}
       </template>
       <template v-slot:item.actions="{ item }">
         <v-btn-toggle dense :value-comparator="() => false">
@@ -122,6 +118,7 @@
 
 </template>
 <script>
+import DisplayLabelsMixin from '@/components/DisplayLabelsMixin';
 import ItemListPageBase from '@/components/ItemListPageBase';
 import KeyForm from '@/components/KeyForm.vue';
 import PageMixin from '@/components/PageMixin';
@@ -135,16 +132,10 @@ export default {
     KeyForm,
   },
 
-  mixins: [ItemListPageBase, PageMixin],
+  mixins: [DisplayLabelsMixin, ItemListPageBase, PageMixin],
 
   props: {
     systemInfo: Object,
-  },
-
-  computed: {
-    isPro() {
-      return (process.env.VUE_APP_BUILD_TYPE || '').startsWith('pro_');
-    },
   },
 
   data() {
@@ -155,6 +146,9 @@ export default {
   },
 
   methods: {
+    getDeleteRequestOptions() {
+      return { params: { reference_only: true } };
+    },
     async loadItemsAndShowPublicKey(e) {
       await this.loadItems();
 

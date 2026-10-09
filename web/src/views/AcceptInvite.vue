@@ -14,18 +14,16 @@
         background-color: var(--highlighted-card-bg-color);
       "
     >
-      <v-card-title>
-        Accept Invitation
-        <v-spacer />
+      <v-card-title>{{ $t('uiAcceptInvitation') }}<v-spacer />
       </v-card-title>
       <v-card-text class="pb-0">
         <div v-if="state === 'processing'" class="text-center pt-6 pb-0">
           <v-progress-circular indeterminate color="primary" />
-          <div class="mt-6">Accepting invitation...</div>
+          <div class="mt-6">{{ $t('uiAcceptingInvitation') }}</div>
         </div>
 
         <v-alert v-else-if="state === 'success'" type="success" text>
-          Invitation accepted. You now have access to the project.
+          {{ $t('uiInvitationAcceptedYouNowHaveAccessToTheProject') }}
         </v-alert>
 
         <v-alert v-else type="error" text>
@@ -37,15 +35,15 @@
         <v-spacer />
 
         <v-btn v-if="state === 'success'" color="primary" @click="goToProject">
-          Go to project
+          {{ $t('uiGoToProject') }}
         </v-btn>
 
         <div v-else-if="state === 'error'" >
           <v-btn text color="primary" @click="goToDashboard" :disabled="!token">
-            Go to dashboard
+            {{ $t('uiGoToDashboard') }}
           </v-btn>
           <v-btn text color="primary" @click="retry" :disabled="!token">
-            Try again
+            {{ $t('uiTryAgain') }}
           </v-btn>
         </div>
       </v-card-actions>

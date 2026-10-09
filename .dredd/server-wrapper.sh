@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-export JEH_MAX_TASKS_PER_TEMPLATE=300
-export JEH_APPS='{"ansible": {}}'
-export JEH_PORT=58427
+export TASKEXEC_MAX_TASKS_PER_TEMPLATE=300
+export TASKEXEC_APPS='{"ansible": {}}'
+export TASKEXEC_PORT=58427
 
-jeh=./jeh
-[[ -x "$jeh" ]] || jeh=./bin/jeh
+taskexec=./taskexec
+[[ -x "$taskexec" ]] || taskexec=./bin/taskexec
 
-exec "$jeh" server --config .dredd/config.json
+exec "$taskexec" server --config .dredd/config.json

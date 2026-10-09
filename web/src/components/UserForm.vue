@@ -2,7 +2,7 @@
   <div>
     <EditDialog
       v-model="passwordDialog"
-      save-button-text="Save"
+      :save-button-text="$t('save')"
       :title="$t('changePassword')"
       v-if="item"
       event-name="i-user"
@@ -20,8 +20,10 @@
     </EditDialog>
 
     <v-tabs v-model="tab">
-      <v-tab key="settings">Settings</v-tab>
-      <v-tab key="2fa" v-if="canChangePassword || authMethods.totp || !isNew"> Security</v-tab>
+      <v-tab key="settings">{{ $t('settings') }}</v-tab>
+      <v-tab key="2fa" v-if="canChangePassword || authMethods.totp || !isNew">
+        {{ $t('uiSecurity') }}
+      </v-tab>
     </v-tabs>
 
     <v-divider class="mb-6" style="margin-top: -1px" />
@@ -44,7 +46,7 @@
           <v-text-field
             v-model="item.username"
             :label="$t('username')"
-            :rules="[(v) => !!v || $t('user_name_required')]"
+            :rules="[(v) => !!v || $t('username_required')]"
             required
             :disabled="formSaving"
             outlined
@@ -61,7 +63,9 @@
             dense
           >
             <template v-slot:append>
-              <v-chip outlined color="green" disabled small style="opacity: 1">private</v-chip>
+              <v-chip outlined color="green" disabled small style="opacity: 1">
+                {{ $t('uiPrivate') }}
+              </v-chip>
             </template>
           </v-text-field>
 
@@ -94,15 +98,6 @@
                 :label="$t('adminUser')"
               ></v-checkbox>
             </v-col>
-            <v-col cols="6" v-if="isPro">
-              <v-checkbox
-                :disabled="!isAdmin"
-                dense
-                hide-details
-                v-model="item.pro"
-                :label="$t('Pro user')"
-              ></v-checkbox>
-            </v-col>
             <v-col cols="6" v-if="isAdmin">
               <v-checkbox
                 :disabled="!isNew"
@@ -121,17 +116,17 @@
         v-if="item != null && (canChangePassword || authMethods.totp || !isNew)"
       >
         <div v-if="canChangePassword">
-          <div class="title mb-3">Password</div>
-          <v-btn color="primary" @click="passwordDialog = true">Change password</v-btn>
+          <div class="title mb-3">{{ $t('password') }}</div>
+          <v-btn color="primary" @click="passwordDialog = true">{{ $t('changePassword') }}</v-btn>
         </div>
 
         <div :class="{ 'pt-10': canChangePassword }" v-if="authMethods.totp">
-          <div class="title mb-2">Two-factor authentication</div>
+          <div class="title mb-2">{{ $t('uiTwoFactorAuthentication') }}</div>
 
           <v-switch
             class="mt-0"
             v-model="totpEnabled"
-            label="Time-based one-time password"
+            :label="$t('uiTimeBasedOneTimePassword')"
           ></v-switch>
 
           <v-card
@@ -164,14 +159,14 @@
                   border: 10px solid white;
                   background-color: white;
                 "
-                alt="QR code"
+                :alt="$t('uiQRCode')"
               />
 
               <div
                 v-if="authMethods.totp.allow_recovery && item.totp && item.totp.recovery_code"
                 class="mt-5 pb-3"
               >
-                <div class="subtitle-1 mb-2">Recovery code</div>
+                <div class="subtitle-1 mb-2">{{ $t('uiRecoveryCode') }}</div>
                 <div style="position: relative">
                   <code style="font-size: 18px; background-color: #e03755">
                     {{ item.totp.recovery_code }}
@@ -197,7 +192,7 @@
           :style="{ marginTop: (!authMethods.totp || totpEnabled) ? 0 : '-30px' }"
         >
           <template v-if="identities.length > 0">
-            <div class="title mb-2">Linked accounts</div>
+            <div class="title mb-2">{{ $t('uiLinkedAccounts') }}</div>
 
             <div style="margin-bottom: -8px;">
               <v-chip
@@ -221,7 +216,7 @@
             v-if="isSelf && (unlinkedLdapProviders.length > 0 || unlinkedOidcProviders.length > 0)"
             :class="{ 'pt-10': identities.length > 0 }"
           >
-            <div class="title mb-2">Link account</div>
+            <div class="title mb-2">{{ $t('uiLinkAccount') }}</div>
 
             <v-card class="mt-4" style="background: var(--highlighted-card-bg-color)">
               <v-card-text>
@@ -248,14 +243,14 @@
 
                   <v-text-field
                     v-model="ldapUsername"
-                    label="LDAP username"
+                    :label="$t('uiLDAPUsername')"
                     outlined
                     dense
                   ></v-text-field>
 
                   <v-text-field
                     v-model="ldapPassword"
-                    label="LDAP password"
+                    :label="$t('uiLDAPPassword')"
                     type="password"
                     autocomplete="new-password"
                     outlined
@@ -267,9 +262,7 @@
                     :disabled="!ldapUsername || !ldapPassword || linkingLdap"
                     :loading="linkingLdap"
                     @click="linkLdapIdentity()"
-                  >
-                    Link
-                  </v-btn>
+                  >{{ $t('uiLink') }}</v-btn>
                 </div>
               </v-card-text>
             </v-card>
@@ -287,7 +280,7 @@
                 @click="linkOidcIdentity(provider.id)"
               >
                 <v-icon left dark v-if="provider.icon">mdi-{{ provider.icon }}</v-icon>
-                Link {{ provider.name || provider.id }}
+                {{ $t('linkProvider', { provider: provider.name || provider.id }) }}
               </v-btn>
             </div>
           </div>
@@ -373,9 +366,6 @@ export default {
   },
 
   computed: {
-    isPro() {
-      return (process.env.VUE_APP_BUILD_TYPE || '').startsWith('pro_');
-    },
 
     canChangePassword() {
       return !this.isNew && !this.item.external && this.LoginWithPassword;
@@ -474,10 +464,10 @@ export default {
         await this.loadIdentities();
       } catch (err) {
         if (err.response && err.response.status === 401) {
-          this.linkError = 'Invalid LDAP credentials.';
+          this.linkError = this.$t('invalidLdapCredentials');
         } else {
           this.linkError = (err.response && err.response.data && err.response.data.error)
-            || 'Failed to link LDAP account.';
+            || this.$t('ldapLinkFailed');
         }
       } finally {
         this.linkingLdap = false;
@@ -495,7 +485,7 @@ export default {
         await this.loadIdentities();
       } catch (err) {
         this.linkError = (err.response && err.response.data && err.response.data.error)
-          || 'Failed to unlink account.';
+          || this.$t('accountUnlinkFailed');
       }
     },
 

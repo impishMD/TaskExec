@@ -9,37 +9,18 @@
     />
 
     <YesNoDialog
-      :title="$t('deleteTemplatePermission')"
-      :text="$t('askDeleteTemplatePermission')"
+      :title="$t('uiDeleteTemplatePermission')"
+      :text="$t('uiDoYouReallyWantToDeleteThisTemplatePermission')"
       v-model="deleteItemDialog"
       @yes="deleteItem(itemId)"
     />
 
-    <v-alert v-if="!features.custom_roles_management" text color="amber darken-3" class="PageAlert">
-      <span class="mr-1" v-html="$t('roles_only_enterprise')"></span>
-
-      <v-btn
-        dark
-        depressed
-        v-if="isAdmin"
-        color="amber darken-3"
-        href="https://github.com/impishMD/jeh/blob/develop/docs/en/configuration.md#feature-scope"
-        target="_blank"
-      >
-        {{ $t('upgrade_to_pro') }}
-      </v-btn>
-
-      <span v-else style="font-weight: bold">
-        {{ $t('contact_admin_to_upgrade_enterprise') }}
-      </span>
-    </v-alert>
-
     <v-btn
-      :disabled="!features.custom_roles_management"
+      :disabled="!features.custom_roles_management || !can(USER_PERMISSIONS.manageProjectUsers)"
       color="primary"
       @click="editItem('new')"
       style="position: absolute; right: 16px"
-      >{{ $t('Add Role') }}
+      >{{ $t('uiAddRole') }}
     </v-btn>
 
     <v-data-table
@@ -72,6 +53,7 @@
 </template>
 
 <script>
+import DisplayLabelsMixin from '@/components/DisplayLabelsMixin';
 import ItemListPageBase from '@/components/ItemListPageBase';
 import EditTemplatePermissionDialog from '@/components/EditTemplatePermissionDialog.vue';
 import YesNoDialog from '@/components/YesNoDialog.vue';
@@ -85,7 +67,7 @@ export default {
     YesNoDialog,
     TemplatePermissionsChips,
   },
-  mixins: [ItemListPageBase],
+  mixins: [DisplayLabelsMixin, ItemListPageBase],
 
   props: {
     projectId: Number,
@@ -115,10 +97,14 @@ export default {
   },
 
   methods: {
+    allowActions() {
+      return this.can(USER_PERMISSIONS.manageProjectUsers);
+    },
+
     async loadRoles() {
       try {
         const response = await axios.get(
-          `/api/project/${this.template.project_id}/roles?mode=merge`,
+          `/api/project/${this.template.project_id}/roles/all`,
         );
         this.availableRoles = response.data;
       } catch (error) {
@@ -129,7 +115,7 @@ export default {
 
     getRoleName(roleId) {
       const role = this.availableRoles.find((r) => r.slug === roleId);
-      return role ? role.name : `Role ${roleId}`;
+      return this.roleTitle(role || roleId);
     },
 
     getRoleColor(roleId) {
@@ -145,10 +131,6 @@ export default {
       };
 
       return colorMap[role.slug] || 'primary';
-    },
-
-    allowActions() {
-      return true;
     },
 
     getHeaders() {

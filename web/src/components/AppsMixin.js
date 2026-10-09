@@ -61,7 +61,10 @@ export default {
       }
 
       if (APP_TITLE[id]) {
-        return APP_TITLE[id];
+        const app = APP_SHORT_TITLE[id];
+        if (id === 'ansible') return this.$t('appPlaybook', { app });
+        return this.$t(['bash', 'python', 'powershell'].includes(id)
+          ? 'appScript' : 'appCode', { app });
       }
 
       return '';

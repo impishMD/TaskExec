@@ -15,7 +15,7 @@
         >#{{ run.id }}</router-link>
       </template>
       <template v-slot:item.status="{ item: run }">
-        <v-chip :color="statusColor(run.status)" small>{{ run.status }}</v-chip>
+        <v-chip :color="statusColor(run.status)" small>{{ statusTitle(run.status) }}</v-chip>
       </template>
       <template v-slot:item.version="{ item: run }">
         {{ run.version || '—' }}
@@ -31,11 +31,13 @@
 </template>
 
 <script>
+import DisplayLabelsMixin from '@/components/DisplayLabelsMixin';
 import axios from 'axios';
 import EventBus from '@/event-bus';
 import { getErrorMessage } from '@/lib/error';
 
 export default {
+  mixins: [DisplayLabelsMixin],
   props: {
     projectId: Number,
     workflow: Object,

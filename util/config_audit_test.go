@@ -61,11 +61,11 @@ func TestAuditSyslogConfig_IsConfigured(t *testing.T) {
 }
 
 func TestAuditConfig_FromEnvironment(t *testing.T) {
-	t.Setenv("JEH_AUDIT_ENABLED", "true")
-	t.Setenv("JEH_AUDIT_INSTANCE_ID", "prod-eu")
-	t.Setenv("JEH_AUDIT_TRUSTED_PROXY_CIDRS", `["10.0.0.0/8","fd00::/8"]`)
-	t.Setenv("JEH_AUDIT_SYSLOG_ID", "siem-syslog")
-	t.Setenv("JEH_AUDIT_SYSLOG_ADDRESS", "siem.example:6514")
+	t.Setenv("TASKEXEC_AUDIT_ENABLED", "true")
+	t.Setenv("TASKEXEC_AUDIT_INSTANCE_ID", "prod-eu")
+	t.Setenv("TASKEXEC_AUDIT_TRUSTED_PROXY_CIDRS", `["10.0.0.0/8","fd00::/8"]`)
+	t.Setenv("TASKEXEC_AUDIT_SYSLOG_ID", "siem-syslog")
+	t.Setenv("TASKEXEC_AUDIT_SYSLOG_ADDRESS", "siem.example:6514")
 
 	config := &ConfigType{}
 	_, err := loadEnvironmentToObject(config)
@@ -84,24 +84,24 @@ func TestAuditConfig_FromEnvironment(t *testing.T) {
 func TestAuditSplunkHECConfig_IsConfigured(t *testing.T) {
 	var nilConfig *AuditSplunkHECConfig
 	assert.False(t, nilConfig.IsConfigured())
-	assert.False(t, (&AuditSplunkHECConfig{Source: "jeh", Sourcetype: "jeh:audit", Timeout: "10s"}).IsConfigured(), "defaults alone do not configure it")
+	assert.False(t, (&AuditSplunkHECConfig{Source: "taskexec", Sourcetype: "taskexec:audit", Timeout: "10s"}).IsConfigured(), "defaults alone do not configure it")
 	assert.False(t, (&AuditSplunkHECConfig{Token: "t", Index: "security"}).IsConfigured(), "optional fields alone send nothing")
 	assert.True(t, (&AuditSplunkHECConfig{URL: "https://hec.example:8088/services/collector/event"}).IsConfigured())
 	assert.True(t, (&AuditSplunkHECConfig{ID: "siem-hec"}).IsConfigured())
 }
 
 func TestAuditSplunkHECConfig_FromEnvironment(t *testing.T) {
-	t.Setenv("JEH_AUDIT_ENABLED", "true")
-	t.Setenv("JEH_AUDIT_INSTANCE_ID", "prod-eu")
-	t.Setenv("JEH_AUDIT_SPLUNK_HEC_ID", "siem-hec")
-	t.Setenv("JEH_AUDIT_SPLUNK_HEC_URL", "https://hec.example:8088/services/collector/event")
-	t.Setenv("JEH_AUDIT_SPLUNK_HEC_TOKEN", "00000000-0000-0000-0000-000000000000")
-	t.Setenv("JEH_AUDIT_SPLUNK_HEC_INDEX", "security")
+	t.Setenv("TASKEXEC_AUDIT_ENABLED", "true")
+	t.Setenv("TASKEXEC_AUDIT_INSTANCE_ID", "prod-eu")
+	t.Setenv("TASKEXEC_AUDIT_SPLUNK_HEC_ID", "siem-hec")
+	t.Setenv("TASKEXEC_AUDIT_SPLUNK_HEC_URL", "https://hec.example:8088/services/collector/event")
+	t.Setenv("TASKEXEC_AUDIT_SPLUNK_HEC_TOKEN", "00000000-0000-0000-0000-000000000000")
+	t.Setenv("TASKEXEC_AUDIT_SPLUNK_HEC_INDEX", "security")
 
 	config := &ConfigType{}
 	sensitive, err := loadEnvironmentToObject(config)
 	require.NoError(t, err)
-	assert.Contains(t, sensitive, "JEH_AUDIT_SPLUNK_HEC_TOKEN")
+	assert.Contains(t, sensitive, "TASKEXEC_AUDIT_SPLUNK_HEC_TOKEN")
 	require.NoError(t, loadDefaultsToObject(config))
 
 	hec := config.Audit.SplunkHEC
@@ -110,8 +110,8 @@ func TestAuditSplunkHECConfig_FromEnvironment(t *testing.T) {
 	assert.Equal(t, "https://hec.example:8088/services/collector/event", hec.URL)
 	assert.Equal(t, "00000000-0000-0000-0000-000000000000", hec.Token)
 	assert.Equal(t, "security", hec.Index)
-	assert.Equal(t, "jeh", hec.Source)
-	assert.Equal(t, "jeh:audit", hec.Sourcetype)
+	assert.Equal(t, "taskexec", hec.Source)
+	assert.Equal(t, "taskexec:audit", hec.Sourcetype)
 	assert.Equal(t, "10s", hec.Timeout)
 }
 
@@ -130,7 +130,7 @@ func TestAuditConfig_TrustedProxiesUnmapsIPv4MappedNetworks(t *testing.T) {
 }
 
 func TestAuditConfig_RetentionFromEnvironment(t *testing.T) {
-	t.Setenv("JEH_AUDIT_RETENTION_DAYS", "180")
+	t.Setenv("TASKEXEC_AUDIT_RETENTION_DAYS", "180")
 	config := &ConfigType{}
 	_, err := loadEnvironmentToObject(config)
 	require.NoError(t, err)

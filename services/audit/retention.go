@@ -5,7 +5,7 @@ import (
 	"math/rand/v2"
 	"time"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 	log "github.com/sirupsen/logrus"
 )
 

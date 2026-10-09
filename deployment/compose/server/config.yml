@@ -3,4 +3,4 @@ version: "3.4"
 services:
   server:
     volumes:
-      - ${JEH_RUNNER_LOCAL_CONFIG:-config.json}:/etc/jeh/config.json:Z
+      - ${TASKEXEC_RUNNER_LOCAL_CONFIG:-config.json}:/etc/taskexec/config.json:Z

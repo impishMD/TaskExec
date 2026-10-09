@@ -3,7 +3,7 @@ package export
 import (
 	"strconv"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 type IntegrationAliasExporter struct {

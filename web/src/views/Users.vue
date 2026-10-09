@@ -2,7 +2,7 @@
   <div v-if="items != null">
     <EditDialog
       v-model="editDialog"
-      save-button-text="Save"
+      :save-button-text="$t('save')"
       :title="$t('editUser')"
       @save="loadItems()"
       :hide-buttons="hideEditDialogButtons"
@@ -32,9 +32,7 @@
     />
 
     <v-toolbar flat>
-      <v-btn icon class="mr-4" @click="returnToProjects()">
-        <v-icon>mdi-arrow-left</v-icon>
-      </v-btn>
+      <v-app-bar-nav-icon @click="showDrawer()" />
       <v-toolbar-title>{{ $t('users') }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn color="primary" @click="editItem('new')">{{ $t('newUser') }}</v-btn>

@@ -20,9 +20,9 @@ for name, digest in checksums.items():
         continue
     with tarfile.open(path) as archive:
         files = {m.name.removeprefix('./'): m for m in archive.getmembers()}
-        for required in ['jeh', 'LICENSE', 'NOTICE', 'docs/en/README.md', 'docs/ru/README.md']:
+        for required in ['taskexec', 'LICENSE', 'NOTICE', 'docs/en/README.md', 'docs/ru/README.md']:
             assert required in files, f'{name}: missing {required}'
-        binary = archive.extractfile(files['jeh']).read(64)
+        binary = archive.extractfile(files['taskexec']).read(64)
         if '_linux_' in name:
             assert binary[:4] == b'\x7fELF', name
             arch = struct.unpack('<H', binary[18:20])[0]

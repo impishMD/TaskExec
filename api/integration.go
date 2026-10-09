@@ -12,13 +12,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/impishMD/jeh/pkg/conv"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/services/server"
-	task2 "github.com/impishMD/jeh/services/tasks"
+	"github.com/impishMD/taskexec/pkg/conv"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/services/server"
+	task2 "github.com/impishMD/taskexec/services/tasks"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
 	log "github.com/sirupsen/logrus"
 	"github.com/thedevsaddam/gojsonq/v2"
 )
@@ -229,16 +229,16 @@ func (c *IntegrationController) ReceiveIntegration(w http.ResponseWriter, r *htt
 
 		task := c.RunIntegration(integration, project, r, payload)
 		if task != nil {
-			w.Header().Add("X-JEH-Task-ID", strconv.Itoa(task.ID))
-			w.Header().Add("X-JEH-Template-ID", strconv.Itoa(task.TemplateID))
-			w.Header().Add("X-JEH-Project-ID", strconv.Itoa(task.ProjectID))
+			w.Header().Add("X-TaskExec-Task-ID", strconv.Itoa(task.ID))
+			w.Header().Add("X-TaskExec-Template-ID", strconv.Itoa(task.TemplateID))
+			w.Header().Add("X-TaskExec-Project-ID", strconv.Itoa(task.ProjectID))
 
 			if task.IntegrationID != nil {
-				w.Header().Add("X-JEH-Integration-ID", strconv.Itoa(*task.IntegrationID))
+				w.Header().Add("X-TaskExec-Integration-ID", strconv.Itoa(*task.IntegrationID))
 			}
 
 			if task.InventoryID != nil {
-				w.Header().Add("X-JEH-Inventory-ID", strconv.Itoa(*task.InventoryID))
+				w.Header().Add("X-TaskExec-Inventory-ID", strconv.Itoa(*task.InventoryID))
 			}
 		}
 	}

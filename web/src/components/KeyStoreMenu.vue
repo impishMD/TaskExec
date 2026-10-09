@@ -5,17 +5,13 @@
         key="keys"
         :to="`/project/${projectId}/keys`"
         data-testid="keystore-keys"
-      >
-        Keys
-      </v-tab>
+      >{{ $t('uiKeys') }}</v-tab>
 
       <v-tab
         key="storages"
         :to="`/project/${projectId}/secret_storages`"
         data-testid="keystore-storages"
-      >
-        Storages
-      </v-tab>
+      >{{ $t('uiStorages') }}</v-tab>
     </v-tabs>
     <v-divider style="margin-top: -1px;" />
   </div>

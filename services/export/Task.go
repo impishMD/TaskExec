@@ -4,7 +4,7 @@ import (
 	"slices"
 	"strconv"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 type TaskExporter struct {

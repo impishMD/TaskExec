@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strconv"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 func QueryParamsForProps(url *url.URL, props db.ObjectProps) (params db.RetrieveQueryParams) {

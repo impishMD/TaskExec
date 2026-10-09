@@ -3,7 +3,7 @@ package cmd
 import (
 	"time"
 
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/util"
 	"github.com/spf13/cobra"
 )
 

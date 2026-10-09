@@ -1,15 +1,25 @@
 $material-dark: (
-        'background': #1E1E1E,
+        'background': #111c24,
+        'cards': #192831,
         'app-bar': transparent,
         'toolbar': transparent,
 );
 
 $material-light: (
+        'background': #f4f7f7,
         'app-bar': transparent,
         'toolbar': transparent,
 );
 
 $tabs-bar-background-color: 'toolbar';
+
+$border-radius-root: 12px;
+$btn-border-radius: 12px;
+$btn-letter-spacing: normal;
+$btn-text-transform: none;
+$card-border-radius: 20px;
+$dialog-border-radius: 24px;
+$text-field-border-radius: 12px;
 
 :root {
   --breakpoint-sm: 600px;

@@ -9,21 +9,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/db/sql"
-	"github.com/impishMD/jeh/pro_interfaces"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/services/audit/audittest"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/db/sql"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/services/audit/audittest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-type nopLogWriter struct{}
-
-func (nopLogWriter) WriteEventLog(pro_interfaces.EventLogRecord) error { return nil }
-func (nopLogWriter) WriteTaskLog(pro_interfaces.TaskLogRecord) error   { return nil }
-func (nopLogWriter) WriteResult(any) error                             { return nil }
 
 type membershipFixture struct {
 	store   *sql.SqlDb
@@ -56,7 +49,6 @@ func (f membershipFixture) request(method string, body string, me db.User, myRol
 	r = helpers.SetContextValue(r, "user", &me)
 	r = helpers.SetContextValue(r, "project", f.project)
 	r = helpers.SetContextValue(r, "projectUserRole", myRole)
-	r = helpers.SetContextValue(r, "log_writer", nopLogWriter{})
 	r = helpers.SetContextValue(r, "audit", rec)
 	if target != nil {
 		membership, _ := f.store.GetProjectUser(f.project.ID, target.ID)

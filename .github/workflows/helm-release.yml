@@ -1,0 +1,129 @@
+name: Helm Release
+
+on:
+  push:
+    tags: ['chart-v[0-9]*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing chart tag to resume (chart-vX.Y.Z)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: helm-release
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    uses: ./.github/workflows/helm-ci.yml
+    with:
+      ref: ${{ inputs.tag || github.ref }}
+  release:
+    needs: checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      packages: read
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+      CR_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
+          # chart-releaser pushes the index to gh-pages using this credential.
+          persist-credentials: true
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: v3.22.0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.13'
+      - run: python -m pip install PyYAML==6.0.3
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Require the published application image
+        run: docker buildx imagetools inspect "ghcr.io/impishmd/taskexec:v$(cat VERSION)"
+      - name: Validate tag and package chart
+        run: |
+          python tools/check-chart.py --release-tag "$RELEASE_TAG"
+          test "$(git rev-parse HEAD)" = "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")"
+          version=${RELEASE_TAG#chart-v}
+          cp "release-notes/charts/en/v$version.md" charts/taskexec/RELEASE.md
+          helm package charts/taskexec --destination .cr-release-packages
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+      - uses: helm/chart-releaser-action@a0d2dc62c5e491af8ef6ba64a2e02bcf3fb33aa1 # v1.7.0
+        with:
+          # v1.7.0's skip_packaging path references an unset latest_tag after
+          # uploading. Install the CLI and invoke upload/index explicitly.
+          install_only: true
+      - name: Prepare Helm repository branch
+        run: |
+          site=$(mktemp -d)
+          if git ls-remote --exit-code --heads origin gh-pages > /dev/null; then
+            git fetch origin gh-pages
+            git worktree add --detach "$site" FETCH_HEAD
+          else
+            git worktree add --detach "$site" HEAD
+            git -C "$site" checkout --orphan gh-pages
+            git -C "$site" rm -rf --quiet .
+            printf 'apiVersion: v1\nentries: {}\n' > "$site/index.yaml"
+          fi
+          cp deployment/helm/index.html "$site/index.html"
+          git -C "$site" add index.html index.yaml
+          if ! git -C "$site" diff --cached --quiet; then
+            git -C "$site" commit -m "Prepare TaskExec Helm repository"
+            git -C "$site" push origin HEAD:gh-pages
+          fi
+          git worktree remove "$site"
+      - name: Publish immutable chart and update index
+        run: |
+          owner=${GITHUB_REPOSITORY%/*}
+          repo=${GITHUB_REPOSITORY#*/}
+          cr upload --config .github/chart-releaser.yaml --owner "$owner" --git-repo "$repo" \
+            --commit "$(git rev-parse HEAD)" --skip-existing --make-release-latest=false
+          # On retry, packaging again changes the archive digest. Build the index
+          # from the published bytes, not the freshly rebuilt local archive.
+          gh release download "$RELEASE_TAG" --pattern 'taskexec-*.tgz' \
+            --dir .cr-release-packages --clobber
+          mkdir -p .cr-index
+          cr index --config .github/chart-releaser.yaml --owner "$owner" --git-repo "$repo" --push
+  pages:
+    needs: release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: gh-pages
+          persist-credentials: false
+          path: site
+      - name: Prepare Pages files
+        run: |
+          mkdir public
+          cp site/index.yaml site/index.html public/
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: public
+      - name: Deploy Helm repository
+        id: deploy
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

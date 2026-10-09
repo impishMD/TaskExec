@@ -13,10 +13,10 @@
     </v-alert>
 
     <v-select
-      :rules="[v => !!v || $t('template_required')]"
+      :rules="[v => !!v || $t('workflowTemplateRequired')]"
       :items="items"
       v-model="itemId"
-      label="Template"
+      :label="$t('template')"
       item-value="id"
       item-text="name"
     />

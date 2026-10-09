@@ -3,7 +3,7 @@ package db
 import (
 	"testing"
 
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -20,9 +20,9 @@ func TestTask_GetWorkflowUrl(t *testing.T) {
 	}{
 		{
 			name:     "workflow task",
-			webHost:  "https://jeh.example.com",
+			webHost:  "https://taskexec.example.com",
 			task:     Task{ID: 1, ProjectID: 3, WorkflowRunID: &runID, WorkflowTemplateID: &workflowID},
-			expected: new("https://jeh.example.com/project/3/workflows/7/runs/42"),
+			expected: new("https://taskexec.example.com/project/3/workflows/7/runs/42"),
 		},
 		{
 			name:     "no web host",
@@ -32,13 +32,13 @@ func TestTask_GetWorkflowUrl(t *testing.T) {
 		},
 		{
 			name:     "not a workflow task",
-			webHost:  "https://jeh.example.com",
+			webHost:  "https://taskexec.example.com",
 			task:     Task{ID: 1, ProjectID: 3},
 			expected: nil,
 		},
 		{
 			name:     "workflow template not resolved",
-			webHost:  "https://jeh.example.com",
+			webHost:  "https://taskexec.example.com",
 			task:     Task{ID: 1, ProjectID: 3, WorkflowRunID: &runID},
 			expected: nil,
 		},

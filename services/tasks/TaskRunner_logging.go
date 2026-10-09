@@ -10,12 +10,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/taskexec/pkg/tz"
 
-	"github.com/impishMD/jeh/api/sockets"
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/api/sockets"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/util"
 	log "github.com/sirupsen/logrus"
 )
 

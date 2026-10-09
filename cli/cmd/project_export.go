@@ -5,8 +5,7 @@ import (
 	"os"
 	"strings"
 
-	proFactory "github.com/impishMD/jeh/pro/db/factory"
-	projectService "github.com/impishMD/jeh/services/project"
+	projectService "github.com/impishMD/taskexec/services/project"
 	"github.com/spf13/cobra"
 )
 
@@ -42,7 +41,7 @@ var projectExportCmd = &cobra.Command{
 		}
 
 		if !ok {
-			fmt.Println("Use command `jeh project export --help` for details.")
+			fmt.Println("Use command `taskexec project export --help` for details.")
 			os.Exit(1)
 		}
 
@@ -74,7 +73,7 @@ var projectExportCmd = &cobra.Command{
 			}
 		}
 
-		workflowStore := proFactory.NewWorkflowStore(store)
+		workflowStore := store
 		backup, err := projectService.GetBackup(projectID, store, workflowStore)
 		if err != nil {
 			fmt.Printf("Failed to create backup: %v\n", err)

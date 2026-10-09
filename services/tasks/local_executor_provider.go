@@ -1,8 +1,8 @@
 package tasks
 
 import (
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/db_lib"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/db_lib"
 )
 
 // LocalExecutorProvider is the ExecutorProvider for the "local" strategy: tasks run

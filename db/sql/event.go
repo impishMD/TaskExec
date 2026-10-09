@@ -2,8 +2,8 @@ package sql
 
 import (
 	"github.com/Masterminds/squirrel"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/tz"
 )
 
 func (d *SqlDb) getEvents(q squirrel.SelectBuilder, params db.RetrieveQueryParams) (events []db.Event, err error) {

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 type mockProjectStore struct {

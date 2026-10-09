@@ -4,26 +4,20 @@
       key="team"
       :to="`/project/${projectId}/team`"
       data-testid="team-members"
-    >
-      Members
-    </v-tab>
+    >{{ $t('uiMembers') }}</v-tab>
 
     <v-tab
       v-if="systemInfo.teams.invites_enabled"
       key="invites"
       :to="`/project/${projectId}/invites`"
       data-testid="team-invites"
-    >
-      Invites
-    </v-tab>
+    >{{ $t('uiInvites') }}</v-tab>
 
     <v-tab
       key="roles"
       :to="`/project/${projectId}/roles`"
       data-testid="team-roles"
-    >
-      Roles
-    </v-tab>
+    >{{ $t('Roles') }}</v-tab>
   </v-tabs>
 </template>
 

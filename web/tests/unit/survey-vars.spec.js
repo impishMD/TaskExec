@@ -133,7 +133,7 @@ describe('SurveyVars.vue', () => {
 
       wrapper.vm.saveVar();
 
-      expect(wrapper.vm.formError).to.equal('Enumeration must have values.');
+      expect(wrapper.vm.formError).to.equal('choiceValuesRequired');
       expect(wrapper.emitted().change).to.equal(undefined);
     });
 
@@ -146,11 +146,11 @@ describe('SurveyVars.vue', () => {
 
       wrapper.vm.editedValues.push({ name: 'x', value: '1' }, { name: 'x', value: '2' });
       wrapper.vm.saveVar();
-      expect(wrapper.vm.formError).to.equal('Select must have unique names.');
+      expect(wrapper.vm.formError).to.equal('choiceValuesUnique');
 
       wrapper.vm.editedValues.splice(0, 2, { name: '', value: '1' });
       wrapper.vm.saveVar();
-      expect(wrapper.vm.formError).to.equal('Value name cannot be empty.');
+      expect(wrapper.vm.formError).to.equal('valueNameRequired');
     });
 
     it('normalises the default value of a select', async () => {

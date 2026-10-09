@@ -17,7 +17,7 @@ defined in the inventory.
 * Project `Infra QA`.
 * A reachable test Linux host (`10.0.0.21`) with the matching public key
   authorized for user `qa`.
-* Connectivity from JEH (or its runner) to the host on port 22.
+* Connectivity from TaskExec (or its runner) to the host on port 22.
 
 ## Test data
 

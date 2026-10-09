@@ -34,93 +34,93 @@ file_env() {
     unset "${1}_FILE"
 }
 
-export JEH_CONFIG_PATH="${JEH_CONFIG_PATH:-/etc/jeh}"
-export JEH_DB_PATH="${JEH_DB_PATH:-/var/lib/jeh}"
-export JEH_DB_PORT="${JEH_DB_PORT:-}"
+export TASKEXEC_CONFIG_PATH="${TASKEXEC_CONFIG_PATH:-/etc/taskexec}"
+export TASKEXEC_DB_PATH="${TASKEXEC_DB_PATH:-/var/lib/taskexec}"
+export TASKEXEC_DB_PORT="${TASKEXEC_DB_PORT:-}"
 
-file_env 'JEH_DB_USER'
-file_env 'JEH_DB_PASS'
-file_env 'JEH_ADMIN'
-export JEH_ADMIN_EMAIL="${JEH_ADMIN_EMAIL:-admin@localhost}"
-export JEH_ADMIN_NAME="${JEH_ADMIN_NAME:-JEH Admin}"
-file_env 'JEH_ADMIN_PASSWORD'
-export JEH_LDAP_ACTIVATED="${JEH_LDAP_ACTIVATED:-no}"
-export JEH_LDAP_HOST="${JEH_LDAP_HOST:-}"
-export JEH_LDAP_PORT="${JEH_LDAP_PORT:-}"
-export JEH_LDAP_DN_BIND="${JEH_LDAP_DN_BIND:-}"
-file_env 'JEH_LDAP_PASSWORD'
-export JEH_LDAP_DN_SEARCH="${JEH_LDAP_DN_SEARCH:-}"
-export JEH_LDAP_MAPPING_USERNAME="${JEH_LDAP_MAPPING_USERNAME:-uid}"
-export JEH_LDAP_MAPPING_FULLNAME="${JEH_LDAP_MAPPING_FULLNAME:-cn}"
-export JEH_LDAP_MAPPING_EMAIL="${JEH_LDAP_MAPPING_EMAIL:-mail}"
-file_env 'JEH_ACCESS_KEY_ENCRYPTION'
+file_env 'TASKEXEC_DB_USER'
+file_env 'TASKEXEC_DB_PASS'
+file_env 'TASKEXEC_ADMIN'
+export TASKEXEC_ADMIN_EMAIL="${TASKEXEC_ADMIN_EMAIL:-admin@localhost}"
+export TASKEXEC_ADMIN_NAME="${TASKEXEC_ADMIN_NAME:-TaskExec Admin}"
+file_env 'TASKEXEC_ADMIN_PASSWORD'
+export TASKEXEC_LDAP_ACTIVATED="${TASKEXEC_LDAP_ACTIVATED:-no}"
+export TASKEXEC_LDAP_HOST="${TASKEXEC_LDAP_HOST:-}"
+export TASKEXEC_LDAP_PORT="${TASKEXEC_LDAP_PORT:-}"
+export TASKEXEC_LDAP_DN_BIND="${TASKEXEC_LDAP_DN_BIND:-}"
+file_env 'TASKEXEC_LDAP_PASSWORD'
+export TASKEXEC_LDAP_DN_SEARCH="${TASKEXEC_LDAP_DN_SEARCH:-}"
+export TASKEXEC_LDAP_MAPPING_USERNAME="${TASKEXEC_LDAP_MAPPING_USERNAME:-uid}"
+export TASKEXEC_LDAP_MAPPING_FULLNAME="${TASKEXEC_LDAP_MAPPING_FULLNAME:-cn}"
+export TASKEXEC_LDAP_MAPPING_EMAIL="${TASKEXEC_LDAP_MAPPING_EMAIL:-mail}"
+file_env 'TASKEXEC_ACCESS_KEY_ENCRYPTION'
 
 
-[ -d "${JEH_CONFIG_PATH}" ] || mkdir -p "${JEH_CONFIG_PATH}" || {
-    echo "Can't create JEH config path ${JEH_CONFIG_PATH}."
+[ -d "${TASKEXEC_CONFIG_PATH}" ] || mkdir -p "${TASKEXEC_CONFIG_PATH}" || {
+    echo "Can't create TaskExec config path ${TASKEXEC_CONFIG_PATH}."
     exit 1
 }
 
-[ -d "${JEH_DB_PATH}" ] || mkdir -p "${JEH_DB_PATH}" || {
-    echo "Can't create JEH data path ${JEH_DB_PATH}."
+[ -d "${TASKEXEC_DB_PATH}" ] || mkdir -p "${TASKEXEC_DB_PATH}" || {
+    echo "Can't create TaskExec data path ${TASKEXEC_DB_PATH}."
     exit 1
 }
 
 
 #
 # Extract database host and port from config.json if they are not set.
-# Set default JEH_DB_DIALECT and JEH_DB_HOST if empty.
+# Set default TASKEXEC_DB_DIALECT and TASKEXEC_DB_HOST if empty.
 #
-if [ -z "${JEH_DB_DIALECT}" ]; then
-    if [ -f "${JEH_CONFIG_PATH}/config.json" ]; then
-        JEH_DB_DIALECT=$(cat "${JEH_CONFIG_PATH}/config.json" | jq '.dialect // ""' -r)
+if [ -z "${TASKEXEC_DB_DIALECT}" ]; then
+    if [ -f "${TASKEXEC_CONFIG_PATH}/config.json" ]; then
+        TASKEXEC_DB_DIALECT=$(cat "${TASKEXEC_CONFIG_PATH}/config.json" | jq '.dialect // ""' -r)
     fi
 fi
 
-export JEH_DB_DIALECT="${JEH_DB_DIALECT:-mysql}"
+export TASKEXEC_DB_DIALECT="${TASKEXEC_DB_DIALECT:-mysql}"
 
-if [ -z "${JEH_DB_HOST}" ]; then
-    if [ -f "${JEH_CONFIG_PATH}/config.json" ]; then
-        JEH_DB_HOST=$(cat "${JEH_CONFIG_PATH}/config.json" | jq ".${JEH_DB_DIALECT}.host // \"\"" -r)
+if [ -z "${TASKEXEC_DB_HOST}" ]; then
+    if [ -f "${TASKEXEC_CONFIG_PATH}/config.json" ]; then
+        TASKEXEC_DB_HOST=$(cat "${TASKEXEC_CONFIG_PATH}/config.json" | jq ".${TASKEXEC_DB_DIALECT}.host // \"\"" -r)
     fi
 fi
 
-if [ -z "${JEH_DB_HOST}" ]; then
-    if [ "${JEH_DB_DIALECT}" = 'sqlite' ]; then
-        export JEH_DB_HOST=${JEH_DB_PATH}/database.sqlite
+if [ -z "${TASKEXEC_DB_HOST}" ]; then
+    if [ "${TASKEXEC_DB_DIALECT}" = 'sqlite' ]; then
+        export TASKEXEC_DB_HOST=${TASKEXEC_DB_PATH}/database.sqlite
     else
-        export JEH_DB_HOST="${JEH_DB_HOST:-0.0.0.0}"
+        export TASKEXEC_DB_HOST="${TASKEXEC_DB_HOST:-0.0.0.0}"
     fi
 fi
 
 
 #
-# Remove port number from JEH_DB_HOST and put it to JEH_DB_PORT
+# Remove port number from TASKEXEC_DB_HOST and put it to TASKEXEC_DB_PORT
 #
-case "$JEH_DB_HOST" in
+case "$TASKEXEC_DB_HOST" in
   *:*)
-    JEH_DB_PORT=$(echo "$JEH_DB_HOST" | cut -d ':' -f 2)
-    JEH_DB_HOST=$(echo "$JEH_DB_HOST" | cut -d ':' -f 1)
+    TASKEXEC_DB_PORT=$(echo "$TASKEXEC_DB_HOST" | cut -d ':' -f 2)
+    TASKEXEC_DB_HOST=$(echo "$TASKEXEC_DB_HOST" | cut -d ':' -f 1)
     ;;
   *)
 esac
 
 
 #
-# Set JEH_DB_PORT if it is not set
+# Set TASKEXEC_DB_PORT if it is not set
 #
-if [ -z "${JEH_DB_PORT}" ]; then
-    case ${JEH_DB_DIALECT} in
+if [ -z "${TASKEXEC_DB_PORT}" ]; then
+    case ${TASKEXEC_DB_DIALECT} in
         mysql)
-            JEH_DB_PORT=3306
+            TASKEXEC_DB_PORT=3306
             ;;
         postgres)
-            JEH_DB_PORT=5432
+            TASKEXEC_DB_PORT=5432
             ;;
         sqlite)
             ;;
         *)
-            echoerr "Unknown database dialect: ${JEH_DB_DIALECT}"
+            echoerr "Unknown database dialect: ${TASKEXEC_DB_DIALECT}"
             exit 1
             ;;
     esac
@@ -130,12 +130,12 @@ fi
 #
 # Ping database if it is not BoltDB
 #
-if [ "${JEH_DB_DIALECT}" != 'sqlite' ]; then
-    echoerr "Pinging database on ${JEH_DB_HOST} port ${JEH_DB_PORT}..."
+if [ "${TASKEXEC_DB_DIALECT}" != 'sqlite' ]; then
+    echoerr "Pinging database on ${TASKEXEC_DB_HOST} port ${TASKEXEC_DB_PORT}..."
     TIMEOUT=30
 
 
-    while ! $(nc -z "$JEH_DB_HOST" "$JEH_DB_PORT") >/dev/null 2>&1; do
+    while ! $(nc -z "$TASKEXEC_DB_HOST" "$TASKEXEC_DB_PORT") >/dev/null 2>&1; do
         TIMEOUT=$(expr $TIMEOUT - 1)
 
         if [ $TIMEOUT -eq 0 ]; then
@@ -147,100 +147,99 @@ if [ "${JEH_DB_DIALECT}" != 'sqlite' ]; then
         sleep 1
     done
     
-    export JEH_DB_HOST="${JEH_DB_HOST}:${JEH_DB_PORT}"
+    export TASKEXEC_DB_HOST="${TASKEXEC_DB_HOST}:${TASKEXEC_DB_PORT}"
 fi
 
 
 #
 # Generate new config.json if it does not exist
 #
-JEH_FIRST_RUN=no
-if [ ! -f "${JEH_CONFIG_PATH}/config.json" ]; then
-    JEH_FIRST_RUN=yes
+TASKEXEC_FIRST_RUN=no
+if [ ! -f "${TASKEXEC_CONFIG_PATH}/config.json" ]; then
+    TASKEXEC_FIRST_RUN=yes
     echoerr "Generating setup file ${TMP_STDIN_CONFIG_FILE} ..."
 
     TMP_STDIN_CONFIG_FILE=$(mktemp)
 
 
-    JEH_TMP_PATH=${JEH_TMP_PATH:-/tmp/jeh}
-    [ -d "${JEH_TMP_PATH}" ] || mkdir -p "${JEH_TMP_PATH}" || {
-        echo "Can't create JEH tmp path ${JEH_TMP_PATH}."
+    TASKEXEC_TMP_PATH=${TASKEXEC_TMP_PATH:-/tmp/taskexec}
+    [ -d "${TASKEXEC_TMP_PATH}" ] || mkdir -p "${TASKEXEC_TMP_PATH}" || {
+        echo "Can't create TaskExec tmp path ${TASKEXEC_TMP_PATH}."
         exit 1
     }
 
 
-    case ${JEH_DB_DIALECT} in
+    case ${TASKEXEC_DB_DIALECT} in
         mysql)
-            JEH_DB_DIALECT_ID=1
+            TASKEXEC_DB_DIALECT_ID=1
             ;;
         postgres)
-            JEH_DB_DIALECT_ID=3
+            TASKEXEC_DB_DIALECT_ID=3
             ;;
         sqlite)
-            JEH_DB_DIALECT_ID=4
+            TASKEXEC_DB_DIALECT_ID=4
             ;;
         *)
-            echoerr "Unknown database dialect: ${JEH_DB_DIALECT}"
+            echoerr "Unknown database dialect: ${TASKEXEC_DB_DIALECT}"
             exit 1
             ;;
     esac
 
 
     cat << EOF > "${TMP_STDIN_CONFIG_FILE}"
-${JEH_DB_DIALECT_ID}
+${TASKEXEC_DB_DIALECT_ID}
 EOF
 
-    if [ "${JEH_DB_DIALECT}" = "sqlite" ]; then
+    if [ "${TASKEXEC_DB_DIALECT}" = "sqlite" ]; then
         cat << EOF >> "${TMP_STDIN_CONFIG_FILE}"
-${JEH_DB_HOST}
+${TASKEXEC_DB_HOST}
 EOF
     else
         cat << EOF >> "${TMP_STDIN_CONFIG_FILE}"
-${JEH_DB_HOST}
-${JEH_DB_USER}
-${JEH_DB_PASS}
-${JEH_DB:-jeh}
+${TASKEXEC_DB_HOST}
+${TASKEXEC_DB_USER}
+${TASKEXEC_DB_PASS}
+${TASKEXEC_DB:-taskexec}
 EOF
     fi
 
     cat << EOF >> "${TMP_STDIN_CONFIG_FILE}"
-${JEH_TMP_PATH}
-${JEH_WEB_ROOT:-}
+${TASKEXEC_TMP_PATH}
+${TASKEXEC_WEB_ROOT:-}
 no
 no
 no
 no
-no
-${JEH_LDAP_ACTIVATED}
+${TASKEXEC_LDAP_ACTIVATED}
 EOF
 
-    if [ "${JEH_LDAP_ACTIVATED}" = "yes" ]; then
+    if [ "${TASKEXEC_LDAP_ACTIVATED}" = "yes" ]; then
         cat << EOF >> "${TMP_STDIN_CONFIG_FILE}"
-${JEH_LDAP_HOST}:${JEH_LDAP_PORT}
-${JEH_LDAP_NEEDTLS:-no}
-${JEH_LDAP_DN_BIND}
-${JEH_LDAP_PASSWORD}
-${JEH_LDAP_DN_SEARCH}
-${JEH_LDAP_SEARCH_FILTER:-(uid=%s)}
-${JEH_LDAP_MAPPING_DN:-dn}
-${JEH_LDAP_MAPPING_USERNAME}
-${JEH_LDAP_MAPPING_FULLNAME}
-${JEH_LDAP_MAPPING_EMAIL}
+${TASKEXEC_LDAP_HOST}:${TASKEXEC_LDAP_PORT}
+${TASKEXEC_LDAP_NEEDTLS:-no}
+${TASKEXEC_LDAP_DN_BIND}
+${TASKEXEC_LDAP_PASSWORD}
+${TASKEXEC_LDAP_DN_SEARCH}
+${TASKEXEC_LDAP_SEARCH_FILTER:-(uid=%s)}
+${TASKEXEC_LDAP_MAPPING_DN:-dn}
+${TASKEXEC_LDAP_MAPPING_USERNAME}
+${TASKEXEC_LDAP_MAPPING_FULLNAME}
+${TASKEXEC_LDAP_MAPPING_EMAIL}
 EOF
     fi;
 
     cat << EOF >> "${TMP_STDIN_CONFIG_FILE}"
-${JEH_CONFIG_PATH}
-${JEH_ADMIN}
-${JEH_ADMIN_EMAIL}
-${JEH_ADMIN_NAME}
-${JEH_ADMIN_PASSWORD}
+${TASKEXEC_CONFIG_PATH}
+${TASKEXEC_ADMIN}
+${TASKEXEC_ADMIN_EMAIL}
+${TASKEXEC_ADMIN_NAME}
+${TASKEXEC_ADMIN_PASSWORD}
 EOF
 
 
-    echoerr "Executing jeh setup"
+    echoerr "Executing taskexec setup"
     if test "$#" -ne 1; then
-        /usr/local/bin/jeh setup - < "${TMP_STDIN_CONFIG_FILE}"
+        /usr/local/bin/taskexec setup - < "${TMP_STDIN_CONFIG_FILE}"
     else
         "$1" setup - < "${TMP_STDIN_CONFIG_FILE}"
     fi
@@ -251,51 +250,51 @@ fi
 #
 # Install additional python dependencies
 #
-if test -f "${JEH_CONFIG_PATH}/requirements.txt"; then
+if test -f "${TASKEXEC_CONFIG_PATH}/requirements.txt"; then
     echoerr "Installing additional python dependencies"
     pip3 install --upgrade \
-        -r "${JEH_CONFIG_PATH}/requirements.txt"
+        -r "${TASKEXEC_CONFIG_PATH}/requirements.txt"
 else
     echoerr "No additional python dependencies to install"
 fi
 
 #
-# Migrate from BoltDB if JEH_MIGRATE_FROM_BOLTDB is set (first run only, SQLite only, skipped if DB file already exists)
+# Migrate from BoltDB if TASKEXEC_MIGRATE_FROM_BOLTDB is set (first run only, SQLite only, skipped if DB file already exists)
 #
-case "${JEH_MIGRATE_FROM_BOLTDB:-}" in
+case "${TASKEXEC_MIGRATE_FROM_BOLTDB:-}" in
     [Tt][Rr][Uu][Ee]|[Yy][Ee][Ss])
-        JEH_MIGRATE_FROM_BOLTDB="${JEH_DB_PATH}/database.boltdb"
+        TASKEXEC_MIGRATE_FROM_BOLTDB="${TASKEXEC_DB_PATH}/database.boltdb"
         ;;
 esac
 
-if [ -n "${JEH_MIGRATE_FROM_BOLTDB:-}" ] && [ "${JEH_FIRST_RUN}" = "yes" ]; then
-    if [ "${JEH_DB_DIALECT}" != "sqlite" ]; then
-        echoerr "JEH_MIGRATE_FROM_BOLTDB is only supported with SQLite dialect, ignoring"
+if [ -n "${TASKEXEC_MIGRATE_FROM_BOLTDB:-}" ] && [ "${TASKEXEC_FIRST_RUN}" = "yes" ]; then
+    if [ "${TASKEXEC_DB_DIALECT}" != "sqlite" ]; then
+        echoerr "TASKEXEC_MIGRATE_FROM_BOLTDB is only supported with SQLite dialect, ignoring"
     else
-        echoerr "Migrating from BoltDB: ${JEH_MIGRATE_FROM_BOLTDB}"
-        MIGRATE_ARGS="--from-boltdb=${JEH_MIGRATE_FROM_BOLTDB} --merge-existing-users"
-        if [ -n "${JEH_MIGRATE_SKIP_TASK_OUTPUT:-}" ]; then
+        echoerr "Migrating from BoltDB: ${TASKEXEC_MIGRATE_FROM_BOLTDB}"
+        MIGRATE_ARGS="--from-boltdb=${TASKEXEC_MIGRATE_FROM_BOLTDB} --merge-existing-users"
+        if [ -n "${TASKEXEC_MIGRATE_SKIP_TASK_OUTPUT:-}" ]; then
             MIGRATE_ARGS="${MIGRATE_ARGS} --skip-task-output"
         fi
         if test "$#" -ne 1; then
-            /usr/local/bin/jeh migrate ${MIGRATE_ARGS} --config "${JEH_CONFIG_PATH}/config.json"
+            /usr/local/bin/taskexec migrate ${MIGRATE_ARGS} --config "${TASKEXEC_CONFIG_PATH}/config.json"
         else
-            "$1" migrate ${MIGRATE_ARGS} --config "${JEH_CONFIG_PATH}/config.json"
+            "$1" migrate ${MIGRATE_ARGS} --config "${TASKEXEC_CONFIG_PATH}/config.json"
         fi
     fi
 fi
 
-# Import project if environment variable JEH_IMPORT_PROJECT_FILE is defined.
-# Optionally use JEH_IMPORT_PROJECT_NAME to specify the project name.
-if [ -n "${JEH_IMPORT_PROJECT_FILE:-}" ] && [ "${JEH_FIRST_RUN}" = "yes" ]; then
-    echoerr "Importing project from ${JEH_IMPORT_PROJECT_FILE}"
-    IMPORT_ARGS="--file ${JEH_IMPORT_PROJECT_FILE}"
-    if [ -n "${JEH_IMPORT_PROJECT_NAME:-}" ]; then
-        echoerr "Using project name: ${JEH_IMPORT_PROJECT_NAME}"
-        IMPORT_ARGS="${IMPORT_ARGS} --project-name ${JEH_IMPORT_PROJECT_NAME}"
+# Import project if environment variable TASKEXEC_IMPORT_PROJECT_FILE is defined.
+# Optionally use TASKEXEC_IMPORT_PROJECT_NAME to specify the project name.
+if [ -n "${TASKEXEC_IMPORT_PROJECT_FILE:-}" ] && [ "${TASKEXEC_FIRST_RUN}" = "yes" ]; then
+    echoerr "Importing project from ${TASKEXEC_IMPORT_PROJECT_FILE}"
+    IMPORT_ARGS="--file ${TASKEXEC_IMPORT_PROJECT_FILE}"
+    if [ -n "${TASKEXEC_IMPORT_PROJECT_NAME:-}" ]; then
+        echoerr "Using project name: ${TASKEXEC_IMPORT_PROJECT_NAME}"
+        IMPORT_ARGS="${IMPORT_ARGS} --project-name ${TASKEXEC_IMPORT_PROJECT_NAME}"
     fi
     if test "$#" -ne 1; then
-        /usr/local/bin/jeh project import ${IMPORT_ARGS} --config "${JEH_CONFIG_PATH}/config.json" || echoerr "Project import failed"
+        /usr/local/bin/taskexec project import ${IMPORT_ARGS} --config "${TASKEXEC_CONFIG_PATH}/config.json" || echoerr "Project import failed"
     else
         "$1" project import ${IMPORT_ARGS} || echoerr "Project import failed"
     fi
@@ -303,11 +302,11 @@ fi
 
 
 #
-# Start JEH server
+# Start TaskExec server
 #
-echoerr "Starting jeh server"
+echoerr "Starting taskexec server"
 if test "$#" -ne 1; then
-    exec /usr/local/bin/jeh server --config "${JEH_CONFIG_PATH}/config.json"
+    exec /usr/local/bin/taskexec server --config "${TASKEXEC_CONFIG_PATH}/config.json"
 else
     exec "$@"
 fi

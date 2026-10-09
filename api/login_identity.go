@@ -4,8 +4,8 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/util"
 )
 
 // Sentinel errors let the OIDC redirect handler map link failures to
@@ -44,7 +44,7 @@ type externalUserProfile struct {
 	EmailVerified bool
 }
 
-// resolveExternalUser maps an external identity to a JEH user:
+// resolveExternalUser maps an external identity to a TaskExec user:
 //  1. by (provider, external_uid) — the only trusted key;
 //  2. by email/username — only under external_auth_email_matching mode,
 //     only External users (local accounts are never adopted);
@@ -163,14 +163,14 @@ func matchExternalUserByEmail(store db.Store, p externalUserProfile) (db.User, e
 	return user, nil
 }
 
-// ldapProfileMatchesJEHUser checks that the LDAP directory profile
-// belongs to the JEH account being linked. A successful bind only proves
+// ldapProfileMatchesTaskExecUser checks that the LDAP directory profile
+// belongs to the TaskExec account being linked. A successful bind only proves
 // ownership of the LDAP credentials, not that they correspond to this account.
-func ldapProfileMatchesJEHUser(ldapUser, jehUser db.User) bool {
-	if ldapUser.Email != "" && strings.EqualFold(ldapUser.Email, jehUser.Email) {
+func ldapProfileMatchesTaskExecUser(ldapUser, taskexecUser db.User) bool {
+	if ldapUser.Email != "" && strings.EqualFold(ldapUser.Email, taskexecUser.Email) {
 		return true
 	}
-	if ldapUser.Username != "" && strings.EqualFold(ldapUser.Username, jehUser.Username) {
+	if ldapUser.Username != "" && strings.EqualFold(ldapUser.Username, taskexecUser.Username) {
 		return true
 	}
 	return false

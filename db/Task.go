@@ -7,13 +7,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/impishMD/jeh/pkg/git"
-	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/taskexec/pkg/git"
+	"github.com/impishMD/taskexec/pkg/tz"
 
 	"github.com/go-gorp/gorp/v3"
 
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/util"
 )
 
 type DefaultTaskParams struct {

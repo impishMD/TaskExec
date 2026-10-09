@@ -8,13 +8,12 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/tz"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/util"
 	"github.com/pquerna/otp"
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/tz"
-	proApi "github.com/impishMD/jeh/pro/api"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/util"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/pquerna/otp/totp"
@@ -22,13 +21,13 @@ import (
 
 func getSession(r *http.Request) (*db.Session, bool) {
 	// fetch session from cookie
-	cookie, err := r.Cookie("jeh")
+	cookie, err := r.Cookie("taskexec")
 	if err != nil {
 		return nil, false
 	}
 
 	value := make(map[string]any)
-	if err = util.Cookie.Decode("jeh", cookie.Value, &value); err != nil {
+	if err = util.Cookie.Decode("taskexec", cookie.Value, &value); err != nil {
 		//w.WriteHeader(http.StatusUnauthorized)
 		return nil, false
 	}
@@ -69,8 +68,8 @@ func getSession(r *http.Request) (*db.Session, bool) {
 // recordLoginAfterMFA records the login once the second factor is accepted.
 func recordLoginAfterMFA(ctx context.Context, r *http.Request, user db.User) {
 	value := make(map[string]any)
-	if cookie, err := r.Cookie("jeh"); err == nil {
-		_ = util.Cookie.Decode("jeh", cookie.Value, &value)
+	if cookie, err := r.Cookie("taskexec"); err == nil {
+		_ = util.Cookie.Decode("taskexec", cookie.Value, &value)
 	}
 	method, _ := value["method"].(string)
 	provider, _ := value["provider"].(string)
@@ -194,7 +193,7 @@ func verifySession(w http.ResponseWriter, r *http.Request) {
 
 	switch session.VerificationMethod {
 	case db.SessionVerificationEmail:
-		proApi.VerifySessionByEmail(session, w, r)
+		helpers.WriteErrorStatus(w, "EMAIL_OTP_UNAVAILABLE", http.StatusForbidden)
 		return
 
 	case db.SessionVerificationTotp:
@@ -436,7 +435,7 @@ func requestOriginHost(r *http.Request) (string, bool) {
 	return "", false
 }
 
-// isSameOriginHost reports whether host belongs to JEH itself. Both the
+// isSameOriginHost reports whether host belongs to TaskExec itself. Both the
 // configured public web host and the host the request was addressed to are
 // accepted, so reverse-proxy deployments keep working.
 func isSameOriginHost(host string, r *http.Request) bool {

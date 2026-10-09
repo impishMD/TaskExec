@@ -158,7 +158,7 @@ export default {
 
         EventBus.$emit('i-snackbar', {
           color: 'success',
-          text: `Workflow "${this.item.name}" deleted`,
+          text: this.$t('workflowDeleted', { name: this.item.name }),
         });
 
         await this.$router.push({

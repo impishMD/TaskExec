@@ -6,12 +6,12 @@ volumes:
 services:
   server:
     environment:
-      JEH_DB_DIALECT: mysql
-      JEH_DB_HOST: db
-      JEH_DB_PORT: 3306
-      JEH_DB_USER: ${MYSQL_USERNAME:-jeh}
-      JEH_DB_PASS: ${MYSQL_PASSWORD:-jeh}
-      JEH_DB: ${MYSQL_DATABASE:-jeh}
+      TASKEXEC_DB_DIALECT: mysql
+      TASKEXEC_DB_HOST: db
+      TASKEXEC_DB_PORT: 3306
+      TASKEXEC_DB_USER: ${MYSQL_USERNAME:-taskexec}
+      TASKEXEC_DB_PASS: ${MYSQL_PASSWORD:-taskexec}
+      TASKEXEC_DB: ${MYSQL_DATABASE:-taskexec}
     depends_on:
       - db
 
@@ -20,8 +20,8 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT:-root}
-      MYSQL_USER: ${MYSQL_USERNAME:-jeh}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-jeh}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-jeh}
+      MYSQL_USER: ${MYSQL_USERNAME:-taskexec}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-taskexec}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-taskexec}
     volumes:
       - mysql:/var/lib/mysql

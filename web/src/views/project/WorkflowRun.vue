@@ -28,7 +28,7 @@
         :color="statusColor(details.run.status)"
         small
         class="mr-3"
-      >{{ details.run.status }}</v-chip>
+      >{{ statusTitle(details.run.status) }}</v-chip>
 
       <v-btn
         v-if="canStopRun"
@@ -52,16 +52,6 @@
 
     <div class="WorkflowRun__body">
       <template v-if="details != null">
-        <v-alert
-          v-if="hasRemoteRunnerNodes"
-          type="warning"
-          dense
-          text
-          tile
-          class="ma-0"
-          icon="mdi-alert-outline"
-        >{{ $t('workflowArtifactsRemoteRunnerWarning') }}</v-alert>
-
         <div class="WorkflowRun__graph">
           <WorkflowGraph
             v-if="workflow"
@@ -141,18 +131,22 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    max-width: 92%;
+    width: min(420px, 92%);
     z-index: 5;
   }
 
   &__approval {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
     border-left: 3px solid #ff9800 !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25) !important;
   }
 
   &__approvalText {
+    flex: 0 0 100%;
+    min-width: 0;
     font-size: 13px;
     word-break: break-word;
   }
@@ -160,6 +154,7 @@
 </style>
 
 <script>
+import DisplayLabelsMixin from '@/components/DisplayLabelsMixin';
 import axios from 'axios';
 import EventBus from '@/event-bus';
 import { getErrorMessage } from '@/lib/error';
@@ -169,7 +164,7 @@ import { USER_PERMISSIONS } from '@/lib/constants';
 
 export default {
   components: { WorkflowGraph },
-  mixins: [PermissionsCheck],
+  mixins: [DisplayLabelsMixin, PermissionsCheck],
   props: {
     projectId: Number,
   },
@@ -201,14 +196,6 @@ export default {
       return (status === 'running' || status === 'approval')
         && this.can(USER_PERMISSIONS.runProjectTasks);
     },
-    hasRemoteRunnerNodes() {
-      if (!this.details) return false;
-      return (this.details.nodes || []).some(
-        (n) => n.task && n.task.used_runner_id != null,
-      );
-    },
-    // node.id -> run info for the card: status, timing, live delay countdown,
-    // the task to open on click and the approval message.
     nodeRuns() {
       const map = {};
       (this.details?.nodes || []).forEach((n) => {

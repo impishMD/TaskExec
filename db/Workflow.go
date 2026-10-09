@@ -3,7 +3,7 @@ package db
 import (
 	"time"
 
-	"github.com/impishMD/jeh/pkg/common_errors"
+	"github.com/impishMD/taskexec/pkg/common_errors"
 )
 
 type WorkflowEdgeCondition string
@@ -61,7 +61,7 @@ type WorkflowTemplate struct {
 // Nodes and edges belong to a revision and are never rewritten: saving a
 // template appends a revision, a run pins the revision it started from, so an
 // edit can neither change a running run nor orphan the node ids of past runs.
-// Revisions no run refers to are deleted when a newer one is saved.
+// Saved revisions are retained, including revisions without runs.
 type WorkflowRevision struct {
 	ID int `db:"id" json:"id"`
 
@@ -164,7 +164,8 @@ type WorkflowRun struct {
 
 	// RevisionID pins the graph revision the run executes; the engine and the
 	// run view read nodes and edges through it, never through the template.
-	RevisionID int `db:"revision_id" json:"revision_id,omitempty" backup:"-"`
+	RevisionID      int  `db:"revision_id" json:"revision_id,omitempty" backup:"-"`
+	StartedByUserID *int `db:"started_by_user_id" json:"started_by_user_id,omitempty" backup:"-"`
 
 	Status WorkflowRunStatus `db:"status" json:"status" backup:"status"`
 

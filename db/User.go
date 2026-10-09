@@ -3,8 +3,8 @@ package db
 import (
 	"time"
 
-	"github.com/impishMD/jeh/pkg/common_errors"
-	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/taskexec/pkg/common_errors"
+	"github.com/impishMD/taskexec/pkg/tz"
 )
 
 // User is the model for an entity which has access to the API
@@ -18,7 +18,6 @@ type User struct {
 	Admin    bool      `db:"admin" json:"admin"`
 	External bool      `db:"external" json:"external"`
 	Alert    bool      `db:"alert" json:"alert"`
-	Pro      bool      `db:"pro" json:"pro"`
 
 	Totp     *UserTotp     `db:"-" json:"totp,omitempty"`
 	EmailOtp *UserEmailOtp `db:"-" json:"email_otp,omitempty"`

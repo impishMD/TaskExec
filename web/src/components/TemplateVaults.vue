@@ -6,7 +6,7 @@
       content-class="NestedDialog"
       width="300"
     >
-      <v-card :color="$vuetify.theme.dark ? '#212121' : 'white'">
+      <v-card>
         <v-card-title></v-card-title>
         <v-card-text class="pb-0">
           <v-form
@@ -61,15 +61,15 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
-            color="blue darken-1"
+            color="primary"
             text
             @click="editDialog = false"
           >
             {{ $t('cancel') }}
           </v-btn>
           <v-btn
-            color="blue darken-1"
-            text
+            color="primary"
+            depressed
             @click="saveVault()"
           >
             {{ editedVaultIndex == null ? $t('add') : $t('save') }}

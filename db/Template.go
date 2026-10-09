@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 
-	"github.com/impishMD/jeh/pkg/common_errors"
-	"github.com/impishMD/jeh/pkg/galaxy"
-	"github.com/impishMD/jeh/pkg/git"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/pkg/common_errors"
+	"github.com/impishMD/taskexec/pkg/galaxy"
+	"github.com/impishMD/taskexec/pkg/git"
+	"github.com/impishMD/taskexec/util"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -88,7 +89,7 @@ func (t TemplateApp) RepositoryFileFilter() RepositoryFileFilter {
 	case AppAnsible, "":
 		return RepositoryFileFilter{Extensions: []string{".yml", ".yaml"}}
 	default:
-		// An app from the configuration file: JEH knows nothing about its
+		// An app from the configuration file: TaskExec knows nothing about its
 		// files and must not hide the one the user wants.
 		return RepositoryFileFilter{}
 	}
@@ -293,6 +294,18 @@ type TerraformTemplateParams struct {
 	BackendFilename  string `json:"backend_filename,omitempty"`
 }
 
+var terraformBackendFilename = regexp.MustCompile(`^[a-zA-Z0-9_\-.]+\.tf$`)
+
+func (p TerraformTemplateParams) ValidateBackendFilename() error {
+	if p.BackendFilename == "" {
+		return nil
+	}
+	if !terraformBackendFilename.MatchString(p.BackendFilename) {
+		return common_errors.NewValidationError("backend filename must be a .tf file name without directories")
+	}
+	return nil
+}
+
 type SurveyVarEnumValue struct {
 	Name  string `json:"name" backup:"name"`
 	Value string `json:"value" backup:"value"`
@@ -335,7 +348,7 @@ type Template struct {
 	// Deprecated: Use EnvironmentIDs instead.
 	EnvironmentID int `db:"-" json:"environment_id" backup:"-"`
 
-	// Name as described in https://github.com/impishMD/jeh/issues/188
+	// Name as described in https://github.com/impishMD/TaskExec/issues/188
 	Name string `db:"name" json:"name"`
 	// playbook name in the form of "some_play.yml"
 	Playbook string `db:"playbook" json:"playbook"`
@@ -344,7 +357,7 @@ type Template struct {
 	WorkingDirectory *string `db:"working_directory" json:"working_directory,omitempty"`
 	// to fit into []string
 	Arguments *string `db:"arguments" json:"arguments,omitempty"`
-	// if true, jeh will not prepend any arguments to `arguments` like inventory, etc
+	// if true, taskexec will not prepend any arguments to `arguments` like inventory, etc
 	AllowOverrideArgsInTask bool `db:"allow_override_args_in_task" json:"allow_override_args_in_task,omitempty"`
 
 	Description *string `db:"description" json:"description,omitempty"`
@@ -455,6 +468,14 @@ func (tpl *Template) Validate() error {
 	}
 
 	switch tpl.App {
+	case AppTerraform, AppTofu, AppTerragrunt:
+		var params TerraformTemplateParams
+		if err := tpl.FillParams(&params); err != nil {
+			return common_errors.NewValidationError("invalid Terraform task params")
+		}
+		if err := params.ValidateBackendFilename(); err != nil {
+			return err
+		}
 	case AppAnsible:
 		if tpl.InventoryID == nil {
 			return common_errors.NewValidationError("template inventory can not be empty")

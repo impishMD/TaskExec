@@ -3,12 +3,12 @@ package tasks
 import (
 	"net/http"
 
-	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/taskexec/pkg/task_logger"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/services/audit"
-	task2 "github.com/impishMD/jeh/services/tasks"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/services/audit"
+	task2 "github.com/impishMD/taskexec/services/tasks"
 )
 
 func TaskMiddleware(next http.Handler) http.Handler {

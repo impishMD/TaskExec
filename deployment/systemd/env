@@ -1,1 +1,1 @@
-JEH_CONFIG=/etc/jeh/config.json
+TASKEXEC_CONFIG=/etc/taskexec/config.json

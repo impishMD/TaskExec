@@ -5,11 +5,11 @@ import (
 	"path"
 	"strconv"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/db_lib"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/db_lib"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/util"
 )
 
 func (t *LocalExecutor) installInventory() (err error) {

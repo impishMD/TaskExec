@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 	"github.com/stretchr/testify/assert"
 )
 

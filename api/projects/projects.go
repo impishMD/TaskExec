@@ -3,12 +3,12 @@ package projects
 import (
 	"net/http"
 
-	"github.com/impishMD/jeh/services/server"
+	"github.com/impishMD/taskexec/services/server"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/util"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -101,7 +101,7 @@ func (c *ProjectsController) createDemoProject(projectID int, noneKeyID int, sto
 	demoRepo, err = store.CreateRepository(db.Repository{
 		Name:      "Demo",
 		ProjectID: projectID,
-		GitURL:    "https://github.com/impishMD/jeh.git",
+		GitURL:    "https://github.com/impishMD/TaskExec.git",
 		GitBranch: "develop",
 		SSHKeyID:  noneKeyID,
 	})
@@ -148,9 +148,9 @@ func (c *ProjectsController) createDemoProject(projectID int, noneKeyID int, sto
 		return
 	}
 
-	desc = "Checks local execution with Ansible in JEH."
+	desc = "Checks local execution with Ansible in TaskExec."
 	_, err = store.CreateTemplate(db.Template{
-		Name:           "Check JEH execution environment",
+		Name:           "Check TaskExec execution environment",
 		Playbook:       "examples/demo/ping.yml",
 		Description:    &desc,
 		ProjectID:      projectID,

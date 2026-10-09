@@ -51,7 +51,7 @@ type Runner struct {
 	// Registered is a transient flag (never persisted) used at creation time to
 	// request a runner without an auth token. Such a runner gets a one-time,
 	// short-lived registration token instead and must be registered later by
-	// presenting that token to `jeh runner register`.
+	// presenting that token to `taskexec runner register`.
 	Registered bool `db:"-" json:"registered"`
 
 	// Status is a transient field (never persisted) reporting whether the runner

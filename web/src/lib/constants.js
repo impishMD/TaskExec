@@ -28,15 +28,19 @@ export const USER_PERMISSIONS = {
 export const USER_ROLES = [{
   slug: 'owner',
   name: 'Owner',
+  titleKey: 'roleOwner',
 }, {
   slug: 'manager',
   name: 'Manager',
+  titleKey: 'roleManager',
 }, {
   slug: 'task_runner',
   name: 'Task Runner',
+  titleKey: 'roleTaskRunner',
 }, {
   slug: 'guest',
   name: 'Guest',
+  titleKey: 'roleGuest',
 }];
 
 export const MATCHER_TYPE_TITLES = {
@@ -226,13 +230,13 @@ export const ANSIBLE_FIELDS = {
 export const TERRAFORM_FIELDS = {
   ...BASE_FIELDS,
   playbook: {
-    label: 'Subdirectory path (Optional)',
+    label: 'subdirectoryPathOptional',
     optional: true,
     // The field names a directory, so the picker lists one level at a time.
     directories: true,
   },
   inventory: {
-    label: 'Workspace (Optional)',
+    label: 'workspaceOptional',
   },
   auto_approve: {
     label: 'auto_approve',
@@ -257,7 +261,7 @@ export const TERRAFORM_FIELDS = {
 export const UNKNOWN_APP_FIELDS = {
   ...BASE_FIELDS,
   playbook: {
-    label: 'Script Filename *',
+    label: 'scriptFilename',
   },
   inventory: undefined,
 };
@@ -302,12 +306,12 @@ export const ROLE_PERMISSIONS = {
   }],
   template: [{
     permission: 1,
-    label: 'Can run tasks',
+    label: 'canRunTasks',
     color: 'blue',
     textColor: 'white',
   }, {
     permission: 4,
-    label: 'Can update the template',
+    label: 'canUpdateTemplate',
     color: 'orange',
     textColor: 'white',
   }],

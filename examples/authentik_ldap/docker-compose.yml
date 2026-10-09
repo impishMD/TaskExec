@@ -70,32 +70,32 @@ services:
       AUTHENTIK_INSECURE: "false"
     env_file:
       - .env
-  jeh:
-    image: impishmd/jeh:latest
+  taskexec:
+    image: impishmd/taskexec:latest
     environment:
-      JEH_DB_DIALECT: "sqlite"
-      JEH_ADMIN_PASSWORD: "changeme"
-      JEH_ADMIN_NAME: "admin"
-      JEH_ADMIN_EMAIL: "admin@example.org"
-      JEH_LDAP_ACTIVATED: "yes"
-      JEH_LDAP_SERVER: "ldap:3389"
-      JEH_LDAP_SEARCH_DN: "ou=users,dc=ldap,dc=goauthentik,dc=io"
-      JEH_LDAP_BIND_DN: "cn=ldapservice,ou=users,dc=ldap,dc=goauthentik,dc=io"
-      JEH_LDAP_SEARCH_FILTER: "(&(objectClass=inetOrgPerson)(cn=%s))"
-      JEH_NON_ADMIN_CAN_CREATE_PROJECT: "yes"
-      JEH_LDAP_MAPPING_DN: "dn"
-      JEH_LDAP_MAPPING_MAIL: "mail"
-      JEH_LDAP_MAPPING_UID: "uid"
-      JEH_LDAP_MAPPING_CN: "cn"
+      TASKEXEC_DB_DIALECT: "sqlite"
+      TASKEXEC_ADMIN_PASSWORD: "changeme"
+      TASKEXEC_ADMIN_NAME: "admin"
+      TASKEXEC_ADMIN_EMAIL: "admin@example.org"
+      TASKEXEC_LDAP_ACTIVATED: "yes"
+      TASKEXEC_LDAP_SERVER: "ldap:3389"
+      TASKEXEC_LDAP_SEARCH_DN: "ou=users,dc=ldap,dc=goauthentik,dc=io"
+      TASKEXEC_LDAP_BIND_DN: "cn=ldapservice,ou=users,dc=ldap,dc=goauthentik,dc=io"
+      TASKEXEC_LDAP_SEARCH_FILTER: "(&(objectClass=inetOrgPerson)(cn=%s))"
+      TASKEXEC_NON_ADMIN_CAN_CREATE_PROJECT: "yes"
+      TASKEXEC_LDAP_MAPPING_DN: "dn"
+      TASKEXEC_LDAP_MAPPING_MAIL: "mail"
+      TASKEXEC_LDAP_MAPPING_UID: "uid"
+      TASKEXEC_LDAP_MAPPING_CN: "cn"
     env_file:
       - .env
     ports:
       - "3000:3000"
     volumes:
-      - jeh_data:/var/lib/jeh
+      - taskexec_data:/var/lib/taskexec
     depends_on:
       - ldap
 volumes:
   database:
   redis:
-  jeh_data:
+  taskexec_data:

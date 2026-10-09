@@ -6,9 +6,9 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/util"
 )
 
 type ShellApp struct {

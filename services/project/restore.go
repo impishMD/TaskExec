@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/common_errors"
-	"github.com/impishMD/jeh/pkg/random"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/common_errors"
+	"github.com/impishMD/taskexec/pkg/random"
 )
 
 func getEntryByName[T BackupEntry](name *string, items []T) *T {
@@ -68,11 +68,26 @@ func (e BackupRole) Restore(b *BackupDB) error {
 }
 
 func (e BackupEnvironment) Verify(backup *BackupFormat) error {
+	for _, source := range e.Sources {
+		key := findEntityByName(&source.Key, backup.Keys)
+		if key == nil || key.Owner != db.AccessKeyShared || (key.Type != db.AccessKeyObject && key.Type != db.AccessKeyString) {
+			return fmt.Errorf("key source does not exist or has an incompatible type")
+		}
+	}
+	for _, binding := range e.Bindings {
+		key := findEntityByName(&binding.Key, backup.Keys)
+		if key == nil || key.Owner != db.AccessKeyShared || (key.Type != db.AccessKeyObject && key.Type != db.AccessKeyString) {
+			return fmt.Errorf("variable binding key does not exist or has an incompatible type")
+		}
+	}
 	return verifyDuplicate[BackupEnvironment](e.Name, backup.Environments)
 }
 
 func (e BackupEnvironment) Restore(b *BackupDB) error {
 	env := e.Environment
+	env.KeyBindings = nil
+	env.KeySources = nil
+	env.SecretExpressions = nil
 	env.ProjectID = b.meta.ID
 	newEnv, err := b.store.CreateEnvironment(env)
 	if err != nil {
@@ -84,6 +99,34 @@ func (e BackupEnvironment) Restore(b *BackupDB) error {
 
 func (e BackupView) Verify(backup *BackupFormat) error {
 	return verifyDuplicate[BackupView](e.Title, backup.Views)
+}
+
+func (e BackupEnvironment) restoreBindings(b *BackupDB) error {
+	if len(e.Bindings) == 0 && len(e.Sources) == 0 && len(e.SecretExpressions) == 0 {
+		return nil
+	}
+	env := findEntityByName(&e.Name, b.environments)
+	if env == nil {
+		return fmt.Errorf("variable group does not exist")
+	}
+	for _, binding := range e.Bindings {
+		key := findEntityByName(&binding.Key, b.keys)
+		if key == nil {
+			return fmt.Errorf("variable binding key does not exist")
+		}
+		env.KeyBindings = append(env.KeyBindings, db.EnvironmentKeyBinding{
+			Name: binding.Name, Type: binding.Type, KeyID: key.ID, Field: binding.Field,
+		})
+	}
+	for _, source := range e.Sources {
+		key := findEntityByName(&source.Key, b.keys)
+		if key == nil {
+			return fmt.Errorf("key source does not exist")
+		}
+		env.KeySources = append(env.KeySources, db.EnvironmentKeySource{Prefix: source.Prefix, KeyID: key.ID})
+	}
+	env.SecretExpressions = e.SecretExpressions
+	return b.store.UpdateEnvironment(*env)
 }
 
 func (e BackupView) Restore(b *BackupDB) error {
@@ -732,6 +775,11 @@ func (backup *BackupFormat) Restore(user db.User, store db.Store, workflowStore 
 	for i, o := range backup.Keys {
 		if err := o.Restore(&b); err != nil {
 			return &newProject, fmt.Errorf("error at keys[%d]: %s", i, err.Error())
+		}
+	}
+	for i, o := range backup.Environments {
+		if err := o.restoreBindings(&b); err != nil {
+			return &newProject, fmt.Errorf("error at environment bindings[%d]: %s", i, err.Error())
 		}
 	}
 

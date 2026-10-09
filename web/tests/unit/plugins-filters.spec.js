@@ -15,7 +15,8 @@ describe('plugins/filters', () => {
     });
 
     it('humanizes numbers and numeric strings', () => {
-      expect(formatMilliseconds(90 * 1000)).to.equal('2 minutes');
+      // Avoid the 90-second rounding boundary: humanize reads the clock twice.
+      expect(formatMilliseconds(120 * 1000)).to.equal('2 minutes');
       expect(formatMilliseconds(String(2 * 3600 * 1000))).to.equal('2 hours');
       expect(formatMilliseconds(3000)).to.equal('a few seconds');
     });

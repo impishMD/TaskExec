@@ -20,7 +20,7 @@
     </EditDialog>
 
     <ObjectRefsDialog
-      object-title="repository"
+      :object-title="$t('repository')"
       :object-refs="itemRefs"
       :project-id="projectId"
       v-model="itemRefsDialog"

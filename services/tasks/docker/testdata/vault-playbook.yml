@@ -1,0 +1,9 @@
+- hosts: all
+  gather_facts: false
+  vars_files:
+    - vault.yml
+  tasks:
+    - name: Validate encrypted fixture
+      ansible.builtin.assert:
+        that: vault_fixture == 'fixture-decrypted'
+      no_log: true

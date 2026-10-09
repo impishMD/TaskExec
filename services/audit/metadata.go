@@ -1,6 +1,13 @@
 package audit
 
-import "github.com/impishMD/jeh/db"
+import "github.com/impishMD/taskexec/db"
+
+type WorkflowMetadata struct {
+	RunID      int    `json:"run_id,omitempty"`
+	RevisionID int    `json:"revision_id,omitempty"`
+	NodeID     int    `json:"node_id,omitempty"`
+	Status     string `json:"status,omitempty"`
+}
 
 type AuthMethodMetadata struct {
 	Method   string `json:"method"`
@@ -14,7 +21,6 @@ type DenyMetadata struct {
 
 type UserCreateMetadata struct {
 	Admin    bool `json:"admin"`
-	Pro      bool `json:"pro"`
 	External bool `json:"external"`
 }
 
@@ -27,7 +33,6 @@ type UserUpdateMetadata struct {
 	// Names only, never values.
 	Fields []string    `json:"fields"`
 	Admin  *BoolChange `json:"admin,omitempty"`
-	Pro    *BoolChange `json:"pro,omitempty"`
 }
 
 type MembershipMetadata struct {
@@ -164,4 +169,11 @@ type TaskMetadata struct {
 
 type RunnerRegisterMetadata struct {
 	Token string `json:"token"`
+}
+
+// Backend metadata deliberately excludes state bodies, credentials and task aliases.
+type TerraformMetadata struct {
+	StateID   int  `json:"state_id,omitempty"`
+	AuthKeyID int  `json:"auth_key_id,omitempty"`
+	TaskID    *int `json:"task_id,omitempty"`
 }

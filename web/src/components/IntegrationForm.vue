@@ -4,8 +4,8 @@
 
     <v-text-field
       v-model="item.name"
-      label="Name"
-      :rules="[(v) => !!v || 'Name is required']"
+      :label="$t('name')"
+      :rules="[(v) => !!v || $t('name_required')]"
       required
       :disabled="formSaving"
       outlined
@@ -14,7 +14,7 @@
 
     <v-autocomplete
       v-model="item.template_id"
-      label="Task Template to run"
+      :label="$t('uiTaskTemplateToRun')"
       clearable
       :items="templates"
       item-value="id"
@@ -52,7 +52,7 @@
 
     <v-select
       v-model="item.auth_method"
-      label="Auth method"
+      :label="$t('uiAuthMethod')"
       :items="authMethods"
       item-value="id"
       item-text="title"
@@ -66,7 +66,7 @@
         <v-text-field
             v-if="['token', 'hmac', 'hmac-sha512'].includes(item.auth_method)"
             v-model="item.auth_header"
-            label="Auth header"
+            :label="$t('uiAuthHeader')"
             :disabled="formSaving"
             outlined
             dense
@@ -102,7 +102,7 @@ export default {
       authMethods: [
         {
           id: '',
-          title: 'None',
+          title: this.$t('keyFormNone'),
         },
         {
           id: 'github',
@@ -114,7 +114,7 @@ export default {
         },
         {
           id: 'token',
-          title: 'Token',
+          title: this.$t('uiToken'),
         },
         {
           id: 'hmac',

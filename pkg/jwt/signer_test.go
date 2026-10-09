@@ -23,7 +23,7 @@ func newTestSigner(t *testing.T, opts SignerOptions) Signer {
 
 func TestSigner_SignRoundtrip(t *testing.T) {
 	s := newTestSigner(t, SignerOptions{
-		Issuer:     "jeh",
+		Issuer:     "taskexec",
 		DefaultTTL: time.Hour,
 		MaxTTL:     time.Hour,
 	})
@@ -32,7 +32,7 @@ func TestSigner_SignRoundtrip(t *testing.T) {
 		TaskID:     42,
 		ProjectID:  7,
 		TemplateID: 3,
-		Audience:   Audience{"openbao", "vault"},
+		Audience:   Audience{"taskexec", "vault"},
 	})
 	require.NoError(t, err)
 
@@ -42,12 +42,12 @@ func TestSigner_SignRoundtrip(t *testing.T) {
 	var claims TaskClaims
 	require.NoError(t, parsed.UnsafeClaimsWithoutVerification(&claims))
 
-	assert.Equal(t, "jeh", claims.Issuer)
+	assert.Equal(t, "taskexec", claims.Issuer)
 	assert.Equal(t, "task:42", claims.Subject)
 	assert.Equal(t, 42, claims.TaskID)
 	assert.Equal(t, 7, claims.ProjectID)
 	assert.Equal(t, 3, claims.TemplateID)
-	assert.Equal(t, Audience{"openbao", "vault"}, claims.Audience)
+	assert.Equal(t, Audience{"taskexec", "vault"}, claims.Audience)
 	assert.NotEmpty(t, claims.JWTID)
 	assert.NotZero(t, claims.ExpiresAt)
 }

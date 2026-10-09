@@ -1,5 +1,3 @@
-import EventBus from '@/event-bus';
-
 export default {
   props: {
     systemInfo: Object,
@@ -12,8 +10,5 @@ export default {
   },
 
   methods: {
-    upgradeToPro(feature) {
-      EventBus.$emit('i-subscription', { feature });
-    },
   },
 };

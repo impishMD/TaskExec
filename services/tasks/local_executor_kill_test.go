@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/impishMD/jeh/db_lib"
-	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/taskexec/db_lib"
+	"github.com/impishMD/taskexec/pkg/task_logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

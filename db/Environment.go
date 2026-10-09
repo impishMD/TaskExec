@@ -3,9 +3,8 @@ package db
 import (
 	"encoding/json"
 	"errors"
-	"time"
 
-	"github.com/impishMD/jeh/pkg/common_errors"
+	"github.com/impishMD/taskexec/pkg/common_errors"
 )
 
 type EnvironmentSecretOperation string
@@ -39,6 +38,7 @@ type EnvironmentSecret struct {
 	Type      EnvironmentSecretType      `json:"type"`
 	Name      string                     `json:"name"`
 	Secret    string                     `json:"secret"`
+	JSONValue json.RawMessage            `json:"json_value,omitempty"`
 	Operation EnvironmentSecretOperation `json:"operation"`
 }
 
@@ -52,17 +52,15 @@ type Environment struct {
 	ENV       *string `db:"env" json:"env" binding:"required"`
 
 	// Secrets is a field which used to update secrets associated with the environment.
-	Secrets []EnvironmentSecret `db:"-" json:"secrets,omitempty" backup:"-"`
+	Secrets     []EnvironmentSecret     `db:"-" json:"secrets,omitempty" backup:"-"`
+	KeyBindings []EnvironmentKeyBinding `db:"-" json:"key_bindings"`
 
-	SecretStorageID        *int    `db:"secret_storage_id" json:"secret_storage_id,omitempty" backup:"-"`
-	SecretStorageKeyPrefix *string `db:"secret_storage_key_prefix" json:"secret_storage_key_prefix,omitempty"`
+	// Retained only for the existing SQL columns; groups no longer select a storage.
+	SecretStorageID        *int    `db:"secret_storage_id" json:"-" backup:"-"`
+	SecretStorageKeyPrefix *string `db:"secret_storage_key_prefix" json:"-" backup:"-"`
 
-	// Sync fields are transfer-only; persisted in project__secret_sync.
-	SyncEnabled      bool             `db:"-" json:"sync_enabled"`
-	SyncInterval     int              `db:"-" json:"sync_interval"`
-	LastSyncedAt     *time.Time       `db:"-" json:"last_synced_at,omitempty"`
-	LastSyncFailedAt *time.Time       `db:"-" json:"last_sync_failed_at,omitempty"`
-	SyncPaths        []SecretSyncPath `db:"-" json:"sync_paths"`
+	KeySources        []EnvironmentKeySource        `db:"-" json:"key_sources"`
+	SecretExpressions []EnvironmentSecretExpression `db:"-" json:"secret_expressions" backup:"secret_expressions"`
 }
 
 func (s *EnvironmentSecret) Validate() error {

@@ -5,19 +5,17 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/random"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/services/server"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/services/server"
 )
 
 type EnvironmentController struct {
-	accessKeyRepo        db.AccessKeyManager
-	accessKeyService     server.AccessKeyService
-	encryptionService    server.AccessKeyEncryptionService
-	environmentService   server.EnvironmentService
-	secretStorageService server.SecretStorageService
+	accessKeyRepo      db.AccessKeyManager
+	accessKeyService   server.AccessKeyService
+	encryptionService  server.AccessKeyEncryptionService
+	environmentService server.EnvironmentService
 }
 
 func NewEnvironmentController(
@@ -25,14 +23,12 @@ func NewEnvironmentController(
 	encryptionService server.AccessKeyEncryptionService,
 	accessKeyService server.AccessKeyService,
 	environmentService server.EnvironmentService,
-	secretStorageService server.SecretStorageService,
 ) *EnvironmentController {
 	return &EnvironmentController{
-		accessKeyRepo:        accessKeyRepo,
-		accessKeyService:     accessKeyService,
-		encryptionService:    encryptionService,
-		environmentService:   environmentService,
-		secretStorageService: secretStorageService,
+		accessKeyRepo:      accessKeyRepo,
+		accessKeyService:   accessKeyService,
+		encryptionService:  encryptionService,
+		environmentService: environmentService,
 	}
 }
 
@@ -51,31 +47,14 @@ func (c *EnvironmentController) updateEnvironmentSecrets(env db.Environment) (au
 
 		switch secret.Operation {
 		case db.EnvironmentSecretCreate:
-			var sourceStorageKey *string
-			var storageType *db.AccessKeySourceStorageType
-
-			if env.SecretStorageID != nil {
-				keyPrefix := ""
-				if env.SecretStorageKeyPrefix != nil {
-					keyPrefix = *env.SecretStorageKeyPrefix
-				}
-				keyPath := keyPrefix + random.String(10)
-				sourceStorageKey = &keyPath
-
-				keyType := db.AccessKeySourceStorageVault
-				storageType = &keyType
-			}
-
 			key, err = c.accessKeyService.Create(db.AccessKey{
-				Name:              secret.Name,
-				String:            secret.Secret,
-				EnvironmentID:     &env.ID,
-				ProjectID:         &env.ProjectID,
-				Type:              db.AccessKeyString,
-				Owner:             secret.Type.GetAccessKeyOwner(),
-				SourceStorageID:   env.SecretStorageID,
-				SourceStorageKey:  sourceStorageKey,
-				SourceStorageType: storageType,
+				Name:          secret.Name,
+				String:        secret.Secret,
+				EnvironmentID: &env.ID,
+				ProjectID:     &env.ProjectID,
+				Type:          db.AccessKeyString,
+				Owner:         secret.Type.GetAccessKeyOwner(),
+				SourceMapping: db.MapStringAnyField{"value": "value"},
 			})
 
 			if err != nil {
@@ -96,7 +75,7 @@ func (c *EnvironmentController) updateEnvironmentSecrets(env db.Environment) (au
 				continue
 			}
 
-			err = c.accessKeyService.Delete(env.ProjectID, secret.ID)
+			err = c.accessKeyService.Delete(env.ProjectID, secret.ID, true)
 			if err != nil {
 				errors = append(errors, err)
 				continue
@@ -121,8 +100,9 @@ func (c *EnvironmentController) updateEnvironmentSecrets(env db.Environment) (au
 				Name:              secret.Name,
 				Type:              db.AccessKeyString,
 				Owner:             key.Owner,
-				SourceStorageID:   env.SecretStorageID,
+				SourceStorageID:   key.SourceStorageID,
 				SourceStorageType: key.SourceStorageType,
+				SourceMapping:     key.SourceMapping,
 				SourceStorageKey:  key.SourceStorageKey,
 			}
 			if secret.Secret != "" {
@@ -341,39 +321,6 @@ func (c *EnvironmentController) RemoveEnvironment(w http.ResponseWriter, r *http
 		ObjectType:  db.EventEnvironment,
 		ObjectID:    env.ID,
 		Description: fmt.Sprintf("Environment %s deleted", env.Name),
-	})
-
-	w.WriteHeader(http.StatusNoContent)
-}
-
-// SyncEnvironment triggers a sync of secrets for the environment
-func (c *EnvironmentController) SyncEnvironment(w http.ResponseWriter, r *http.Request) {
-	env := helpers.GetFromContext(r, "environment").(db.Environment)
-
-	sync, err := helpers.Store(r).GetEnvironmentSecretSync(env.ID)
-	if err != nil {
-		helpers.WriteError(w, err)
-		return
-	}
-
-	err = c.secretStorageService.SyncSecrets(sync)
-	if err != nil {
-		helpers.WriteError(w, err)
-		return
-	}
-
-	helpers.EventLog(r, helpers.EventLogUpdate, helpers.EventLogItem{
-		UserID:      helpers.UserFromContext(r).ID,
-		ProjectID:   env.ProjectID,
-		ObjectType:  db.EventEnvironment,
-		ObjectID:    env.ID,
-		Description: fmt.Sprintf("Environment %s secrets synced", env.Name),
-	})
-
-	helpers.Audit(r).Record(r.Context(), audit.Event{
-		Kind:      audit.ResourceEnvironmentSync,
-		Target:    audit.ResourceTarget(audit.TargetEnvironment, env.ID, env.Name),
-		ProjectID: env.ProjectID,
 	})
 
 	w.WriteHeader(http.StatusNoContent)

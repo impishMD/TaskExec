@@ -79,4 +79,16 @@ describe('EditDialog.vue', () => {
 
     expect(outer.vm.dialog, 'outer dialog closes on the next Escape').to.equal(false);
   });
+
+  it('keeps help scoped to a dialog and resets it when the dialog closes', async () => {
+    const outer = await open({ helpButton: true });
+    const inner = await open({ helpButton: true });
+    await outer.find('.context-help-toggle').trigger('click');
+    expect(outer.vm.needHelp).to.equal(true);
+    expect(inner.vm.needHelp).to.equal(false);
+    expect(outer.find('.context-help-toggle').attributes('aria-pressed')).to.equal('true');
+    outer.vm.close();
+    await outer.vm.$nextTick();
+    expect(outer.vm.needHelp).to.equal(false);
+  });
 });

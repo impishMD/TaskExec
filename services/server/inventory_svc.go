@@ -1,6 +1,6 @@
 package server
 
-import "github.com/impishMD/jeh/db"
+import "github.com/impishMD/taskexec/db"
 
 type InventoryService interface {
 	GetInventory(projectID int, inventoryID int) (inventory db.Inventory, err error)

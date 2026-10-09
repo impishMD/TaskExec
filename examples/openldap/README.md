@@ -1,4 +1,4 @@
-# JEH with OpenLDAP example
+# TaskExec with OpenLDAP example
 
 1. Start stack by command:
    ```
@@ -10,9 +10,9 @@
    3. Create new user `john`
 
 
-3. Create new JEH project:
+3. Create new TaskExec project:
    1. Open http://localhost:3000
    2. Login as `john`
    3. Create demo project
 
-[JEH documentation EN](../../docs/en/README.md) · [Документация RU](../../docs/ru/README.md).
+[TaskExec documentation EN](../../docs/en/README.md) · [Документация RU](../../docs/ru/README.md).

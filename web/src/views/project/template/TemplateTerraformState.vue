@@ -4,7 +4,7 @@
     <EditDialog
       v-model="editDialog"
       :save-button-text="aliasId === 'new' ? $t('create') : $t('save')"
-      :title="`${aliasId === 'new' ? $t('nnew') : $t('edit')} Key`"
+      :title="`${aliasId === 'new' ? $t('nnew') : $t('edit')} ${$t('terraformBackendAlias')}`"
       :max-width="450"
       @save="loadAliases()"
     >
@@ -54,11 +54,11 @@
 
     <EditDialog
       v-model="attachInventoryDialog"
-      :save-button-text="$t('Attach')"
+      :save-button-text="$t('uiAttach')"
       :icon="getAppIcon(template.app)"
       :icon-color="getAppColor(template.app)"
       :max-width="450"
-      title="Choose workspace to attach"
+      :title="$t('uiChooseWorkspaceToAttach')"
       @save="attachInventory($event.itemId)"
     >
       <template v-slot:form="{ onSave, needSave, needReset }">
@@ -102,9 +102,9 @@
           </v-btn>
         </v-btn-toggle>
 
-        <span v-else>No workspaces.</span>
+        <span v-else>{{ $t('uiNoWorkspaces') }}</span>
 
-        <v-menu offset-y>
+        <v-menu offset-y v-if="canManageResources">
           <template v-slot:activator="{ on, attrs }">
             <v-btn
               color="primary"
@@ -123,20 +123,21 @@
               <v-list-item-icon>
                 <v-icon>mdi-pencil</v-icon>
               </v-list-item-icon>
-              <v-list-item-title>New workspace</v-list-item-title>
+              <v-list-item-title>{{ $t('uiNewWorkspace') }}</v-list-item-title>
             </v-list-item>
             <v-list-item @click="attachInventoryDialog = true">
               <v-list-item-icon>
                 <v-icon>mdi-connection</v-icon>
               </v-list-item-icon>
-              <v-list-item-title>Attach existing workspace</v-list-item-title>
+              <v-list-item-title>{{ $t('uiAttachExistingWorkspace') }}</v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
       </div>
 
       <v-card
-        style="background-color: var(--highlighted-card-bg-color);"
+        style="background-color: var(--taskexec-surface);"
+        class="TerraformWorkspace"
         v-if="inventories.length > 0"
       >
 
@@ -145,27 +146,23 @@
           style="font-weight: normal;"
         >
 
-          <span>Workspace: <strong>{{ inventory.inventory }}</strong></span>
+          <span>{{ $t('uiWorkspaceLabel') }} <strong>{{ inventory.inventory }}</strong></span>
 
-          <div>
+          <div v-if="canManageResources" class="TerraformWorkspace__actions">
 
             <v-btn
               class="mr-4"
               :disabled="inventoryId === template.inventory_id"
               color="success"
               @click="setDefaultInventory()"
-            >
-              Make default
-            </v-btn>
+            >{{ $t('uiMakeDefault') }}</v-btn>
 
             <v-btn
               class="mr-4"
               color="primary"
               :disabled="inventoryId === template.inventory_id"
               @click="detachInventory()"
-            >
-              Detach
-            </v-btn>
+            >{{ $t('uiDetach') }}</v-btn>
 
             <v-btn
               icon
@@ -188,45 +185,30 @@
         </v-card-title>
 
         <v-divider />
-
-        <v-alert
-          type="info"
-          text
-          color="hsl(348deg, 86%, 61%)"
-          style="border-radius: 0;"
-          v-if="!features.terraform_backend"
-        >
-            <span class="mr-2">
-              Terraform/OpenTofu HTTP backend available only in <b>PRO</b> version.
-            </span>
-          <v-btn
-            color="hsl(348deg, 86%, 61%)"
-            href="https://github.com/impishMD/jeh/blob/develop/docs/en/configuration.md#feature-scope"
-          >
-            Learn more
-            <v-icon>mdi-chevron-right</v-icon>
-          </v-btn>
-        </v-alert>
         <v-card-text>
 
-          <h3>Aliases</h3>
-          <div class="mb-6">Unique endpoints (aliases) to access your Terraform HTTP backend.</div>
+          <h3>{{ $t('aliases') }}</h3>
+          <div class="mb-6">
+            {{ $t('uiUniqueEndpointsAliasesToAccessYourTerraformHTTPBackend') }}
+          </div>
 
-          <div v-for="alias of (aliases || [])" :key="alias.id">
-            <code class="mr-2">{{ alias.url }}</code>
+          <div v-for="alias of (aliases || [])" :key="alias.id" class="TerraformWorkspace__alias">
+            <code>{{ alias.url }}</code>
             <CopyClipboardButton
               :text="alias.url"
               :success-message="$t('aliasUrlCopied')"
             />
-            <v-btn icon @click="editAlias(alias.id)">
+            <v-btn v-if="canManageResources" icon @click="editAlias(alias.id)">
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
-            <v-btn icon @click="deleteAlias(alias.id)">
+            <v-btn v-if="canManageResources" icon @click="deleteAlias(alias.id)">
               <v-icon>mdi-delete</v-icon>
             </v-btn>
           </div>
 
           <v-btn
+            v-if="canManageResources"
+            data-testid="terraform-add-alias"
             color="primary"
             @click="addAlias()"
             :disabled="!features.terraform_backend"
@@ -237,8 +219,8 @@
 
           <v-divider class="mb-4" />
 
-          <h3>State history</h3>
-          <div class="mb-6">Chronological history of the workspace state changes.</div>
+          <h3>{{ $t('uiStateHistory') }}</h3>
+          <div class="mb-6">{{ $t('uiChronologicalHistoryOfTheWorkspaceStateChanges') }}</div>
 
           <v-data-table
             style="
@@ -247,10 +229,12 @@
             v-if="features.terraform_backend"
             :headers="headers"
             :items="states"
+            :mobile-breakpoint="0"
             :footer-props="{ itemsPerPageOptions: [20] }"
             single-expand
-            show-expand
-            class="mt-4 TaskListTable TaskListTable TerraformStateTable"
+            :show-expand="canManageResources"
+            data-testid="terraform-state-history"
+            class="mt-4 TaskListTable TerraformStateTable"
           >
             <template v-slot:item.id="{ item }">
               #{{ item.id }}
@@ -289,7 +273,7 @@
           </v-data-table>
 
           <v-container v-else>
-            <div style="text-align: center; color: grey;">No state available.</div>
+            <div style="text-align: center; color: grey;">{{ $t('uiNoStateAvailable') }}</div>
           </v-container>
 
         </v-card-text>
@@ -300,7 +284,37 @@
   </div>
 </template>
 <style lang="scss">
-.TerraformStateTable {
+.TerraformWorkspace {
+  .v-card__title { gap: 12px; word-break: normal; }
+  &__actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+  &__alias {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    code { overflow-wrap: anywhere; min-width: 0; }
+  }
+}
+.taskexec-app.v-application .taskexec-workspace .v-data-table.TerraformStateTable {
+
+  @media (max-width: 600px) {
+    table { table-layout: fixed; }
+    > .v-data-table__wrapper > table {
+      > thead > tr > th, > tbody > tr > td {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+      > thead > tr > th span { white-space: normal; overflow-wrap: anywhere; }
+      > thead > tr > th:first-child, > tbody > tr > td:first-child { padding-left: 8px !important; }
+      > thead > tr > th:last-child, > tbody > tr > td:last-child { padding-right: 8px !important; }
+      > thead > tr > th:nth-child(1) { width: 48px !important; min-width: 48px; }
+      > thead > tr > th:nth-child(2) { width: 48px; }
+      > thead > tr > th:nth-child(3) { width: 80px; }
+    }
+  }
 
   .v-data-table__wrapper {
     padding-left: 0 !important;
@@ -318,7 +332,7 @@
 import axios from 'axios';
 import TerraformInventoryForm from '@/components/TerraformInventoryForm.vue';
 import EditDialog from '@/components/EditDialog.vue';
-import { APP_INVENTORY_TITLE } from '@/lib/constants';
+import { APP_INVENTORY_TITLE, USER_PERMISSIONS } from '@/lib/constants';
 import AppsMixin from '@/components/AppsMixin';
 import YesNoDialog from '@/components/YesNoDialog.vue';
 import InventorySelectForm from '@/components/InventorySelectForm.vue';
@@ -331,8 +345,17 @@ import CopyClipboardButton from '@/components/CopyClipboardButton.vue';
 export default {
   mixins: [AppsMixin],
   computed: {
+    canManageResources() {
+      // State may contain secrets shared by multiple templates in the project.
+      // A grant on this template alone does not grant access to their state.
+      // eslint-disable-next-line no-bitwise
+      const canManage = (this.projectPermissions & USER_PERMISSIONS.manageProjectResources) !== 0;
+      return this.isAdmin || canManage;
+    },
     APP_INVENTORY_TITLE() {
-      return APP_INVENTORY_TITLE;
+      return Object.fromEntries(Object.entries(APP_INVENTORY_TITLE).map(([id, title]) => [
+        id, this.$t(id === 'ansible' ? 'appInventory' : 'appWorkspace', { app: title.split(' ')[0] }),
+      ]));
     },
   },
 
@@ -351,6 +374,8 @@ export default {
   props: {
     template: Object,
     features: Object,
+    isAdmin: Boolean,
+    projectPermissions: Number,
   },
 
   watch: {
@@ -375,24 +400,19 @@ export default {
       editDialog: null,
       headers: [
         {
-          text: 'ID',
+          text: this.$t('uiID'),
           value: 'id',
           sortable: false,
         },
         {
-          text: this.$i18n.t('taskId'),
+          text: this.$t('taskId'),
           value: 'task_id',
           sortable: false,
         },
         {
-          text: this.$i18n.t('created'),
+          text: this.$t('uiCreated'),
           value: 'created',
           sortable: false,
-        },
-        {
-          value: 'actions',
-          sortable: false,
-          width: '0%',
         },
       ],
       itemId: null,
@@ -400,11 +420,10 @@ export default {
   },
 
   async created() {
-    this.inventoryId = this.template.inventory_id;
     await this.loadInventories();
-    this.inventory = this.inventories.find((inv) => inv.id === this.inventoryId);
-    await this.loadAliases();
-    await this.loadStates();
+    if (this.inventoryId == null) {
+      this.states = [];
+    }
   },
 
   methods: {
@@ -465,7 +484,8 @@ export default {
         (this.inventoryId == null
           || !this.inventories.some((inv) => inv.id === this.inventoryId))
         && this.inventories.length > 0) {
-        this.inventoryId = this.inventories[0].id;
+        this.inventoryId = this.inventories.some((inv) => inv.id === this.template.inventory_id)
+          ? this.template.inventory_id : this.inventories[0].id;
       }
     },
 

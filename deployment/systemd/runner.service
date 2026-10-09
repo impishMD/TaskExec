@@ -1,13 +1,13 @@
 [Unit]
-Description=JEH Runner
+Description=TaskExec Runner
 Requires=network.target
 
 [Service]
-EnvironmentFile=/etc/jeh/env
-ExecStart=/usr/bin/jeh runner start --config ${JEH_CONFIG}
+EnvironmentFile=/etc/taskexec/env
+ExecStart=/usr/bin/taskexec runner start --config ${TASKEXEC_CONFIG}
 ExecReload=/bin/kill -HUP $MAINPID
-User=jeh
-Group=jeh
+User=taskexec
+Group=taskexec
 Restart=always
 RestartSec=3s
 

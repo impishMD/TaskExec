@@ -22,7 +22,7 @@
     </EditDialog>
 
     <ObjectRefsDialog
-      object-title="schedule"
+      :object-title="$t('schedule')"
       :object-refs="itemRefs"
       :project-id="projectId"
       v-model="itemRefsDialog"
@@ -71,7 +71,7 @@
             <v-list-item-icon>
               <v-icon>mdi-clock-time-eight-outline</v-icon>
             </v-list-item-icon>
-            <v-list-item-title>Run once</v-list-item-title>
+            <v-list-item-title>{{ $t('uiRunOnce') }}</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>

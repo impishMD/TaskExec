@@ -1,6 +1,11 @@
 package db
 
-import "github.com/impishMD/jeh/pkg/common_errors"
+import (
+	"regexp"
+	"unicode/utf8"
+
+	"github.com/impishMD/taskexec/pkg/common_errors"
+)
 
 type Role struct {
 	Slug        string                `db:"slug" json:"slug" backup:"-"`
@@ -11,12 +16,17 @@ type Role struct {
 
 const KnownRolePermissions = CanRunProjectTasks | CanUpdateProject | CanManageProjectResources | CanManageProjectUsers
 
+var roleSlugPattern = regexp.MustCompile(`^[a-z0-9_-]{1,100}$`)
+
 func ValidateRole(role Role) error {
 	if role.Name == "" {
 		return &common_errors.ValidationError{Message: "Role name cannot be empty"}
 	}
 	if role.Slug == "" {
 		return &common_errors.ValidationError{Message: "Role slug cannot be empty"}
+	}
+	if !roleSlugPattern.MatchString(role.Slug) || utf8.RuneCountInString(role.Name) > 100 {
+		return common_errors.NewValidationError("Role slug must use lowercase letters, numbers, hyphens or underscores; name and slug must not exceed 100 characters")
 	}
 	// Built-in role slugs are reserved. Allowing a custom role to reuse one lets
 	// it shadow the built-in role and escalate the permissions of its members.

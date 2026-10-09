@@ -6,10 +6,7 @@
       content-class="NestedDialog"
       width="440"
     >
-      <v-card
-        :color="$vuetify.theme.dark ? '#212121' : 'white'"
-        @keydown.enter.prevent
-      >
+      <v-card @keydown.enter.prevent>
         <v-card-title></v-card-title>
         <v-card-text class="pb-0">
           <v-form
@@ -133,7 +130,7 @@
                 </v-data-table>
 
                 <div class="text-right mt-2 mb-2">
-                  <v-btn color="primary" @click="addEditedVarValue()">Add Value</v-btn>
+                  <v-btn color="primary" @click="addEditedVarValue()">{{ $t('uiAddValue') }}</v-btn>
                 </div>
 
                 <v-select
@@ -199,10 +196,10 @@
             class="ml-1"
           />
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="editDialog = false">
+          <v-btn color="primary" text @click="editDialog = false">
             {{ $t('cancel') }}
           </v-btn>
-          <v-btn color="blue darken-1" text @click="saveVar()">
+          <v-btn color="primary" depressed @click="saveVar()">
             {{ editedVarIndex == null ? $t('add') : $t('save') }}
           </v-btn>
         </v-card-actions>
@@ -309,37 +306,37 @@ export default {
       varTypes: [
         {
           id: '',
-          name: 'String',
+          name: this.$t('uiString'),
         },
         {
           id: 'int',
-          name: 'Integer',
+          name: this.$t('integerType'),
         },
         {
           id: 'secret',
-          name: 'Secret',
+          name: this.$t('uiSecret'),
         },
         {
           id: 'enum',
-          name: 'Enum',
+          name: this.$t('enumType'),
         },
         {
           id: 'text',
-          name: 'Text',
+          name: this.$t('textType'),
         },
         {
           id: 'select',
-          name: 'Select',
+          name: this.$t('selectType'),
         },
       ],
       varTargets: [
         {
           id: '',
-          name: 'Extra variable',
+          name: this.$t('extraVariable'),
         },
         {
           id: 'env',
-          name: 'Environment variable',
+          name: this.$t('environmentVariable'),
         },
       ],
       formError: null,
@@ -392,24 +389,22 @@ export default {
         return;
       }
 
-      const typeLabel = this.editedVar.type === 'select' ? 'Select' : 'Enumeration';
-
       if (this.editedVar.type === 'enum' || this.editedVar.type === 'select') {
         if (this.editedValues.length === 0) {
-          this.formError = `${typeLabel} must have values.`;
+          this.formError = this.$t('choiceValuesRequired');
           return;
         }
 
         const uniq = new Set(this.editedValues.map((v) => v.name));
 
         if (this.editedValues.length !== uniq.size) {
-          this.formError = `${typeLabel} must have unique names.`;
+          this.formError = this.$t('choiceValuesUnique');
           return;
         }
 
         this.editedValues.forEach((v) => {
           if (v.name === '') {
-            this.formError = 'Value name cannot be empty.';
+            this.formError = this.$t('valueNameRequired');
           }
         });
 

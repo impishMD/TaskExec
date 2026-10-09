@@ -13,13 +13,15 @@
 
     <v-select
       v-model="item.auth_key_id"
-      :label="$t('Auth key')"
+      :label="$t('uiAuthKey')"
       :items="keys"
       item-value="id"
       item-text="name"
       outlined
       dense
       required
+      :rules="[(v) => !!v || $t('key_required')]"
+      data-testid="terraform-alias-key"
       :disabled="formSaving"
     ></v-select>
 

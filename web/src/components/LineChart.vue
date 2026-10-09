@@ -55,21 +55,21 @@ export default {
 
         datasets: [
           {
-            label: 'Success',
+            label: this.$t('status_success'),
             borderColor: '#4caf50',
             backgroundColor: '#4caf50',
             data: (this.sourceData || []).map((row) => row.count_by_status.success),
             cubicInterpolationMode: 'monotone',
           },
           {
-            label: 'Failed',
+            label: this.$t('status_failed'),
             borderColor: '#ff5252',
             backgroundColor: '#ff5252',
             data: (this.sourceData || []).map((row) => row.count_by_status.error),
             cubicInterpolationMode: 'monotone',
           },
           {
-            label: 'Stopped',
+            label: this.$t('status_stopped'),
             borderColor: '#555',
             backgroundColor: '#555',
             data: (this.sourceData || []).map((row) => row.count_by_status.stopped),

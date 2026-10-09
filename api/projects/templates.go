@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/util"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/services/audit"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/services/audit"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -410,6 +410,9 @@ func (c *TemplateController) GetTemplatePerms(w http.ResponseWriter, r *http.Req
 		helpers.WriteError(w, err)
 		return
 	}
+	if perms == nil {
+		perms = []db.TemplateRolePerm{}
+	}
 
 	helpers.WriteJSON(w, http.StatusOK, perms)
 }
@@ -428,6 +431,10 @@ func (c *TemplateController) AddTemplatePerm(w http.ResponseWriter, r *http.Requ
 
 	perm.ProjectID = template.ProjectID
 	perm.TemplateID = template.ID
+	if _, err := c.roleRepo.GetProjectOrGlobalRoleBySlug(template.ProjectID, perm.RoleSlug); err != nil {
+		helpers.WriteError(w, err)
+		return
+	}
 
 	newPerm, err := c.templateRepo.CreateTemplateRole(perm)
 	if err != nil {

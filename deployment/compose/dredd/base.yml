@@ -6,11 +6,11 @@ volumes:
 services:
   server:
     environment:
-      JEH_ADMIN_PASSWORD: password
-      JEH_ADMIN_NAME: Developer
-      JEH_ADMIN_EMAIL: admin@localhost
-      JEH_ADMIN: admin
-      JEH_WEB_ROOT: http://0.0.0.0:3000
+      TASKEXEC_ADMIN_PASSWORD: password
+      TASKEXEC_ADMIN_NAME: Developer
+      TASKEXEC_ADMIN_EMAIL: admin@localhost
+      TASKEXEC_ADMIN: admin
+      TASKEXEC_WEB_ROOT: http://0.0.0.0:3000
 
   dredd:
     build:
@@ -20,6 +20,6 @@ services:
       - --config
       - .dredd/dredd.docker.yml
     environment:
-      JEH_ACCESS_KEY_ENCRYPTION: ${JEH_ACCESS_KEY_ENCRYPTION:-IlRqgrrO5Gp27MlWakDX1xVrPv4jhoUx+ARY+qGyDxQ=}
+      TASKEXEC_ACCESS_KEY_ENCRYPTION: ${TASKEXEC_ACCESS_KEY_ENCRYPTION:-IlRqgrrO5Gp27MlWakDX1xVrPv4jhoUx+ARY+qGyDxQ=}
     volumes:
       - dredd:/data

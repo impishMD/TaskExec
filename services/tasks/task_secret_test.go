@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/impishMD/jeh/pkg/tz"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/pkg/tz"
+	"github.com/impishMD/taskexec/util"
 	"github.com/stretchr/testify/assert"
 )
 

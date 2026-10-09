@@ -12,6 +12,11 @@ describe('lang/', () => {
 
   Object.keys(messages).forEach((lang) => {
     describe(lang, () => {
+      it('translates every English key without falling back', () => {
+        const missing = [...enKeys].filter((key) => !Object.hasOwn(messages[lang], key));
+        expect(missing, `${lang}: missing translations`).to.deep.equal([]);
+      });
+
       it('has no keys missing from en (dead translations)', () => {
         const extra = Object.keys(messages[lang]).filter((k) => !enKeys.has(k));
         expect(extra, `keys not present in en.js: ${extra.join(', ')}`).to.deep.equal([]);
@@ -25,7 +30,7 @@ describe('lang/', () => {
       });
 
       it('keeps the same interpolation placeholders as en', () => {
-        const placeholders = (s) => (s.match(/\{[a-zA-Z0-9_]+\}/g) || []).sort();
+        const placeholders = (s) => [...new Set(s.match(/\{[a-zA-Z0-9_]+\}/g) || [])].sort();
         Object.entries(messages[lang]).forEach(([key, value]) => {
           if (typeof en[key] !== 'string') {
             return;

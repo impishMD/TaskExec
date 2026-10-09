@@ -2,7 +2,7 @@ package sql
 
 import (
 	"github.com/Masterminds/squirrel"
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 func (d *SqlDb) GetInventory(projectID int, inventoryID int) (inventory db.Inventory, err error) {

@@ -6,16 +6,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/impishMD/jeh/pkg/common_errors"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/services/server"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/pkg/common_errors"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/services/server"
+	"github.com/impishMD/taskexec/util"
 
 	"github.com/robfig/cron/v3"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/db_lib"
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/services/tasks"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/db_lib"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/services/tasks"
 	log "github.com/sirupsen/logrus"
 )
 

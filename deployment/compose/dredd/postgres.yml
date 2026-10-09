@@ -3,8 +3,8 @@ version: "3.4"
 services:
   dredd:
     environment:
-      JEH_DB_DIALECT: postgres
-      JEH_DB_CONFIG: '{"host": "db:5432","user": "jeh","pass": "jeh","name": "jeh","options": {"sslmode": "disable"}}'
+      TASKEXEC_DB_DIALECT: postgres
+      TASKEXEC_DB_CONFIG: '{"host": "db:5432","user": "taskexec","pass": "taskexec","name": "taskexec","options": {"sslmode": "disable"}}'
     depends_on:
       - server
       - db

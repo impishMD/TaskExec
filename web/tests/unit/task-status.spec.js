@@ -1,9 +1,10 @@
+import en from '@/lang/en';
 import { expect } from 'chai';
 import { shallowMount } from '@vue/test-utils';
 import TaskStatus from '@/components/TaskStatus.vue';
 
 function vm(status) {
-  return shallowMount(TaskStatus, { propsData: { status } }).vm;
+  return shallowMount(TaskStatus, { propsData: { status }, mocks: { $t: (key, values = {}) => (en[key] || key).replace(/\{(\w+)\}/g, (_, k) => values[k]) } }).vm;
 }
 
 describe('TaskStatus.vue', () => {

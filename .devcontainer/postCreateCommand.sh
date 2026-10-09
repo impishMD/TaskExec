@@ -14,7 +14,7 @@ task dredd:hooks
 
 cp ./.devcontainer/config.json ./.dredd/config.json
 
-./bin/jeh user add \
+./bin/taskexec user add \
     --admin \
     --login admin \
     --name Admin \

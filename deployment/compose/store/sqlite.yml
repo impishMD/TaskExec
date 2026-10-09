@@ -6,7 +6,7 @@ volumes:
 services:
   server:
     environment:
-      JEH_DB_DIALECT: sqlite
-      JEH_DB_PATH: /var/lib/database
+      TASKEXEC_DB_DIALECT: sqlite
+      TASKEXEC_DB_PATH: /var/lib/database
     volumes:
       - sqlite:/var/lib/database

@@ -7,472 +7,282 @@
       :label="$t('name')"
       :rules="[(v) => !!v || $t('name_required')]"
       required
-      :disabled="formSaving"
+      :disabled="busy"
       outlined
       dense
     ></v-text-field>
 
     <v-text-field
-      v-if="item.type !== 'aws_sm' && item.type !== 'azure_kv'"
       v-model="item.params.url"
-      :label="$t('Server URL')"
-      :disabled="formSaving"
-      :rules="[(v) => !!v || $t('url_required')]"
+      :label="$t('uiServerURL')"
+      :disabled="busy"
+      :rules="[(v) => !!v || $t('uiURLIsRequired')]"
       required
       data-testid="secretStorage-vaultURL"
       outlined
       dense
     ></v-text-field>
 
-    <div v-if="item.type === 'vault' || item.type === 'openbao'">
-      <v-text-field
-        v-model="item.params.mount"
-        :label="$t('Mount')"
-        hint="'secret' by default"
-        :disabled="formSaving"
-        data-testid="secretStorage-vaultMount"
-        outlined
-        dense
-      ></v-text-field>
-
-      <v-text-field
-        v-model="item.params.namespace"
-        :label="$t('Namespace')"
-        :hint="item.type === 'openbao'
-          ? 'OpenBao namespaces (v2.3+)'
-          : 'For Vault Enterprise and HCP Dedicated only'"
-        :disabled="formSaving"
-        data-testid="secretStorage-vaultNamespace"
-        outlined
-        dense
-      ></v-text-field>
-
-      <SecretSourceToggle v-model="secretStorage" label="Token" :disabled="formSaving" />
-
-      <v-text-field
-        v-if="secretStorage === 'database'"
-        class="masked-secret-input"
-        v-model="item.secret"
-        :label="$t('Token')"
-        :disabled="formSaving"
-        :rules="[(v) => !!v || itemId !== 'new' || $t('token_required')]"
-        required
-        data-testid="secretStorage-vaultToken"
-        outlined
-        dense
-        append-icon="mdi-lock"
-      ></v-text-field>
-
-      <v-text-field
-        v-else
-        v-model="item.secret"
-        :label="secretStorage === 'env' ? $t('Env var name') : $t('Path to the file')"
-        :disabled="formSaving"
-        :rules="[(v) => !!v || itemId !== 'new' || $t('envvar_required')]"
-        required
-        data-testid="secretStorage-vaultTokenSource"
-        outlined
-        dense
-      ></v-text-field>
+    <div class="VaultConnectionFields">
+      <v-text-field v-model="item.params.mount" :label="$t('vaultKVMount')"
+        :placeholder="defaultMount" :disabled="busy" outlined dense />
+      <v-select v-model="item.params.kv_version" :items="[1, 2]"
+        :label="$t('vaultKVVersion')" :disabled="busy" outlined dense
+        data-testid="secretStorage-kvVersion" />
     </div>
 
-    <div v-else-if="item.type === 'dvls'">
-      <v-checkbox
-        class="pt-0 mb-2"
-        style="margin-top: -5px"
-        v-model="item.params.insecure_tls"
-        label="Skip TLS certificate verification (insecure)"
-        :disabled="formSaving"
-      />
+    <h3 class="text-subtitle-1 mb-3">{{ $t('authentication') }}</h3>
+    <div class="VaultAuthMethods" role="radiogroup" :aria-label="$t('authentication')">
+      <button v-for="method in authMethods" :key="method.value" type="button" role="radio"
+        :aria-checked="authMethod === method.value" :tabindex="authMethod === method.value ? 0 : -1"
+        :disabled="busy"
+        :class="{ 'VaultAuthMethods__selected': authMethod === method.value }"
+        :data-testid="`vault-auth-${method.value}`" @click="selectMethod(method.value)"
+        @keydown="navigateMethods($event, method.value)">
+        <v-icon size="22">{{ method.icon }}</v-icon>
+        <span>{{ method.text }}</span>
+      </button>
+    </div>
+    <p class="text-body-2 text--secondary mt-3 mb-5">{{ methodHint }}</p>
 
-      <v-text-field
-        v-model="item.params.vault_id"
-        :label="$t('Vault ID')"
-        :disabled="formSaving"
-        :rules="[(v) => !!v || itemId !== 'new' || $t('key_required')]"
-        required
-        data-testid="secretStorage-dvlsKey"
-        outlined
-        dense
-      ></v-text-field>
-
-      <v-text-field
-        v-model="item.params.app_key"
-        :label="$t('App Key')"
-        :disabled="formSaving"
-        :rules="[(v) => !!v || itemId !== 'new' || $t('key_required')]"
-        required
-        data-testid="secretStorage-dvlsKey"
-        outlined
-        dense
-      ></v-text-field>
-
-      <SecretSourceToggle v-model="secretStorage" label="App secret" :disabled="formSaving" />
-
-      <v-text-field
-        v-if="secretStorage === 'database'"
-        class="TextInput TextInput--no-legend masked-secret-input"
-        v-model="item.secret"
-        :label="$t('Secret')"
-        :disabled="formSaving"
-        :rules="[(v) => !!v || itemId !== 'new' || $t('secret_required')]"
-        required
-        data-testid="secretStorage-dvlsSecret"
-        outlined
-        dense
-        append-icon="mdi-lock"
-      ></v-text-field>
-
-      <v-text-field
-        v-else
-        class="TextInput TextInput--no-legend"
-        v-model="item.secret"
-        :label="secretStorage === 'env' ? $t('Env var name') : $t('Path to the file')"
-        :disabled="formSaving"
-        :rules="[(v) => !!v || itemId !== 'new' || $t('envvar_required')]"
-        required
-        data-testid="secretStorage-dvlsEnv"
-        outlined
-        dense
-      ></v-text-field>
+    <div v-if="authMethod !== 'token'" class="VaultConnectionFields">
+      <v-text-field v-model="item.params.auth_mount" :label="$t('vaultAuthMount')"
+        :hint="$t('vaultAuthMountHint')" persistent-hint :disabled="busy"
+        :placeholder="authMethod" outlined dense data-testid="vault-auth-mount" />
+      <v-text-field v-if="['kubernetes', 'jwt', 'cert'].includes(authMethod)"
+        v-model="item.params.auth_role" :label="$t('role')" :disabled="busy"
+        :rules="authMethod === 'cert' ? [] : [(v) => !!v || $t('role_required')]"
+        outlined dense data-testid="vault-auth-role" />
     </div>
 
-    <div v-else-if="item.type === 'aws_sm'">
-      <v-text-field
-        v-model="item.params.region"
-        label="Region"
-        :disabled="formSaving"
-        :rules="[(v) => !!v || 'Region is required']"
-        required
-        placeholder="us-east-1"
-        data-testid="secretStorage-awsRegion"
-        outlined
-        dense
-      ></v-text-field>
+    <VaultCredentialField v-for="field in credentialFields" :key="`${authMethod}-${field.name}`"
+      v-model="item.credentials[field.name]" :field="field.name" :label="field.label"
+      :multiline="field.multiline" :disabled="busy" />
+    <v-checkbox v-if="authMethod === 'approle'" v-model="item.params.without_secret_id"
+      :label="$t('vaultWithoutSecretID')" :disabled="busy" class="mt-0 mb-4"
+      hide-details />
 
-      <v-text-field
-        v-model="item.params.endpoint_url"
-        label="Endpoint URL (optional)"
-        :disabled="formSaving"
-        hint="Leave empty to use the default AWS endpoint"
-        data-testid="secretStorage-awsEndpointURL"
-        outlined
-        dense
-      ></v-text-field>
+    <v-expansion-panels flat class="mb-6">
+      <v-expansion-panel>
+        <v-expansion-panel-header>{{ $t('advanced') }}</v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <v-text-field v-model="item.params.namespace" :label="$t('uiNamespace')"
+            :hint="$t('vaultNamespaceSupport')" persistent-hint :disabled="busy" outlined dense />
+          <v-checkbox v-model="customCA" :label="$t('vaultCustomCA')" :disabled="busy" />
+          <VaultCredentialField v-if="customCA" v-model="item.credentials.ca_cert"
+            field="ca_cert" :label="$t('vaultCACertificate')" multiline :disabled="busy" />
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+    </v-expansion-panels>
 
-      <v-checkbox
-        class="pt-0 mb-2"
-        style="margin-top: -5px"
-        v-model="item.params.use_iam_role"
-        label="Use IAM Role / Instance Profile"
-        :disabled="formSaving"
-        data-testid="secretStorage-awsUseIamRole"
-      />
-
-      <div :class="{ 'aws-credentials--inactive': useIamRole }">
-        <v-text-field
-          v-model="item.params.access_key_id"
-          label="Access Key ID"
-          :disabled="formSaving || useIamRole"
-          :rules="[(v) => !!v || useIamRole || 'Access Key ID is required']"
-          required
-          data-testid="secretStorage-awsAccessKeyId"
-          outlined
-          dense
-        ></v-text-field>
-
-        <SecretSourceToggle
-          v-model="secretStorage"
-          label="Secret Key"
-          :disabled="formSaving || useIamRole"
-        />
-
-        <v-text-field
-          v-if="secretStorage === 'database'"
-          class="TextInput TextInput--no-legend masked-secret-input"
-          v-model="item.secret"
-          label="Secret Access Key"
-          :disabled="formSaving || useIamRole"
-          :rules="[(v) => !!v || !awsSecretRequired || 'Secret Access Key is required']"
-          required
-          data-testid="secretStorage-awsSecretKey"
-          outlined
-          dense
-          append-icon="mdi-lock"
-        ></v-text-field>
-
-        <v-text-field
-          v-else
-          class="TextInput TextInput--no-legend"
-          v-model="item.secret"
-          :label="secretStorage === 'env' ? $t('Env var name') : $t('Path to the file')"
-          :disabled="formSaving || useIamRole"
-          :rules="[(v) => !!v || !awsSecretRequired || $t('envvar_required')]"
-          required
-          data-testid="secretStorage-awsSecretKeySource"
-          outlined
-          dense
-        ></v-text-field>
-      </div>
-    </div>
-
-    <div v-else-if="item.type === 'azure_kv'">
-      <v-text-field
-        v-model="item.params.vault_url"
-        label="Vault URL"
-        :disabled="formSaving"
-        :rules="[(v) => !!v || 'Vault URL is required']"
-        required
-        placeholder="https://my-vault.vault.azure.net"
-        data-testid="secretStorage-azureVaultURL"
-        outlined
-        dense
-      ></v-text-field>
-
-      <v-text-field
-        v-model="item.params.tenant_id"
-        label="Tenant ID"
-        :disabled="formSaving"
-        :rules="[(v) => !!v || 'Tenant ID is required']"
-        required
-        data-testid="secretStorage-azureTenantId"
-        outlined
-        dense
-      ></v-text-field>
-
-      <v-text-field
-        v-model="item.params.client_id"
-        label="Client ID"
-        :disabled="formSaving"
-        :rules="[(v) => !!v || 'Client ID is required']"
-        required
-        data-testid="secretStorage-azureClientId"
-        outlined
-        dense
-      ></v-text-field>
-
-      <SecretSourceToggle v-model="secretStorage" label="Client Secret" :disabled="formSaving" />
-
-      <v-text-field
-        v-if="secretStorage === 'database'"
-        class="TextInput TextInput--no-legend masked-secret-input"
-        v-model="item.secret"
-        label="Client Secret"
-        :disabled="formSaving"
-        :rules="[(v) => !!v || itemId !== 'new' || 'Client Secret is required']"
-        required
-        data-testid="secretStorage-azureClientSecret"
-        outlined
-        dense
-        append-icon="mdi-lock"
-      ></v-text-field>
-
-      <v-text-field
-        v-else
-        class="TextInput TextInput--no-legend"
-        v-model="item.secret"
-        :label="secretStorage === 'env' ? $t('Env var name') : $t('Path to the file')"
-        :disabled="formSaving"
-        :rules="[(v) => !!v || itemId !== 'new' || $t('envvar_required')]"
-        required
-        data-testid="secretStorage-azureClientSecretSource"
-        outlined
-        dense
-      ></v-text-field>
+    <div class="mb-6">
+      <v-btn outlined color="primary" :loading="testing" :disabled="busy"
+        @click="testAuthentication" data-testid="vault-test-auth">
+        <v-icon left>mdi-connection</v-icon>{{ $t('vaultTestAuth') }}
+      </v-btn>
+      <v-alert v-if="testResult" :type="testResult.type" text class="mt-3 mb-0" role="status">
+        {{ testResult.message }}
+      </v-alert>
     </div>
 
     <v-checkbox
       v-model="item.readonly"
-      :label="$t('Read only')"
-      :disabled="formSaving"
+      :label="$t('uiReadOnly')"
+      :disabled="busy"
       hide-details
-      style="position: absolute; bottom: 15px; margin: 0; left: 25px"
+      class="mt-0 mb-4"
     />
 
-    <div class="d-flex items-center justify-space-between">
-      <v-checkbox
-        class="mt-0"
-        v-model="item.sync_enabled"
-        :label="$t('Sync keys enabled')"
-        :disabled="formSaving"
-      />
-
-      <v-btn
-        style="margin-right: -10px"
-        text
-        color="primary"
-        @click="syncSettingsDialog = true"
-        :disabled="formSaving"
-        v-if="item.sync_enabled"
-      >
-        <v-icon left>mdi-cog-sync</v-icon>
-        Sync paths
-        <v-chip class="ml-2" outlined style="transform: translateY(-1px)" color="primary" small>
-          {{ item.sync_paths.length }}</v-chip
-        >
-      </v-btn>
-    </div>
-
-    <v-dialog v-model="syncSettingsDialog" max-width="500" persistent>
-      <v-card>
-        <v-card-title>Sync paths</v-card-title>
-        <v-card-text class="pt-4 pb-0">
-          <v-text-field
-            style="width: 140px"
-            v-if="item.sync_enabled"
-            v-model.number="item.sync_interval"
-            min="0"
-            :label="$t('Auto-sync interval')"
-            persistent-hint
-            :disabled="formSaving"
-            suffix="minutes"
-            outlined
-            dense
-          ></v-text-field>
-
-          <SecretStorageSyncOptionsForm v-model="item.sync_paths" />
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn text color="blue darken-1" @click="syncSettingsDialog = false">
-            {{ $t('close') }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-form>
 </template>
 <script>
+import axios from 'axios';
 import ItemFormBase from '@/components/ItemFormBase';
-import SecretStorageSyncOptionsForm from '@/components/SecretStorageSyncOptionsForm.vue';
-import SecretSourceToggle from '@/components/SecretSourceToggle.vue';
+import VaultCredentialField from '@/components/VaultCredentialField.vue';
+import { getErrorMessage } from '@/lib/error';
+
+const emptyCredential = () => ({ source: 'database', value: '', configured: false });
+const fieldsFor = (method) => ({
+  token: ['token'],
+  approle: ['role_id', 'secret_id'],
+  kubernetes: ['jwt'],
+  jwt: ['jwt'],
+  cert: ['client_cert', 'client_key'],
+}[method]);
 
 export default {
-  components: { SecretStorageSyncOptionsForm, SecretSourceToggle },
-
-  props: {
-    itemType: String,
-  },
-
+  components: { VaultCredentialField },
+  props: { itemType: String },
   mixins: [ItemFormBase],
-
   data() {
     return {
-      secretStorage: 'database',
-      secretStorageReady: false,
-      syncSettingsDialog: false,
-      // IAM role state of the storage at load time.
-      initialUseIamRole: false,
+      defaultMount: 'secret',
+      customCA: false,
+      testing: false,
+      testResult: null,
+      savedMethod: 'token',
+      savedCredentials: {},
+      savedAuthParams: {},
     };
   },
-
+  computed: {
+    busy() { return this.formSaving || this.testing; },
+    authMethod() { return this.item?.params.auth_method || 'token'; },
+    authMethods() {
+      return [
+        { value: 'token', text: this.$t('uiToken'), icon: 'mdi-key-outline' },
+        { value: 'approle', text: 'AppRole', icon: 'mdi-account-key-outline' },
+        { value: 'kubernetes', text: 'Kubernetes', icon: 'mdi-kubernetes' },
+        { value: 'jwt', text: 'JWT', icon: 'mdi-shield-key-outline' },
+        { value: 'cert', text: this.$t('vaultCertificate'), icon: 'mdi-certificate-outline' },
+      ];
+    },
+    methodHint() {
+      return this.$t({
+        token: 'vaultTokenAuthHint',
+        approle: 'vaultAppRoleHint',
+        kubernetes: 'vaultKubernetesHint',
+        jwt: 'vaultJWTHint',
+        cert: 'vaultCertHint',
+      }[this.authMethod]);
+    },
+    credentialFields() {
+      const labels = {
+        token: this.$t('uiToken'),
+        role_id: 'Role ID',
+        secret_id: 'Secret ID',
+        jwt: 'JWT',
+        client_cert: this.$t('vaultClientCertificate'),
+        client_key: this.$t('privateKey'),
+      };
+      return fieldsFor(this.authMethod)
+        .filter((name) => name !== 'secret_id' || !this.item.params.without_secret_id)
+        .map((name) => ({ name, label: labels[name], multiline: name.startsWith('client_') }));
+    },
+  },
   methods: {
     getNewItem() {
       return {
-        sync_enabled: false,
-        sync_interval: 0,
-        sync_paths: [],
-        params: {},
+        type: 'vault',
+        params: { kv_version: 2, auth_method: 'token' },
+        readonly: true,
+        credentials: {},
       };
     },
-
     afterLoadData() {
-      if (!this.item.params) {
-        this.item.params = {};
-      }
-
-      if (!this.item.sync_paths) {
-        this.$set(this.item, 'sync_paths', []);
-      }
-
-      if (this.itemId === 'new') {
-        this.item.type = this.itemType;
-      }
-
-      if (this.item.type === 'aws_sm' && this.item.params.use_iam_role === undefined) {
-        // Storages created before the IAM role option always had an access key.
-        const useIamRole = this.itemId !== 'new' && !this.item.params.access_key_id;
-        this.$set(this.item.params, 'use_iam_role', useIamRole);
-      }
-
-      this.initialUseIamRole = !!this.item.params.use_iam_role;
-
-      this.secretStorageReady = false;
-      this.secretStorage = this.item.source_storage_type || 'database';
-      this.$nextTick(() => {
-        this.secretStorageReady = true;
+      this.item.type = 'vault';
+      this.$set(this.item, 'params', { kv_version: 2, auth_method: 'token', ...this.item.params });
+      const credentials = this.item.credentials || {
+        token: {
+          source: this.item.source_storage_type || 'database',
+          value: this.item.secret || '',
+          configured: !this.isNew,
+        },
+      };
+      this.savedMethod = this.authMethod;
+      this.savedAuthParams = { ...this.item.params };
+      this.savedCredentials = JSON.parse(JSON.stringify(credentials));
+      this.$set(this.item, 'credentials', { ...credentials });
+      [...fieldsFor(this.authMethod), 'ca_cert'].forEach((field) => {
+        if (!this.item.credentials[field]) {
+          this.$set(this.item.credentials, field, emptyCredential());
+        }
       });
+      this.customCA = !!credentials.ca_cert?.configured;
+      delete this.item.secret;
+      delete this.item.source_storage_type;
     },
-
+    selectMethod(method) {
+      if (method === this.authMethod) return;
+      this.item.params.auth_method = method;
+      this.$set(this.item.params, 'auth_mount', method === 'token' ? '' : method);
+      this.$set(this.item.params, 'auth_role', '');
+      this.$delete(this.item.params, 'without_secret_id');
+      if (method === this.savedMethod) {
+        ['auth_mount', 'auth_role', 'without_secret_id'].forEach((key) => {
+          if (this.savedAuthParams[key] !== undefined) {
+            this.$set(this.item.params, key, this.savedAuthParams[key]);
+          }
+        });
+      }
+      const credentials = { ca_cert: this.item.credentials.ca_cert };
+      fieldsFor(method).forEach((field) => {
+        credentials[field] = method === this.savedMethod && this.savedCredentials[field]
+          ? { ...this.savedCredentials[field] } : emptyCredential();
+        if (method === 'kubernetes' && !credentials[field].configured) {
+          credentials[field].source = 'file';
+        }
+      });
+      this.$set(this.item, 'credentials', credentials);
+      this.$refs.form.resetValidation();
+    },
+    navigateMethods(event, method) {
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+      const index = this.authMethods.findIndex((m) => m.value === method);
+      const next = {
+        Home: 0, End: 4, ArrowLeft: (index + 4) % 5, ArrowRight: (index + 1) % 5,
+      }[event.key];
+      this.selectMethod(this.authMethods[next].value);
+      event.currentTarget.parentElement.children[next].focus();
+    },
     beforeSave() {
-      if (this.useIamRole) {
-        // Credentials are taken from the environment, don't send the disabled
-        // secret fields to the server.
-        this.item.secret = '';
-        this.item.source_storage_type = undefined;
+      if (!this.customCA) this.item.credentials.ca_cert = { ...emptyCredential(), clear: true };
+      if (this.item.params.without_secret_id) {
+        this.item.credentials.secret_id = { ...emptyCredential(), clear: true };
       }
     },
-
-    getItemsUrl() {
-      return `/api/project/${this.projectId}/secret_storages`;
+    async testAuthentication() {
+      if (!this.$refs.form.validate()) return;
+      this.beforeSave();
+      this.testing = true;
+      this.testResult = null;
+      try {
+        await axios.post(`${this.getItemsUrl()}/test`, { ...this.item, project_id: this.projectId });
+        this.testResult = { type: 'success', message: this.$t('vaultAuthSucceeded') };
+      } catch (error) {
+        this.testResult = { type: 'error', message: getErrorMessage(error) };
+      } finally { this.testing = false; }
     },
-
-    getSingleItemUrl() {
-      return `/api/project/${this.projectId}/secret_storages/${this.itemId}`;
-    },
+    getItemsUrl() { return `/api/project/${this.projectId}/secret_storages`; },
+    getSingleItemUrl() { return `${this.getItemsUrl()}/${this.itemId}`; },
   },
-
-  computed: {
-    useIamRole() {
-      return this.item?.params?.use_iam_role;
-    },
-
-    awsSecretRequired() {
-      if (this.useIamRole) {
-        return false;
-      }
-
-      // Switching the IAM role off removes the previously stored credentials,
-      // so a new secret must be provided.
-      return this.itemId === 'new' || this.initialUseIamRole;
-    },
-  },
-
   watch: {
-    secretStorage(value, oldValue) {
-      this.item.source_storage_type = value === 'database' ? undefined : value;
-
-      if (!this.secretStorageReady || value === oldValue) {
-        return;
-      }
-
-      this.item.secret = '';
-    },
+    item: { deep: true, handler() { this.testResult = null; } },
   },
 };
 </script>
-<style lang="scss" scoped>
-.aws-credentials--inactive {
-  position: relative;
-  &::after {
-    content: "";
-    position: absolute;
-    background: white;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    opacity: 0.65;
+
+<style scoped lang="scss">
+.VaultConnectionFields {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+.VaultAuthMethods {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; padding: 14px 6px; min-height: 86px; border-radius: 14px;
+    border: 1px solid var(--taskexec-border); color: var(--taskexec-muted);
+    font-size: 13px; font-weight: 600; overflow-wrap: anywhere;
+    .v-icon { color: inherit; }
+    &:focus-visible { outline: 2px solid var(--taskexec-accent); outline-offset: 3px; }
+    &:disabled { opacity: .55; cursor: default; }
+  }
+  .VaultAuthMethods__selected {
+    background: var(--taskexec-accent-soft); border-color: var(--taskexec-accent);
+    color: var(--taskexec-accent);
   }
 }
-
-.theme--dark {
-  .aws-credentials--inactive {
-    position: relative;
-    &::after {
-      background: #1E1E1E;
-    }
-  }
+@media (max-width: 599px) {
+  .VaultAuthMethods { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .VaultConnectionFields { grid-template-columns: 1fr; gap: 0; }
 }
-
 </style>

@@ -6,12 +6,12 @@ volumes:
 services:
   server:
     environment:
-      JEH_DB_DIALECT: mysql
-      JEH_DB_HOST: db
-      JEH_DB_PORT: 3306
-      JEH_DB_USER: ${MARIADB_USERNAME:-jeh}
-      JEH_DB_PASS: ${MARIADB_PASSWORD:-jeh}
-      JEH_DB: ${MARIADB_DATABASE:-jeh}
+      TASKEXEC_DB_DIALECT: mysql
+      TASKEXEC_DB_HOST: db
+      TASKEXEC_DB_PORT: 3306
+      TASKEXEC_DB_USER: ${MARIADB_USERNAME:-taskexec}
+      TASKEXEC_DB_PASS: ${MARIADB_PASSWORD:-taskexec}
+      TASKEXEC_DB: ${MARIADB_DATABASE:-taskexec}
     depends_on:
       - db
 
@@ -20,8 +20,8 @@ services:
     restart: always
     environment:
       MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT:-root}
-      MARIADB_USER: ${MARIADB_USERNAME:-jeh}
-      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-jeh}
-      MARIADB_DATABASE: ${MARIADB_DATABASE:-jeh}
+      MARIADB_USER: ${MARIADB_USERNAME:-taskexec}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-taskexec}
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-taskexec}
     volumes:
       - mariadb:/var/lib/mysql

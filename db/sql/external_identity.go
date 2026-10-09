@@ -1,8 +1,8 @@
 package sql
 
 import (
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/tz"
 )
 
 func (d *SqlDb) CreateExternalIdentity(identity db.UserExternalIdentity) (db.UserExternalIdentity, error) {

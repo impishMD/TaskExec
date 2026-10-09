@@ -1,0 +1,14 @@
+apiVersion: v2
+name: taskexec
+description: Web interface and API for Ansible, Terraform, OpenTofu and scripts
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+kubeVersion: ">=1.26.0-0"
+home: https://github.com/impishMD/TaskExec
+sources:
+  - https://github.com/impishMD/TaskExec
+keywords: [ansible, terraform, opentofu, automation]
+maintainers:
+  - name: impishMD
+    url: https://github.com/impishMD

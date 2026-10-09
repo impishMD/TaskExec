@@ -1,4 +1,6 @@
 import Vue from 'vue';
+import Alerts from '@/views/Alerts.vue';
+import ServerSettings from '@/views/ServerSettings.vue';
 import VueRouter from 'vue-router';
 import RestoreProject from '@/views/project/RestoreProject.vue';
 import Tasks from '@/views/Tasks.vue';
@@ -27,7 +29,6 @@ import Integrations from '../views/project/Integrations.vue';
 import IntegrationExtractor from '../views/project/IntegrationExtractor.vue';
 import Apps from '../views/Apps.vue';
 import Runners from '../views/Runners.vue';
-import Cluster from '../views/Cluster.vue';
 import Stats from '../views/project/Stats.vue';
 import Tokens from '../views/Tokens.vue';
 import AcceptInvite from '../views/AcceptInvite.vue';
@@ -42,6 +43,8 @@ import WorkflowEditor from '../views/project/WorkflowEditor.vue';
 Vue.use(VueRouter);
 
 const routes = [
+  { path: '/settings', component: ServerSettings },
+  { path: '/alerts', component: Alerts },
   {
     path: '/project/new',
     component: New,
@@ -209,10 +212,6 @@ const routes = [
   {
     path: '/runners',
     component: Runners,
-  },
-  {
-    path: '/cluster',
-    component: Cluster,
   },
   {
     path: '/tasks',

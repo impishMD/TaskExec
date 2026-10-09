@@ -1,6 +1,6 @@
-# Contributing to Job Executor Hub
+# Contributing to TaskExec
 
-Use issues and pull requests in [impishMD/jeh](https://github.com/impishMD/jeh).
+Use issues and pull requests in [the source repository](https://github.com/impishMD/TaskExec).
 The default branch is `develop`.
 
 1. Read the [development guide](docs/en/development.md) ([Русский](docs/ru/development.md)).

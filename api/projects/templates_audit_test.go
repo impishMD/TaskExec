@@ -9,10 +9,10 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/services/audit/audittest"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/services/audit/audittest"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,6 +21,12 @@ type fakeTemplateRoles struct {
 	existing  db.TemplateRolePerm
 	getErr    error
 	deleteErr error
+}
+
+type existingRoleRepo struct{ db.RoleRepository }
+
+func (existingRoleRepo) GetProjectOrGlobalRoleBySlug(projectID int, slug string) (db.Role, error) {
+	return db.Role{ProjectID: &projectID, Slug: slug}, nil
 }
 
 func (f *fakeTemplateRoles) CreateTemplateRole(perm db.TemplateRolePerm) (db.TemplateRolePerm, error) {
@@ -45,7 +51,7 @@ func templatePermRequest(method string, body string, permID string) (*http.Reque
 }
 
 func TestTemplatePermissions_AreRecorded(t *testing.T) {
-	controller := NewTemplateController(&fakeTemplateRoles{existing: db.TemplateRolePerm{ID: 5, RoleSlug: "ops", Permissions: db.CanRunProjectTasks}}, nil)
+	controller := NewTemplateController(&fakeTemplateRoles{existing: db.TemplateRolePerm{ID: 5, RoleSlug: "ops", Permissions: db.CanRunProjectTasks}}, existingRoleRepo{})
 
 	r, rec := templatePermRequest(http.MethodPost, `{"role_slug":"ops","permissions":1}`, "")
 	controller.AddTemplatePerm(httptest.NewRecorder(), r)
@@ -78,7 +84,7 @@ func TestDeleteTemplatePerm_UnknownIDRecordsNothing(t *testing.T) {
 }
 
 func TestTemplatePermissions_LongRoleSlugIsBounded(t *testing.T) {
-	controller := NewTemplateController(&fakeTemplateRoles{}, nil)
+	controller := NewTemplateController(&fakeTemplateRoles{}, existingRoleRepo{})
 	r, rec := templatePermRequest(http.MethodPost, `{"role_slug":"`+strings.Repeat("s", 5000)+`","permissions":1}`, "")
 
 	controller.AddTemplatePerm(httptest.NewRecorder(), r)

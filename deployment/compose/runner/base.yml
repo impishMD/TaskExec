@@ -2,13 +2,13 @@ version: "3.4"
 
 services:
   runner:
-    image: docker.io/impishmd/jeh:${JEH_VERSION:-latest}-runner
+    image: docker.io/impishmd/taskexec:${TASKEXEC_VERSION:-latest}-runner
     restart: always
     environment:
-      JEH_WEB_ROOT: ${JEH_WEB_ROOT:-http://server:3000}
-      JEH_RUNNER_API_URL: ${JEH_RUNNER_API_URL:-http://server:3000/internal}
-      JEH_RUNNER_REGISTRATION_TOKEN: ${JEH_RUNNER_REGISTRATION_TOKEN:-H1wDyorbg6gTSwJlVwle2Fne}
+      TASKEXEC_WEB_ROOT: ${TASKEXEC_WEB_ROOT:-http://server:3000}
+      TASKEXEC_RUNNER_API_URL: ${TASKEXEC_RUNNER_API_URL:-http://server:3000/internal}
+      TASKEXEC_RUNNER_REGISTRATION_TOKEN: ${TASKEXEC_RUNNER_REGISTRATION_TOKEN:-H1wDyorbg6gTSwJlVwle2Fne}
 
   server:
     environment:
-      JEH_RUNNER_REGISTRATION_TOKEN: ${JEH_RUNNER_REGISTRATION_TOKEN:-H1wDyorbg6gTSwJlVwle2Fne}
+      TASKEXEC_RUNNER_REGISTRATION_TOKEN: ${TASKEXEC_RUNNER_REGISTRATION_TOKEN:-H1wDyorbg6gTSwJlVwle2Fne}

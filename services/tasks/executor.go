@@ -1,14 +1,14 @@
 package tasks
 
 import (
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/task_logger"
 )
 
 // ExecutorProvider is the long-lived factory that produces per-task Executors. One
 // Provider is built at runner startup and owns whatever shared, expensive state its
 // strategy needs (the K8s clientset for Kubernetes, the AccessKey installer for
-// local, a Docker client for the future Docker provider). The JobPool holds a single
+// local, a Docker client for the Docker provider). The JobPool holds a single
 // ExecutorProvider regardless of strategy — adding a new executor type means writing
 // a new Provider, not threading another field through the pool.
 //
@@ -32,10 +32,8 @@ type ExecutorProvider interface {
 // of the working environment, execution of the underlying tool (ansible-playbook,
 // terraform, shell, ...), and cleanup of any resources it allocated.
 //
-// Today the only implementation is LocalExecutor, which runs the tool as a subprocess
-// on the runner host. The interface exists so future implementations (e.g. a Kubernetes
-// executor that runs each task in an ephemeral Pod, GitLab-runner-style) can plug into
-// the same job pool without changes to TaskRunner / job_pool.
+// LocalExecutor runs tools on the runner host; the Docker provider runs the same
+// task logic in an ephemeral container. Further providers can use the same pool.
 //
 // Execution model:
 //   - Run is the single entry point used by the job pool. Implementations are free to

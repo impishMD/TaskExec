@@ -7,7 +7,7 @@ from urllib.parse import unquote
 
 root = Path(__file__).resolve().parents[1]
 files = list(root.glob('*.md'))
-for folder in ['docs', 'deployment', 'examples', 'test', 'web']:
+for folder in ['docs', 'release-notes', 'charts', 'deployment', 'examples', 'test', 'web']:
     files += [p for p in (root / folder).rglob('*.md')
               if not any(x in p.parts for x in ['node_modules', 'public', 'dist'])]
 errors = []

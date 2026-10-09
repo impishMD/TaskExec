@@ -3,7 +3,7 @@ package db_lib
 import (
 	"os/exec"
 
-	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/taskexec/pkg/task_logger"
 )
 
 func runCommand(cmd *exec.Cmd, stopCh <-chan struct{}, logger task_logger.Logger) error {

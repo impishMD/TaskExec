@@ -9,6 +9,7 @@
       :help-button="true"
       :no-escape="editNoEscape"
       test-id="varGroupDialog"
+      content-class="VariableGroupDialog"
     >
       <template v-slot:form="{ onSave, onError, needSave, needReset, needHelp }">
         <EnvironmentForm
@@ -19,14 +20,13 @@
           :need-save="needSave"
           :need-reset="needReset"
           :need-help="needHelp"
-          :support-storages="features.secret_storages"
           @maximize="editNoEscape = $event.maximized"
         />
       </template>
     </EditDialog>
 
     <ObjectRefsDialog
-      object-title="environment"
+      :object-title="$t('environment')"
       :object-refs="itemRefs"
       :project-id="projectId"
       v-model="itemRefsDialog"
@@ -66,13 +66,6 @@
       </template>
       <template v-slot:item.actions="{ item }">
         <v-btn-toggle dense :value-comparator="() => false">
-          <v-btn
-            v-if="item.sync_enabled"
-            @click="syncItem(item.id)"
-            :disabled="!(item.sync_paths && item.sync_paths.length > 0)"
-          >
-            <v-icon>mdi-sync</v-icon>
-          </v-btn>
           <v-btn @click="askDeleteItem(item.id)">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
@@ -88,9 +81,6 @@
 import ItemListPageBase from '@/components/ItemListPageBase';
 import EnvironmentForm from '@/components/EnvironmentForm.vue';
 import PageMixin from '@/components/PageMixin';
-import axios from 'axios';
-import EventBus from '@/event-bus';
-import { getErrorMessage } from '@/lib/error';
 
 export default {
   components: { EnvironmentForm },
@@ -101,25 +91,7 @@ export default {
     };
   },
   methods: {
-    async syncItem(itemId) {
-      try {
-        await axios({
-          method: 'post',
-          url: `/api/project/${this.projectId}/environment/${itemId}/sync`,
-          responseType: 'json',
-        });
-        EventBus.$emit('i-snackbar', {
-          color: 'success',
-          text: 'Variable group synced successfully',
-        });
-        await this.loadItems();
-      } catch (err) {
-        EventBus.$emit('i-snackbar', {
-          color: 'error',
-          text: getErrorMessage(err),
-        });
-      }
-    },
+
     getHeaders() {
       return [
         {

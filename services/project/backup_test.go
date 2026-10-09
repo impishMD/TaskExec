@@ -4,11 +4,10 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/impishMD/jeh/db/sql"
+	"github.com/impishMD/taskexec/db/sql"
 
-	"github.com/impishMD/jeh/db"
-	proFactory "github.com/impishMD/jeh/pro/db/factory"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -26,6 +25,7 @@ func TestBackupProject(t *testing.T) {
 
 	proj, err := store.CreateProject(db.Project{
 		Name: "Test 123",
+		Icon: new("mdi-server"),
 	})
 	assert.NoError(t, err)
 
@@ -69,7 +69,7 @@ func TestBackupProject(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	backup, err := GetBackup(proj.ID, store, proFactory.NewWorkflowStore(store))
+	backup, err := GetBackup(proj.ID, store, store)
 	assert.NoError(t, err)
 	assert.Equal(t, proj.ID, backup.Meta.ID)
 
@@ -94,9 +94,10 @@ func TestBackupProject(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	restoredProj, err := restoredBackup.Restore(user, store, proFactory.NewWorkflowStore(store))
+	restoredProj, err := restoredBackup.Restore(user, store, store)
 	assert.NoError(t, err)
 	assert.Equal(t, restoredProj.Name, "Test 1234")
+	assert.Equal(t, proj.Icon, restoredProj.Icon)
 
 	restoredTemplates, err := store.GetTemplates(restoredProj.ID, db.TemplateFilter{}, db.RetrieveQueryParams{})
 	assert.NoError(t, err)
@@ -140,7 +141,7 @@ func TestBackup_BackupSecretStorage(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	backup, err := GetBackup(proj.ID, store, proFactory.NewWorkflowStore(store))
+	backup, err := GetBackup(proj.ID, store, store)
 	assert.NoError(t, err)
 	assert.Equal(t, proj.ID, backup.Meta.ID)
 	backup.Meta.Name = "Test 1234"
@@ -163,6 +164,7 @@ func TestBackup_BackupSecretStorage(t *testing.T) {
     {
       "name": "Test Key",
       "owner": "vault",
+      "source_mapping": {},
       "storage": "Test",
       "synchronized": false,
       "type": "none"
@@ -183,8 +185,6 @@ func TestBackup_BackupSecretStorage(t *testing.T) {
       "name": "Test",
       "params": {},
       "readonly": false,
-      "sync_enabled": false,
-      "sync_interval": 0,
       "type": "vault"
     }
   ],
@@ -209,7 +209,7 @@ func TestBackup_BackupSecretStorage(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	restoredProj, err := restoredBackup.Restore(user, store, proFactory.NewWorkflowStore(store))
+	restoredProj, err := restoredBackup.Restore(user, store, store)
 	assert.Nil(t, err)
 
 	restoredStorages, err := store.GetSecretStorages(restoredProj.ID)
@@ -224,8 +224,8 @@ func TestBackup_BackupSecretStorage(t *testing.T) {
 }
 
 // TestBackup_RestoreScheduleWithoutTaskParams is a regression test for
-// https://github.com/impishMD/jeh/issues/3858 . Backups written by
-// older JEH versions omit the per-schedule "task_params" object; on
+// https://github.com/impishMD/TaskExec/issues/3858 . Backups written by
+// older TaskExec versions omit the per-schedule "task_params" object; on
 // restore, BackupSchedule.Restore used to dereference the nil pointer and
 // crash the HTTP handler with a runtime nil-pointer panic.
 func TestBackup_RestoreScheduleWithoutTaskParams(t *testing.T) {
@@ -312,7 +312,7 @@ func TestBackup_RestoreScheduleWithoutTaskParams(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	restoredProj, err := restoredBackup.Restore(user, store, proFactory.NewWorkflowStore(store))
+	restoredProj, err := restoredBackup.Restore(user, store, store)
 	assert.NoError(t, err)
 
 	restoredSchedules, err := store.GetSchedules()
@@ -327,9 +327,50 @@ func TestBackup_RestoreScheduleWithoutTaskParams(t *testing.T) {
 	assert.True(t, found, "restored schedule should be persisted")
 }
 
-// TestBackup_Workflow moved to pro_impl/db/sql/backup_workflow_test.go because
-// workflow persistence is a Pro feature requiring the real workflow store
-// (the open-source build only has the no-op stub).
+func TestBackupWorkflowRoundTrip(t *testing.T) {
+	store := sql.InitConfigCreateTestStore()
+	t.Cleanup(store.Close)
+	util.Config.Apps = map[string]util.App{"bash": {}}
+	project, err := store.CreateProject(db.Project{Name: "workflow source"})
+	require.NoError(t, err)
+	key, err := store.CreateAccessKey(db.AccessKey{ProjectID: &project.ID, Name: "none", Type: db.AccessKeyNone})
+	require.NoError(t, err)
+	repo, err := store.CreateRepository(db.Repository{ProjectID: project.ID, Name: "repo", GitURL: "https://example.test/repo", GitBranch: "main", SSHKeyID: key.ID})
+	require.NoError(t, err)
+	tpl, err := store.CreateTemplate(db.Template{ProjectID: project.ID, Name: "script", App: db.AppBash, RepositoryID: repo.ID, Playbook: "test.sh"})
+	require.NoError(t, err)
+	_, err = store.CreateWorkflowTemplate(db.WorkflowTemplate{ProjectID: project.ID, Name: "pipeline", Nodes: []db.WorkflowNode{
+		{ID: 1, TemplateID: tpl.ID, TaskParams: &db.TaskParams{Environment: `{"KEY":"value"}`}},
+		{ID: 2, Kind: db.WorkflowNodeApprovalKind, ApprovalMessage: new("Approve?")},
+	}, Edges: []db.WorkflowEdge{{SourceNodeID: 1, DestinationNodeID: 2, Condition: db.WorkflowEdgeOnSuccess}}})
+	require.NoError(t, err)
+	backup, err := GetBackup(project.ID, store, store)
+	require.NoError(t, err)
+	payload, err := backup.Marshal()
+	require.NoError(t, err)
+	restored := &BackupFormat{}
+	require.NoError(t, restored.Unmarshal(payload))
+	require.NoError(t, restored.Verify())
+	restored.Meta.Name = "workflow restored"
+	user, err := store.CreateUser(db.UserWithPwd{Pwd: "test-password", User: db.User{Username: "workflow", Name: "Workflow", Email: "workflow@example.test", Admin: true}})
+	require.NoError(t, err)
+	target, err := restored.Restore(user, store, store)
+	require.NoError(t, err)
+	graphs, err := store.GetWorkflowTemplates(target.ID, db.RetrieveQueryParams{})
+	require.NoError(t, err)
+	require.Len(t, graphs, 1)
+	graph := graphs[0]
+	require.Len(t, graph.Nodes, 2)
+	require.Len(t, graph.Edges, 1)
+	require.NotEqual(t, tpl.ID, graph.Nodes[0].TemplateID)
+	newTpl, err := store.GetTemplate(target.ID, graph.Nodes[0].TemplateID)
+	require.NoError(t, err)
+	require.Equal(t, tpl.Name, newTpl.Name)
+	require.Equal(t, graph.Nodes[0].ID, graph.Edges[0].SourceNodeID)
+	require.Equal(t, graph.Nodes[1].ID, graph.Edges[0].DestinationNodeID)
+	require.JSONEq(t, `{"KEY":"value"}`, graph.Nodes[0].TaskParams.Environment)
+	require.Equal(t, "Approve?", *graph.Nodes[1].ApprovalMessage)
+}
 
 func isUnique(items []testItem) bool {
 	for i, item := range items {
@@ -397,7 +438,7 @@ func TestBackupProject_HostConfig(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	backup, err := GetBackup(proj.ID, store, proFactory.NewWorkflowStore(store))
+	backup, err := GetBackup(proj.ID, store, store)
 	require.NoError(t, err)
 
 	require.Len(t, backup.HostConfigs, 2)
@@ -422,7 +463,7 @@ func TestBackupProject_HostConfig(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	restoredProj, err := restoredBackup.Restore(user, store, proFactory.NewWorkflowStore(store))
+	restoredProj, err := restoredBackup.Restore(user, store, store)
 	require.NoError(t, err)
 
 	restored, err := store.GetHostConfigs(restoredProj.ID, db.RetrieveQueryParams{})
@@ -509,7 +550,7 @@ func TestRestore_RejectsInvalidHostConfig(t *testing.T) {
 			SSHKey:     &keyName,
 		}})
 
-		_, err := backup.Restore(user, store, proFactory.NewWorkflowStore(store))
+		_, err := backup.Restore(user, store, store)
 
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "host_configs")
@@ -551,7 +592,7 @@ func TestRestore_RejectsInvalidHostConfig(t *testing.T) {
 
 		require.NoError(t, backup.Verify())
 
-		project, err := backup.Restore(user, store, proFactory.NewWorkflowStore(store))
+		project, err := backup.Restore(user, store, store)
 		require.NoError(t, err)
 
 		hostConfigs, err := store.GetHostConfigs(project.ID, db.RetrieveQueryParams{})
@@ -565,7 +606,7 @@ func TestRestore_RejectsInvalidHostConfig(t *testing.T) {
 			SSHKey:     &keyName,
 		}})
 
-		project, err := backup.Restore(user, store, proFactory.NewWorkflowStore(store))
+		project, err := backup.Restore(user, store, store)
 
 		require.NoError(t, err)
 		hostConfigs, err := store.GetHostConfigs(project.ID, db.RetrieveQueryParams{})
@@ -597,7 +638,7 @@ func TestRestore_DropsUnknownPermissionBits(t *testing.T) {
 
 	user, err := store.CreateUser(db.UserWithPwd{Pwd: "3412341234123", User: db.User{Username: "roles", Name: "roles", Email: "roles@example.com", Admin: true}})
 	require.NoError(t, err)
-	project, err := backup.Restore(user, store, proFactory.NewWorkflowStore(store))
+	project, err := backup.Restore(user, store, store)
 	require.NoError(t, err)
 
 	roles, err := store.GetProjectRoles(project.ID)
@@ -612,4 +653,50 @@ func TestRestore_DropsUnknownPermissionBits(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, perms, 1)
 	assert.Equal(t, db.CanManageProjectResources, perms[0].Permissions)
+}
+
+func TestBackupRestoresVariableKeyBindingsByName(t *testing.T) {
+	store := sql.InitConfigCreateTestStore()
+	defer store.Close()
+	project, err := store.CreateProject(db.Project{Name: "source"})
+	require.NoError(t, err)
+	key, err := store.CreateAccessKey(db.AccessKey{Name: "blabla", ProjectID: &project.ID, Type: db.AccessKeyObject, SourceStorageType: new(db.AccessKeySourceStorageEnv), SourceStorageKey: new("TEST_OBJECT")})
+	require.NoError(t, err)
+	_, err = store.CreateEnvironment(db.Environment{
+		Name: "variables", ProjectID: project.ID, JSON: `{"ip":"{{ test.dns_server }}"}`,
+		KeyBindings:       []db.EnvironmentKeyBinding{{Name: "dns", Type: db.EnvironmentSecretVar, KeyID: key.ID, Field: new("dns_server")}},
+		KeySources:        []db.EnvironmentKeySource{{Prefix: "test", KeyID: key.ID}},
+		SecretExpressions: []db.EnvironmentSecretExpression{{Name: "DNS", Type: db.EnvironmentSecretEnv, Expression: "{{ test.dns_server }}"}},
+	})
+	require.NoError(t, err)
+	backup, err := GetBackup(project.ID, store, store)
+	require.NoError(t, err)
+	serialized, err := backup.Marshal()
+	require.NoError(t, err)
+	require.Contains(t, serialized, `"key": "blabla"`)
+	require.NotContains(t, serialized, "key_id")
+	restored := &BackupFormat{}
+	require.NoError(t, restored.Unmarshal(serialized))
+	user, err := store.CreateUser(db.UserWithPwd{Pwd: "test-password", User: db.User{Username: "backup-user", Name: "Backup", Email: "test@example.com"}})
+	require.NoError(t, err)
+	restored.Meta.Name = "restored bindings"
+	created, err := restored.Restore(user, store, store)
+	require.NoError(t, err)
+	groups, err := store.GetEnvironments(created.ID, db.RetrieveQueryParams{})
+	require.NoError(t, err)
+	require.Len(t, groups, 1)
+	require.Len(t, groups[0].KeyBindings, 1)
+	b := groups[0].KeyBindings[0]
+	require.NotEqual(t, key.ID, b.KeyID)
+	resolved, err := store.GetAccessKey(created.ID, b.KeyID)
+	require.NoError(t, err)
+	require.Equal(t, "blabla", resolved.Name)
+	require.Equal(t, "dns_server", *b.Field)
+	require.Equal(t, "dns", b.Name)
+	require.Len(t, groups[0].KeySources, 1)
+	require.Equal(t, b.KeyID, groups[0].KeySources[0].KeyID)
+	require.Equal(t, "test", groups[0].KeySources[0].Prefix)
+	require.Len(t, groups[0].SecretExpressions, 1)
+	require.Equal(t, "{{ test.dns_server }}", groups[0].SecretExpressions[0].Expression)
+	require.JSONEq(t, `{"ip":"{{ test.dns_server }}"}`, groups[0].JSON)
 }

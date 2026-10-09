@@ -2,12 +2,13 @@ package sql
 
 import (
 	"encoding/json"
+	"errors"
 	"math/rand"
 	"time"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/task_logger"
 )
 
 func (d *SqlDb) CreateTaskStage(stage db.TaskStage) (res db.TaskStage, err error) {
@@ -94,10 +95,12 @@ func (d *SqlDb) getTaskStages(projectID int, taskID int, stageType *db.TaskStage
 		return
 	}
 
-	q := squirrel.Select("p.*, pu.json").
+	res = make([]db.TaskStageWithResult, 0)
+	q := squirrel.Select("p.*, coalesce(pu.json, '') as json").
 		From("task__stage as p").
-		Join("task__stage_result as pu on pu.stage_id=p.id").
-		Where("pu.task_id=?", taskID)
+		LeftJoin("task__stage_result as pu on pu.stage_id=p.id and pu.task_id=p.task_id").
+		Where("p.task_id=?", taskID).
+		OrderBy("p.id")
 
 	if stageType != nil {
 		q = q.Where(squirrel.Eq{"type": *stageType})
@@ -128,14 +131,14 @@ func (d *SqlDb) clearTasks(projectID int, templateID int, maxTasks int) {
 
 	if rand.Intn(10) == 0 { // randomly recalculate number of tasks for the template
 		var n int64
-		n, err = d.Sql().SelectInt("SELECT count(*) FROM task WHERE template_id=?", templateID)
+		err = d.selectOne(&n, "SELECT count(*) FROM task WHERE template_id=?", templateID)
 		if err != nil {
 			return
 		}
 
 		if n != int64(nTasks) {
 			_, err = d.exec("UPDATE `project__template` SET `tasks`=? WHERE project_id=? and id=?",
-				maxTasks, projectID, templateID)
+				n, projectID, templateID)
 			if err != nil {
 				return
 			}
@@ -157,14 +160,16 @@ func (d *SqlDb) clearTasks(projectID int, templateID int, maxTasks int) {
 		return
 	}
 
-	_, err = d.exec("DELETE FROM task WHERE template_id=? AND created<?", templateID, oldestTask.Created)
+	// Workflow tasks are the durable execution record: deleting them can make
+	// reconciliation run a node twice and destroys the saved run's history.
+	_, err = d.exec("DELETE FROM task WHERE template_id=? AND created<? AND workflow_run_id IS NULL", templateID, oldestTask.Created)
 
 	if err != nil {
 		return
 	}
 
-	_, _ = d.exec("UPDATE `project__template` SET `tasks`=? WHERE project_id=? and id=?",
-		maxTasks, projectID, templateID)
+	_, _ = d.exec("UPDATE `project__template` SET `tasks`=(SELECT count(*) FROM task WHERE template_id=?) WHERE project_id=? and id=?",
+		templateID, projectID, templateID)
 }
 
 func (d *SqlDb) CreateTask(task db.Task, maxTasks int) (newTask db.Task, err error) {
@@ -383,10 +388,17 @@ func (d *SqlDb) GetWorkflowRunTasks(projectID int, runID int, params db.Retrieve
 
 func (d *SqlDb) DeleteTaskWithOutputs(projectID int, taskID int) (err error) {
 	// check if task exists in the project
-	_, err = d.GetTask(projectID, taskID)
+	task, err := d.GetTask(projectID, taskID)
 
 	if err != nil {
 		return
+	}
+	if task.WorkflowRunID != nil {
+		if _, runErr := d.GetWorkflowRunByID(projectID, *task.WorkflowRunID); runErr == nil {
+			return db.ErrInvalidOperation
+		} else if !errors.Is(runErr, db.ErrNotFound) {
+			return runErr
+		}
 	}
 
 	_, err = d.exec("delete from task__output where task_id=?", taskID)

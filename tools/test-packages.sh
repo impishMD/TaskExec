@@ -20,14 +20,14 @@ docker run --rm -v "$artifacts:/packages:ro" -v "$repo/tools:/tests:ro" \
   else
     dnf install -y -q curl-minimal python3 openssl "$PACKAGE"
   fi
-  test -f /usr/lib/systemd/system/jeh.service
-  test -f /usr/share/licenses/jeh/NOTICE
-  id jeh
-  test "$(stat -c %U /etc/jeh)" = jeh
-  runuser -u jeh -- bash /tests/test-binary.sh /usr/bin/jeh "$EXPECTED_VERSION"
-  printf retained > /etc/jeh/retention-check
-  printf retained > /var/lib/jeh/retention-check
-  if [[ "$FORMAT" == deb ]]; then dpkg --remove jeh; else rpm -e jeh; fi
-  test "$(cat /etc/jeh/retention-check)" = retained
-  test "$(cat /var/lib/jeh/retention-check)" = retained
+  test -f /usr/lib/systemd/system/taskexec.service
+  test -f /usr/share/licenses/taskexec/NOTICE
+  id taskexec
+  test "$(stat -c %U /etc/taskexec)" = taskexec
+  runuser -u taskexec -- bash /tests/test-binary.sh /usr/bin/taskexec "$EXPECTED_VERSION"
+  printf retained > /etc/taskexec/retention-check
+  printf retained > /var/lib/taskexec/retention-check
+  if [[ "$FORMAT" == deb ]]; then dpkg --remove taskexec; else rpm -e taskexec; fi
+  test "$(cat /etc/taskexec/retention-check)" = retained
+  test "$(cat /var/lib/taskexec/retention-check)" = retained
 '

@@ -1,4 +1,4 @@
 #!/bin/sh
 set -eu
-printf '%s\n' 'Job Executor Hub execution environment'
+printf '%s\n' 'TaskExec execution environment'
 uname -a

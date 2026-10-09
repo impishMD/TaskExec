@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <v-tabs class="pl-4">
+  <div class="taskexec-section-tabs">
+    <v-tabs show-arrows>
       <v-tab
         v-if="projectType === ''"
         key="history"
@@ -27,7 +27,6 @@
       </v-tab>
     </v-tabs>
 
-    <v-divider style="margin-top: -1px;" />
   </div>
 </template>
 <script>
@@ -38,12 +37,6 @@ export default {
     projectId: Number,
     projectType: String,
     canUpdateProject: Boolean,
-  },
-
-  computed: {
-    isPro() {
-      return (process.env.VUE_APP_BUILD_TYPE || '').startsWith('pro_');
-    },
   },
 
   data() {

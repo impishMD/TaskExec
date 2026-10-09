@@ -1,6 +1,6 @@
 <template>
-  <v-chip v-if="status" style="font-weight: bold;" :color="getStatusColor(status)">
-    <v-icon v-if="status !== 'running'" left>{{ getStatusIcon(status) }}</v-icon>
+  <v-chip v-if="status" class="taskexec-task-status" small outlined :color="getStatusColor(status)">
+    <v-icon v-if="status !== 'running'" left small>{{ getStatusIcon(status) }}</v-icon>
     <IndeterminateProgressCircular v-else style="margin-left: -5px;" />
     {{ humanizeStatus(status) }}
   </v-chip>
@@ -48,6 +48,8 @@ export default {
           return 'mdi-check-circle';
         case TaskStatus.WAITING_CONFIRMATION:
           return 'mdi-pause-circle';
+        case TaskStatus.REJECTED:
+          return 'mdi-close-circle';
         default:
           throw new Error(`Unknown task status ${status}`);
       }
@@ -56,23 +58,25 @@ export default {
     humanizeStatus(status) {
       switch (status) {
         case TaskStatus.WAITING:
-          return 'Waiting';
+          return this.$t('status_waiting');
         case TaskStatus.STARTING:
-          return 'Starting...';
+          return this.$t('status_starting');
         case TaskStatus.RUNNING:
-          return 'Running';
+          return this.$t('running');
         case TaskStatus.SUCCESS:
-          return 'Success';
+          return this.$t('status_success');
         case TaskStatus.ERROR:
-          return 'Failed';
+          return this.$t('status_failed');
         case TaskStatus.STOPPING:
-          return 'Stopping...';
+          return this.$t('status_stopping');
         case TaskStatus.STOPPED:
-          return 'Stopped';
+          return this.$t('status_stopped');
         case TaskStatus.CONFIRMED:
-          return 'Confirmed';
+          return this.$t('status_confirmed');
         case TaskStatus.WAITING_CONFIRMATION:
-          return 'Waiting confirmation';
+          return this.$t('status_waiting_confirmation');
+        case TaskStatus.REJECTED:
+          return this.$t('status_rejected');
         default:
           throw new Error(`Unknown task status ${status}`);
       }
@@ -98,6 +102,8 @@ export default {
           return 'warning';
         case TaskStatus.WAITING_CONFIRMATION:
           return 'warning';
+        case TaskStatus.REJECTED:
+          return 'error';
         default:
           throw new Error(`Unknown task status ${status}`);
       }

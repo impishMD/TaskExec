@@ -1,7 +1,7 @@
 ---
 
 name: Problem
-description: You have encountered problems when using JEH
+description: You have encountered problems when using TaskExec
 title: "Problem: "
 labels: ['problem', 'triage']
 
@@ -11,11 +11,11 @@ body:
       value: |
         Please make sure to go through these steps **before opening an issue**:
         
-        - [ ] Read the [documentation](https://github.com/impishMD/jeh/tree/develop/docs/en)
-          - [ ] Read the [troubleshooting guide](https://github.com/impishMD/jeh/tree/develop/docs/en)
-          - [ ] Read the [documentation regarding manual installations](https://github.com/impishMD/jeh/tree/develop/docs/en) if you don't use docker
+        - [ ] Read the [documentation](https://github.com/impishMD/TaskExec/tree/develop/docs/en)
+          - [ ] Read the [troubleshooting guide](https://github.com/impishMD/TaskExec/tree/develop/docs/en)
+          - [ ] Read the [documentation regarding manual installations](https://github.com/impishMD/TaskExec/tree/develop/docs/en) if you don't use docker
 
-        - [ ] Check if there are existing [issues](https://github.com/impishMD/jeh/issues) or [discussions](https://github.com/impishMD/jeh/discussions) regarding your topic
+        - [ ] Check if there are existing [issues](https://github.com/impishMD/TaskExec/issues) or [discussions](https://github.com/impishMD/TaskExec/discussions) regarding your topic
 
   - type: textarea
     id: problem
@@ -32,7 +32,7 @@ body:
     attributes:
       label: Impact
       description: |
-        What parts of JEH are impacted by the problem?
+        What parts of TaskExec are impacted by the problem?
 
       multiple: true
       options:
@@ -43,7 +43,7 @@ body:
         - Configuration
         - Database
         - Docker
-        - JEH Project
+        - TaskExec Project
         - Other
     validations:
       required: true
@@ -53,7 +53,7 @@ body:
     attributes:
       label: Installation method
       description: |
-        How did you install JEH?
+        How did you install TaskExec?
 
       multiple: false
       options:
@@ -84,7 +84,7 @@ body:
     attributes:
       label: Browser
       description: |
-        If the problem occurs in the JEH WebUI - in what browsers do you see it?
+        If the problem occurs in the TaskExec WebUI - in what browsers do you see it?
 
       multiple: true
       options:
@@ -95,12 +95,12 @@ body:
         - Opera
 
   - type: textarea
-    id: version-jeh
+    id: version-taskexec
     attributes:
-      label: JEH Version
+      label: TaskExec Version
       description: |
-        What version of JEH are you running?
-        > Command: `jeh version`
+        What version of TaskExec are you running?
+        > Command: `taskexec version`
     validations:
       required: true
 
@@ -146,7 +146,7 @@ body:
     attributes:
       label: Manual installation - system information
       description: |
-        If you have installed JEH using the package or binary:
+        If you have installed TaskExec using the package or binary:
         
         Please share your operating system & -version!
         > Command: `uname -a`
@@ -160,7 +160,7 @@ body:
     attributes:
       label: Configuration
       description: |
-        Please provide JEH configuration related to your problem - like:
+        Please provide TaskExec configuration related to your problem - like:
         * Config file options
         * Environment variables
         * WebUI configuration

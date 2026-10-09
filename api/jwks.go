@@ -3,8 +3,8 @@ package api
 import (
 	"net/http"
 
-	"github.com/impishMD/jeh/pkg/jwt"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/pkg/jwt"
+	"github.com/impishMD/taskexec/util"
 	log "github.com/sirupsen/logrus"
 )
 

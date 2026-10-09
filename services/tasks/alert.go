@@ -4,15 +4,17 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
+	"github.com/impishMD/taskexec/services/alerting"
+	"html"
 	htmltemplate "html/template"
 	"net/http"
 	"strconv"
 	"text/template"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/util"
-	"github.com/impishMD/jeh/util/mailer"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/util"
+	"github.com/impishMD/taskexec/util/mailer"
 )
 
 //go:embed templates/*.tmpl
@@ -127,80 +129,18 @@ func (t *TaskRunner) sendMailAlert() {
 }
 
 func (t *TaskRunner) sendTelegramAlert() {
-	if !util.Config.TelegramAlert || !t.alert {
-		return
-	}
-
 	if t.shouldSkipStatusAlert() {
 		return
 	}
-
-	chatID := util.Config.TelegramChat
-	if t.alertChat != nil && *t.alertChat != "" {
-		chatID = *t.alertChat
-	}
-
-	if chatID == "" {
-		return
-	}
-
-	body := bytes.NewBufferString("")
 	author, version := t.alertInfos()
-
-	alert := Alert{
-		Name:   t.Template.Name,
-		Author: author,
-		Color:  t.alertColor("telegram"),
-		Task: alertTask{
-			ID:      strconv.Itoa(t.Task.ID),
-			URL:     t.taskLink(),
-			Result:  t.Task.Status.Format(),
-			Version: version,
-			Desc:    t.Task.Message,
-		},
-		Chat: alertChat{
-			ID: chatID,
-		},
-	}
-
-	tpl, err := template.ParseFS(templates, "templates/telegram.tmpl")
-
+	message := fmt.Sprintf("<code>%s</code>\n#%d <b>%s</b> <code>%s</code> - %s\nby %s\n%s",
+		html.EscapeString(t.Template.Name), t.Task.ID, html.EscapeString(t.Task.Status.Format()),
+		html.EscapeString(version), html.EscapeString(t.Task.Message), html.EscapeString(author), html.EscapeString(t.taskLink()))
+	sent, err := (alerting.Service{Store: t.pool.store}).SendTelegram(t.Template.ProjectID, message, nil)
 	if err != nil {
-		t.Log("Can't parse telegram alert template!")
-		panic(err)
-	}
-
-	if err := tpl.Execute(body, alert); err != nil {
-		t.Log("Can't generate telegram alert template!")
-		panic(err)
-	}
-
-	if body.Len() == 0 {
-		t.Log("Buffer for telegram alert is empty")
-		return
-	}
-
-	t.Log("Attempting to send telegram alert")
-
-	resp, err := http.Post(
-		fmt.Sprintf(
-			"https://api.telegram.org/bot%s/sendMessage",
-			util.Config.TelegramToken,
-		),
-		"application/json",
-		body,
-	)
-
-	if err != nil {
-		t.Log("Can't send telegram alert! Error: " + err.Error())
-	} else if resp.StatusCode != 200 {
-		t.Log("Can't send telegram alert! Response code: " + strconv.Itoa(resp.StatusCode))
-	} else {
-		t.Log("Sent successfully telegram alert")
-	}
-
-	if resp != nil {
-		defer resp.Body.Close() //nolint:errcheck
+		t.Log("Can't send Telegram alert: " + err.Error())
+	} else if sent {
+		t.Log("Sent successfully Telegram alert")
 	}
 }
 

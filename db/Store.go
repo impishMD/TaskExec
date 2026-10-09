@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/impishMD/jeh/pkg/common_errors"
-	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/taskexec/pkg/common_errors"
+	"github.com/impishMD/taskexec/pkg/task_logger"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -77,6 +77,8 @@ type ObjectReferrers struct {
 	Schedules    []ObjectReferrer `json:"schedules"`
 	AccessKeys   []ObjectReferrer `json:"access_keys"`
 	HostConfigs  []ObjectReferrer `json:"host_configs"`
+	Workflows    []ObjectReferrer `json:"workflows,omitempty"`
+	Environments []ObjectReferrer `json:"environments,omitempty"`
 }
 
 type IntegrationReferrers struct {
@@ -216,7 +218,6 @@ type OptionsManager interface {
 
 // UserManager handles user-related operations
 type UserManager interface {
-	GetProUserCount() (int, error)
 	GetUserCount() (int, error)
 	GetUsers(params RetrieveQueryParams) ([]User, error)
 	CreateUserWithoutPassword(user User) (User, error)
@@ -340,7 +341,7 @@ type GetAccessKeyOptions struct {
 	// IgnoreOwner disables the Owner filter entirely, returning keys of
 	// every owner type (shared, environment, variable, vault, task).
 	// Needed by callers that must see all keys regardless of who owns
-	// them, e.g. vault rekeying and secret storage sync cleanup.
+	// them, e.g. vault rekeying.
 	IgnoreOwner bool
 
 	EnvironmentID   *int
@@ -553,26 +554,6 @@ type SecretStorageRepository interface {
 	DeleteSecretStorage(projectID int, storageID int) error
 }
 
-type SecretSyncRepository interface {
-	// GetSyncEnabledSecretSyncs returns every sync config (storage-level
-	// and env-scoped) that is enabled with a positive interval.
-	GetSyncEnabledSecretSyncs() ([]SecretSync, error)
-	MarkSecretSyncSynced(syncID int, success bool, at time.Time) error
-
-	// GetStorageSecretSync returns the storage-level sync (EnvironmentID=nil)
-	// for the given storage, or ErrNotFound.
-	GetStorageSecretSync(storageID int) (SecretSync, error)
-	// GetEnvironmentSecretSync returns the env-scoped sync for the env,
-	// or ErrNotFound.
-	GetEnvironmentSecretSync(environmentID int) (SecretSync, error)
-
-	// SaveSecretSync upserts a sync config (and its paths) identified by
-	// (StorageID, EnvironmentID) on the passed struct. When SyncEnabled
-	// is false, SyncInterval is zero, and Paths is empty, the row is
-	// deleted instead of being written.
-	SaveSecretSync(sync SecretSync) error
-}
-
 type RoleRepository interface {
 	GetGlobalRoleBySlug(slug string) (Role, error)
 	GetProjectOrGlobalRoleBySlug(projectID int, slug string) (Role, error)
@@ -586,9 +567,11 @@ type RoleRepository interface {
 
 // Store is the main interface that aggregates all specialized interfaces
 type Store interface {
+	WorkflowManager
 	ConnectionManager
 	MigrationManager
 	OptionsManager
+	AlertChannelRepository
 	UserManager
 	ProjectStore
 	ProjectInviteRepository
@@ -603,12 +586,13 @@ type Store interface {
 	TokenManager
 	ExternalIdentityManager
 	TaskManager
+	AnsibleTaskRepository
+	TerraformStore
 	ScheduleManager
 	ViewManager
 	RunnerManager
 	EventManager
 	SecretStorageRepository
-	SecretSyncRepository
 	RoleRepository
 	AuditEventManager
 }

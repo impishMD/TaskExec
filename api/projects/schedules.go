@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/services/schedules"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/services/schedules"
 )
 
 // SchedulesMiddleware ensures a template exists and loads it to the context

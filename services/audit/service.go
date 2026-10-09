@@ -6,14 +6,13 @@ import (
 	"net/http"
 	"net/netip"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pro_interfaces"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/util"
 )
 
 type Service struct {
 	recorder Recorder
-	exporter pro_interfaces.AuditExporter
+	exporter Exporter
 	trusted  []netip.Prefix
 	enabled  bool
 
@@ -25,12 +24,15 @@ func StartService(
 	store db.AuditEventManager,
 	conf *util.AuditConfig,
 	nodeID string,
-	exporter pro_interfaces.AuditExporter,
+	exporter Exporter,
 ) (*Service, error) {
 	if !conf.IsEnabled() {
 		return &Service{recorder: Nop{}}, nil
 	}
 
+	if exporter == nil {
+		exporter = localOnlyExporter{}
+	}
 	trusted, err := conf.TrustedProxies()
 	if err != nil {
 		return nil, err

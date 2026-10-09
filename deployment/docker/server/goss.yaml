@@ -1,12 +1,12 @@
 file:
   /usr/local/bin/server-wrapper:
     exists: true
-    owner: jeh
+    owner: taskexec
     group: root
     filetype: file
-  /usr/local/bin/jeh:
+  /usr/local/bin/taskexec:
     exists: true
-    owner: jeh
+    owner: taskexec
     group: root
     filetype: file
 
@@ -48,13 +48,13 @@ package:
     installed: true
 
 user:
-  jeh:
+  taskexec:
     exists: true
     uid: 1001
     gid: 0
-    home: /home/jeh
+    home: /home/taskexec
 
 command:
-  jeh:
+  taskexec:
     exit-status: 0
     timeout: 10000

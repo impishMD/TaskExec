@@ -43,9 +43,9 @@ jobs:
         run: |
           [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]
           test "$(cat VERSION)" = "${RELEASE_TAG#v}"
-          test -s "docs/en/releases/$RELEASE_TAG.md"
-          test -s "docs/ru/releases/$RELEASE_TAG.md"
-          goreleaser release --clean --skip=publish --release-notes "docs/en/releases/$RELEASE_TAG.md"
+          test -s "release-notes/en/$RELEASE_TAG.md"
+          test -s "release-notes/ru/$RELEASE_TAG.md"
+          goreleaser release --clean --skip=publish --release-notes "release-notes/en/$RELEASE_TAG.md"
       - run: python3 tools/verify-release.py dist
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:

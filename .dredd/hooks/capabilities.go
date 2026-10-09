@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 	trans "github.com/snikch/goodman/transaction"
 )
 
@@ -123,7 +123,7 @@ func resolveCapability(caps []string, resolved []string, uid string) {
 		case "repository":
 			pRepo, err := store.CreateRepository(db.Repository{
 				ProjectID: userProject.ID,
-				GitURL:    "git@github.com/ansible,jeh/jeh",
+				GitURL:    "git@github.com/ansible,taskexec/taskexec",
 				GitBranch: "develop",
 				SSHKeyID:  userKey.ID,
 				Name:      "ITR-" + uid,

@@ -165,7 +165,7 @@ describe('WorkflowNodeCard.vue', () => {
           },
         },
       }, false);
-      expect(w.find('.WorkflowNodeCard__sub').text()).to.equal('success · 2m 14s');
+      expect(w.find('.WorkflowNodeCard__sub').text()).to.equal('status_success · 2m 14s');
       expect(w.find('.WorkflowNodeCard__status .mdi-check-circle').exists()).to.equal(true);
       expect(w.classes()).to.include('WorkflowNodeCard--clickable');
     });

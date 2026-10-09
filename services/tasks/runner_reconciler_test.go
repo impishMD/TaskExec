@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/db/sql"
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/db/sql"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -36,13 +36,12 @@ func (s *reconcilerStoreStub) UpdateTask(task db.Task) error {
 
 func newReconcilerTestPool(store db.Store, state TaskStateStore) TaskPool {
 	return TaskPool{
-		queueEvents:     make(chan PoolEvent, 10),
-		logger:          make(chan logRecord, 100),
-		state:           state,
-		store:           store,
-		logWriteService: &mockLogWriteService{},
-		stop:            make(chan struct{}),
-		reconcileDone:   make(chan struct{}),
+		queueEvents:   make(chan PoolEvent, 10),
+		logger:        make(chan logRecord, 100),
+		state:         state,
+		store:         store,
+		stop:          make(chan struct{}),
+		reconcileDone: make(chan struct{}),
 	}
 }
 
@@ -351,11 +350,10 @@ func TestRequeueTaskRunnerOffline(t *testing.T) {
 	state := NewMemoryTaskStateStore()
 
 	pool := TaskPool{
-		queueEvents:     make(chan PoolEvent, 10),
-		logger:          make(chan logRecord, 100),
-		state:           state,
-		store:           store,
-		logWriteService: &mockLogWriteService{},
+		queueEvents: make(chan PoolEvent, 10),
+		logger:      make(chan logRecord, 100),
+		state:       state,
+		store:       store,
 	}
 
 	newTask, runnerID := createReconcilerTestTask(t, store, task_logger.TaskStartingStatus, nil)
@@ -396,11 +394,10 @@ func TestRequeueTaskRunnerOffline_NoopWhenAlreadyRunning(t *testing.T) {
 	state := NewMemoryTaskStateStore()
 
 	pool := TaskPool{
-		queueEvents:     make(chan PoolEvent, 10),
-		logger:          make(chan logRecord, 100),
-		state:           state,
-		store:           store,
-		logWriteService: &mockLogWriteService{},
+		queueEvents: make(chan PoolEvent, 10),
+		logger:      make(chan logRecord, 100),
+		state:       state,
+		store:       store,
 	}
 
 	runnerID := 42
@@ -429,11 +426,10 @@ func TestFinalizeRemoteTask_DoesNotOverwriteConcurrentTerminalSuccess(t *testing
 	state := NewMemoryTaskStateStore()
 
 	pool := TaskPool{
-		queueEvents:     make(chan PoolEvent, 10),
-		logger:          make(chan logRecord, 100),
-		state:           state,
-		store:           store,
-		logWriteService: &mockLogWriteService{},
+		queueEvents: make(chan PoolEvent, 10),
+		logger:      make(chan logRecord, 100),
+		state:       state,
+		store:       store,
 	}
 
 	now := time.Now()
@@ -474,11 +470,10 @@ func TestFailTaskRunnerLost(t *testing.T) {
 	state := NewMemoryTaskStateStore()
 
 	pool := TaskPool{
-		queueEvents:     make(chan PoolEvent, 10),
-		logger:          make(chan logRecord, 100),
-		state:           state,
-		store:           store,
-		logWriteService: &mockLogWriteService{},
+		queueEvents: make(chan PoolEvent, 10),
+		logger:      make(chan logRecord, 100),
+		state:       state,
+		store:       store,
 	}
 
 	now := time.Now()

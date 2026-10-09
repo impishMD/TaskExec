@@ -72,7 +72,7 @@ func (conf *ConfigType) GetSysProcAttr() (res *syscall.SysProcAttr) {
 }
 
 // ChownDir changes ownership of the directory to the process config user/group.
-// This is needed because directories are created by the main JEH process,
+// This is needed because directories are created by the main TaskExec process,
 // but child processes (git, ansible, etc.) run as the configured process user.
 func ChownDir(path string) error {
 	uid, gid := Config.getProcessCredential()

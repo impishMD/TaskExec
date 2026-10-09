@@ -149,13 +149,13 @@ export default {
     validationSuccessMessage() {
       switch (this.type) {
         case 'json':
-          return 'Valid JSON format.';
+          return this.$t('validJson');
         case 'json_array':
-          return 'Valid JSON array format.';
+          return this.$t('validJsonArray');
         case 'yaml':
-          return 'Valid YAML format.';
+          return this.$t('validYaml');
         default:
-          return 'Validation passed successfully.';
+          return this.$t('validationPassed');
       }
     },
   },
@@ -180,7 +180,7 @@ export default {
           try {
             const res = JSON.parse(this.text);
             if (!Array.isArray(res)) {
-              throw new Error('Must be JSON array');
+              throw new Error(this.$t('mustBeJsonArray'));
             }
           } catch (e) {
             this.errorMessage = getErrorMessage(e);

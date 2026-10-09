@@ -2,17 +2,20 @@ package sql
 
 import (
 	"github.com/Masterminds/squirrel"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/tz"
 )
 
 func (d *SqlDb) CreateProject(project db.Project) (newProject db.Project, err error) {
+	if err = project.ValidateIcon(); err != nil {
+		return
+	}
 	project.Created = tz.Now()
 
 	insertId, err := d.insert(
 		"id",
-		"insert into project(name, created, type, alert, alert_chat, max_parallel_tasks) values (?, ?, ?, ?, ?, ?)",
-		project.Name, project.Created, project.Type, project.Alert, project.AlertChat, project.MaxParallelTasks)
+		"insert into project(name, created, type, alert, alert_chat, max_parallel_tasks, icon) values (?, ?, ?, ?, ?, ?, ?)",
+		project.Name, project.Created, project.Type, project.Alert, project.AlertChat, project.MaxParallelTasks, project.Icon)
 
 	if err != nil {
 		return
@@ -88,7 +91,9 @@ func (d *SqlDb) DeleteProject(projectID int) error {
 	}
 
 	statements := []string{
+		"delete from project__alert_channel where project_id=?",
 		"delete from project__workflow_run where project_id=?",
+		"delete from project__workflow_template where project_id=?",
 		"update project__template set build_template_id = null where project_id=?",
 		"delete from project__template where project_id=?",
 		"delete from project__user where project_id=?",
@@ -99,6 +104,8 @@ func (d *SqlDb) DeleteProject(projectID int) error {
 		// The restriction stays, so deleting a key on its own still reports the
 		// mappings using it.
 		"delete from project__host_config where project_id=?",
+		"delete from project__environment_expression where environment_id in (select id from project__environment where project_id=?)",
+		"delete from project__environment_key where environment_id in (select id from project__environment where project_id=?)",
 		"delete from access_key where project_id=?",
 	}
 
@@ -122,12 +129,16 @@ func (d *SqlDb) DeleteProject(projectID int) error {
 }
 
 func (d *SqlDb) UpdateProject(project db.Project) error {
+	if err := project.ValidateIcon(); err != nil {
+		return err
+	}
 	_, err := d.exec(
-		"update project set name=?, alert=?, alert_chat=?, max_parallel_tasks=? where id=?",
+		"update project set name=?, alert=?, alert_chat=?, max_parallel_tasks=?, icon=? where id=?",
 		project.Name,
 		project.Alert,
 		project.AlertChat,
 		project.MaxParallelTasks,
+		project.Icon,
 		project.ID)
 	return err
 }

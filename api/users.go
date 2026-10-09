@@ -8,27 +8,24 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/services/audit"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pro_interfaces"
-	"github.com/impishMD/jeh/services/audit"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/util"
 )
 
 type UsersController struct {
-	subscriptionService pro_interfaces.SubscriptionService
-	log                 *log.Entry
+	log *log.Entry
 }
 
-func NewUsersController(subscriptionService pro_interfaces.SubscriptionService) *UsersController {
+func NewUsersController() *UsersController {
 	return &UsersController{
-		subscriptionService: subscriptionService,
-		log:                 log.WithField("context", "api.users"),
+		log: log.WithField("context", "api.users"),
 	}
 }
 
@@ -79,25 +76,6 @@ func (c *UsersController) AddUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.Pro {
-		ok, err := c.subscriptionService.CanAddProUser()
-
-		if err != nil {
-			c.log.WithError(err).Error("Failed to check Pro user limit")
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		if !ok {
-			helpers.WriteErrorStatus(
-				w,
-				"You have reached the limit of Pro users for your subscription.",
-				http.StatusForbidden,
-			)
-			return
-		}
-	}
-
 	var err error
 	var newUser db.User
 
@@ -116,7 +94,7 @@ func (c *UsersController) AddUser(w http.ResponseWriter, r *http.Request) {
 	helpers.Audit(r).Record(r.Context(), audit.Event{
 		Kind:     audit.IAMUserCreate,
 		Target:   audit.UserTarget(newUser.ID, newUser.Username),
-		Metadata: audit.UserCreateMetadata{Admin: newUser.Admin, Pro: newUser.Pro, External: newUser.External},
+		Metadata: audit.UserCreateMetadata{Admin: newUser.Admin, External: newUser.External},
 	})
 
 	helpers.WriteJSON(w, http.StatusCreated, newUser)
@@ -193,35 +171,6 @@ func (c *UsersController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var user db.UserWithPwd
 	if !helpers.Bind(w, r, &user) {
 		return
-	}
-
-	if !editor.Admin && (user.Pro && !targetUser.Pro) {
-		c.log.WithFields(log.Fields{
-			"editor":  editor.Username,
-			"user_id": targetUser.ID,
-		}).Debug("Not permitted to mark users as Pro")
-		helpers.RecordDenied(r, "admin", 0)
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	if user.Pro {
-		ok, err := c.subscriptionService.CanAddProUser()
-
-		if err != nil {
-			c.log.WithError(err).Error("Failed to check Pro user limit")
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		if !ok {
-			helpers.WriteErrorStatus(
-				w,
-				"You have reached the limit of Pro users for your subscription.",
-				http.StatusForbidden,
-			)
-			return
-		}
 	}
 
 	if !editor.Admin && editor.ID != targetUser.ID {
@@ -468,7 +417,7 @@ func (c *UsersController) EnableTotp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	key, err := totp.Generate(totp.GenerateOpts{
-		Issuer:      "JEH",
+		Issuer:      "TaskExec",
 		AccountName: user.Email,
 	})
 
@@ -546,10 +495,7 @@ func userUpdateMetadata(before db.User, after db.UserWithPwd) audit.UserUpdateMe
 		meta.Fields = append(meta.Fields, "admin")
 		meta.Admin = &audit.BoolChange{Old: before.Admin, New: after.Admin}
 	}
-	if before.Pro != after.Pro {
-		meta.Fields = append(meta.Fields, "pro")
-		meta.Pro = &audit.BoolChange{Old: before.Pro, New: after.Pro}
-	}
+
 	if after.Pwd != "" {
 		meta.Fields = append(meta.Fields, "password")
 	}

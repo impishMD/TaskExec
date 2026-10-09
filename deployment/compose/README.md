@@ -1,4 +1,4 @@
-# JEH Compose examples
+# TaskExec Compose examples
 
 The root [compose.yaml](../../compose.yaml) is the supported SQLite quick start with
 persistent data/configuration and explicit credentials. This directory contains

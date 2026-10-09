@@ -32,6 +32,7 @@
         :project-id="projectId"
         :item="item"
         :system-info="systemInfo"
+        :app="template ? template.app : null"
       />
 
       <v-skeleton-loader

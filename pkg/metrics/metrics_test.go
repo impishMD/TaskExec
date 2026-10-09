@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/impishMD/jeh/pkg/task_logger"
+	"github.com/impishMD/taskexec/pkg/task_logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -38,10 +38,10 @@ func TestMetrics_RecordTaskStatusChange_RunningGauge(t *testing.T) {
 	m := NewMetrics()
 
 	m.RecordTaskStatusChange(task_logger.TaskWaitingStatus, task_logger.TaskRunningStatus)
-	assert.Contains(t, scrape(m), "jeh_tasks_running 1")
+	assert.Contains(t, scrape(m), "taskexec_tasks_running 1")
 
 	m.RecordTaskStatusChange(task_logger.TaskRunningStatus, task_logger.TaskSuccessStatus)
-	assert.Contains(t, scrape(m), "jeh_tasks_running 0")
+	assert.Contains(t, scrape(m), "taskexec_tasks_running 0")
 }
 
 func TestMetrics_RecordTaskStatusChange_SkipsRunningGaugeWhenNeverRan(t *testing.T) {
@@ -51,7 +51,7 @@ func TestMetrics_RecordTaskStatusChange_SkipsRunningGaugeWhenNeverRan(t *testing
 	m.RecordTaskStatusChange(task_logger.TaskWaitingConfirmation, task_logger.TaskRejected)
 	m.RecordTaskStatusChange(task_logger.TaskRejected, task_logger.TaskStoppedStatus)
 
-	assert.Contains(t, scrape(m), "jeh_tasks_running 0")
+	assert.Contains(t, scrape(m), "taskexec_tasks_running 0")
 }
 
 func TestMetrics_RecordTaskStatusChange_OutcomeCounter(t *testing.T) {
@@ -70,7 +70,7 @@ func TestMetrics_RecordTaskStatusChange_OutcomeCounter(t *testing.T) {
 
 			m.RecordTaskStatusChange(task_logger.TaskRunningStatus, tt.status)
 
-			assert.Contains(t, scrape(m), `jeh_tasks_total{status="`+string(tt.status)+`"} 1`)
+			assert.Contains(t, scrape(m), `taskexec_tasks_total{status="`+string(tt.status)+`"} 1`)
 		})
 	}
 }
@@ -82,8 +82,8 @@ func TestMetrics_RecordTaskStatusChange_TerminalToTerminalNotDoubleCounted(t *te
 	m.RecordTaskStatusChange(task_logger.TaskSuccessStatus, task_logger.TaskFailStatus)
 
 	body := scrape(m)
-	assert.Contains(t, body, `jeh_tasks_total{status="success"} 1`)
-	assert.NotContains(t, body, `jeh_tasks_total{status="error"}`)
+	assert.Contains(t, body, `taskexec_tasks_total{status="success"} 1`)
+	assert.NotContains(t, body, `taskexec_tasks_total{status="error"}`)
 }
 
 func TestMetrics_RecordTaskStatusChange_NonFinishedStatusNotCounted(t *testing.T) {
@@ -91,7 +91,7 @@ func TestMetrics_RecordTaskStatusChange_NonFinishedStatusNotCounted(t *testing.T
 
 	m.RecordTaskStatusChange(task_logger.TaskWaitingStatus, task_logger.TaskRunningStatus)
 
-	assert.NotContains(t, scrape(m), "jeh_tasks_total{")
+	assert.NotContains(t, scrape(m), "taskexec_tasks_total{")
 }
 
 func TestMetrics_RecordTaskStatusChange_NilReceiverIsNoop(t *testing.T) {
@@ -104,14 +104,14 @@ func TestMetrics_RecordTaskStatusChange_NilReceiverIsNoop(t *testing.T) {
 
 func TestRegister_ExposesForeignCollectors(t *testing.T) {
 	m := NewMetrics()
-	gauge := prometheus.NewGauge(prometheus.GaugeOpts{Name: "jeh_test_gauge", Help: "Test."})
+	gauge := prometheus.NewGauge(prometheus.GaugeOpts{Name: "taskexec_test_gauge", Help: "Test."})
 	gauge.Set(7)
 
 	require.NoError(t, m.Register(gauge))
 
 	w := httptest.NewRecorder()
 	m.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/api/metrics", nil))
-	assert.Contains(t, w.Body.String(), "jeh_test_gauge 7")
+	assert.Contains(t, w.Body.String(), "taskexec_test_gauge 7")
 	assert.Error(t, m.Register(gauge), "a second registration of the same collector")
 }
 

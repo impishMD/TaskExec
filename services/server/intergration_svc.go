@@ -1,6 +1,6 @@
 package server
 
-import "github.com/impishMD/jeh/db"
+import "github.com/impishMD/taskexec/db"
 
 type IntegrationService interface {
 	FillIntegration(integration *db.Integration) error

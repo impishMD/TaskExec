@@ -30,7 +30,7 @@ jobs:
       - run: go test -race -coverprofile=coverage.out ./...
       - run: npm --prefix web run test:unit
       - run: make build
-      - run: bash tools/test-binary.sh ./bin/jeh "v$(cat VERSION)"
+      - run: bash tools/test-binary.sh ./bin/taskexec "v$(cat VERSION)"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: coverage
@@ -50,7 +50,14 @@ jobs:
           context: .
           target: server
           load: true
-          tags: jeh:ci
+          tags: taskexec:ci
           cache-from: type=gha,scope=ci-${{ runner.arch }}
           cache-to: type=gha,scope=ci-${{ runner.arch }},mode=max
-      - run: bash tools/test-container.sh jeh:ci dev server
+      - run: bash tools/test-container.sh taskexec:ci dev server
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version-file: go.mod
+      - name: Exercise the Docker task executor
+        run: |
+          docker build --build-arg TASKEXEC_TEST_BASE=taskexec:ci -t taskexec:docker-fixture services/tasks/docker/testdata
+          TASKEXEC_DOCKER_TEST_IMAGE=taskexec:docker-fixture go test -race -timeout 4m ./services/tasks/docker

@@ -95,7 +95,7 @@
             <v-list-item-icon>
               <v-icon>mdi-cogs</v-icon>
             </v-list-item-icon>
-            <v-list-item-title>Applications</v-list-item-title>
+            <v-list-item-title>{{ $t('applications') }}</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
@@ -115,7 +115,7 @@
         :style="{
           'text-decoration': view.hidden ? 'line-through' : 'none',
         }"
-      >{{ view.title }}
+      >{{ viewTitle(view) }}
       </v-tab>
 
       <v-btn
@@ -264,6 +264,7 @@
 }
 </style>
 <script>
+import DisplayLabelsMixin from '@/components/DisplayLabelsMixin';
 import ItemListPageBase from '@/components/ItemListPageBase';
 import TaskLink from '@/components/TaskLink.vue';
 import axios from 'axios';
@@ -292,7 +293,7 @@ export default {
   props: {
     features: Object,
   },
-  mixins: [ItemListPageBase, AppsMixin],
+  mixins: [DisplayLabelsMixin, ItemListPageBase, AppsMixin],
 
   data() {
     return {

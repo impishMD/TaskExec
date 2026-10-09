@@ -4,18 +4,44 @@ import OpenTofuIcon from '@/components/OpenTofuIcon.vue';
 import PulumiIcon from '@/components/PulumiIcon.vue';
 import TerragruntIcon from '@/components/TerragruntIcon.vue';
 import HashicorpVaultIcon from '@/components/HashicorpVaultIcon.vue';
-import OpenBaoIcon from '@/components/OpenBaoIcon.vue';
+import {
+  cs, de, en, es, fr, it, ja, ko, nl, pl, pt, ru, zhHans, zhHant,
+} from 'vuetify/lib/locale';
 import DvlsIcon from '../components/DvlsIcon.vue';
 import AwsSmIcon from '../components/AwsSmIcon.vue';
 import AzureKvIcon from '../components/AzureKvIcon.vue';
+import i18n from './i18';
 
 Vue.use(Vuetify);
 
 export default new Vuetify({
+  lang: {
+    current: i18n.locale,
+    locales: {
+      cs, de, en, es, fr, it, ja, ko, nl, pl, pt, pt_br: pt, ru, zh_cn: zhHans, zh_tw: zhHant,
+    },
+  },
   theme: {
+    dark: localStorage.getItem('darkMode') === '1',
     themes: {
-      light: { primary: '#167561', secondary: '#142536', accent: '#b36a16' },
-      dark: { primary: '#69d2b0', secondary: '#142536', accent: '#ffba63' },
+      light: {
+        primary: '#187563',
+        secondary: '#203c46',
+        accent: '#ad711c',
+        success: '#218263',
+        error: '#c94b5b',
+        warning: '#a56a17',
+        info: '#387baf',
+      },
+      dark: {
+        primary: '#83d9bb',
+        secondary: '#29434e',
+        accent: '#ebbc73',
+        success: '#83d9bb',
+        error: '#f1919d',
+        warning: '#ebbc73',
+        info: '#8cbde6',
+      },
     },
   },
   icons: {
@@ -31,9 +57,6 @@ export default new Vuetify({
       },
       hashicorp_vault: {
         component: HashicorpVaultIcon,
-      },
-      openbao: {
-        component: OpenBaoIcon,
       },
       dvls: {
         component: DvlsIcon,

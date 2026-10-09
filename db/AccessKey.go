@@ -15,6 +15,7 @@ const (
 	AccessKeyNone          AccessKeyType = "none"
 	AccessKeyLoginPassword AccessKeyType = "login_password"
 	AccessKeyString        AccessKeyType = "string"
+	AccessKeyObject        AccessKeyType = "object"
 )
 const (
 	AccessKeyEnvironment   AccessKeyOwner = "environment"
@@ -32,7 +33,7 @@ const (
 	AccessKeySourceStorageFile  AccessKeySourceStorageType = "file"
 )
 
-// AccessKey represents a key used to access a machine with ansible from jeh
+// AccessKey represents a key used to access a machine with ansible from taskexec
 type AccessKey struct {
 	ID   int    `db:"id" json:"id" backup:"-"`
 	Name string `db:"name" json:"name" binding:"required"`
@@ -47,11 +48,14 @@ type AccessKey struct {
 	Plain       *string `db:"plain" json:"plain,omitempty"`
 	IgnorePlain bool    `db:"-" json:"-" backup:"-" `
 
-	String         string        `db:"-" json:"string"`
-	LoginPassword  LoginPassword `db:"-" json:"login_password"`
-	SshKey         SshKey        `db:"-" json:"ssh"`
-	GenerateSSHKey bool          `db:"-" json:"generate_ssh_key,omitempty"`
-	OverrideSecret bool          `db:"-" json:"override_secret,omitempty"`
+	String         string         `db:"-" json:"string"`
+	Object         map[string]any `db:"-" json:"object,omitempty" backup:"-"`
+	LoginPassword  LoginPassword  `db:"-" json:"login_password"`
+	SshKey         SshKey         `db:"-" json:"ssh"`
+	GenerateSSHKey bool           `db:"-" json:"generate_ssh_key,omitempty"`
+	OverrideSecret bool           `db:"-" json:"override_secret,omitempty"`
+	// ReferenceOnly edits a Vault reference without reading or writing its remote value.
+	ReferenceOnly bool `db:"-" json:"reference_only,omitempty" backup:"-"`
 
 	StorageID *int `db:"storage_id" json:"-" backup:"-"`
 
@@ -81,6 +85,7 @@ type AccessKey struct {
 	// If SourceStorageID is nil, this field is references to an environment variable.
 	SourceStorageKey  *string                     `db:"source_storage_key" json:"source_storage_key,omitempty"`
 	SourceStorageType *AccessKeySourceStorageType `db:"source_storage_type" json:"source_storage_type,omitempty"`
+	SourceMapping     MapStringAnyField           `db:"source_mapping" json:"source_mapping,omitempty"`
 
 	Synchronized bool `db:"synchronized" json:"synchronized,omitempty"`
 }
@@ -120,6 +125,8 @@ func (key *AccessKey) IsEmpty() bool {
 	switch key.Type {
 	case AccessKeyString:
 		return key.String == ""
+	case AccessKeyObject:
+		return key.Object == nil
 	case AccessKeySSH:
 		return key.SshKey.PrivateKey == ""
 	case AccessKeyLoginPassword:

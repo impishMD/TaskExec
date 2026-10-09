@@ -2,24 +2,24 @@
 set -e
 echoerr() { printf "%s\n" "$*" >&2; }
 
-export JEH_CONFIG_PATH="${JEH_CONFIG_PATH:-/etc/jeh}"
-export JEH_TMP_PATH="${JEH_TMP_PATH:-/tmp/jeh}"
-export JEH_DATA_PATH="${JEH_DATA_PATH:-/var/lib/jeh}"
+export TASKEXEC_CONFIG_PATH="${TASKEXEC_CONFIG_PATH:-/etc/taskexec}"
+export TASKEXEC_TMP_PATH="${TASKEXEC_TMP_PATH:-/tmp/taskexec}"
+export TASKEXEC_DATA_PATH="${TASKEXEC_DATA_PATH:-/var/lib/taskexec}"
 
-if test -f "${JEH_CONFIG_PATH}/requirements.txt"; then
+if test -f "${TASKEXEC_CONFIG_PATH}/requirements.txt"; then
     echoerr "Installing additional python dependencies"
-    pip3 install --upgrade -r "${JEH_CONFIG_PATH}/requirements.txt"
+    pip3 install --upgrade -r "${TASKEXEC_CONFIG_PATH}/requirements.txt"
 else
     echoerr "No additional python dependencies to install"
 fi
 
-echoerr "Starting jeh runner"
+echoerr "Starting taskexec runner"
 
-RUNNER_CMD="/usr/local/bin/jeh runner start --no-config"
+RUNNER_CMD="/usr/local/bin/taskexec runner start --no-config"
 
-if [ -n "${JEH_RUNNER_REGISTRATION_TOKEN:-}" ] || [ -n "${JEH_RUNNER_REGISTRATION_TOKEN_FILE:-}" ]; then
-  if [ -z "${JEH_RUNNER_TOKEN:-}" ] && [ -z "${JEH_RUNNER_TOKEN_FILE:-}" ]; then
-    export JEH_RUNNER_TOKEN_FILE="${JEH_DATA_PATH}/runner_token.txt"
+if [ -n "${TASKEXEC_RUNNER_REGISTRATION_TOKEN:-}" ] || [ -n "${TASKEXEC_RUNNER_REGISTRATION_TOKEN_FILE:-}" ]; then
+  if [ -z "${TASKEXEC_RUNNER_TOKEN:-}" ] && [ -z "${TASKEXEC_RUNNER_TOKEN_FILE:-}" ]; then
+    export TASKEXEC_RUNNER_TOKEN_FILE="${TASKEXEC_DATA_PATH}/runner_token.txt"
   fi
   echoerr "Registration token provided, starting runner in registration mode"
   exec ${RUNNER_CMD} --register

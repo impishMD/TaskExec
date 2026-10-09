@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/impishMD/jeh/pkg/common_errors"
-	"github.com/impishMD/jeh/pkg/git"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/pkg/common_errors"
+	"github.com/impishMD/taskexec/pkg/git"
+	"github.com/impishMD/taskexec/util"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -92,7 +92,7 @@ func (r Repository) GetHomePath(templateID int) string {
 	return path.Join(util.Config.GetProjectTmpDir(r.ProjectID), r.GetDirName(templateID)+"_home")
 }
 
-// GetInternalPath returns a per-template directory under the project tmp dir for JEH-owned
+// GetInternalPath returns a per-template directory under the project tmp dir for TaskExec-owned
 // metadata (e.g. galaxy requirements hashes). It is not a copy of the repository.
 func (r Repository) GetInternalPath(templateID int) string {
 	return path.Join(util.Config.GetProjectTmpDir(r.ProjectID), r.GetDirName(templateID)+"_internal")

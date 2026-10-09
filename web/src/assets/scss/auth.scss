@@ -1,0 +1,126 @@
+.auth__divider {
+  margin-top: 15px;
+  margin-bottom: 5px;
+
+  display: flex;
+  &:before,
+  &:after {
+    margin-top: 10px;
+    width: 100%;
+    content: '';
+    border-top: 1px solid rgba(128, 128, 128, 0.51);
+  }
+
+  &:before {
+    margin-right: 10px;
+  }
+
+  &:after {
+    margin-left: 10px;
+  }
+}
+.taskexec-app .auth {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 40px 24px;
+  background: var(--taskexec-bg);
+
+  &__shell {
+    width: 100%;
+    max-width: 1040px;
+    min-width: 0;
+  }
+
+  &__preferences {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 24px;
+  }
+
+  &__layout {
+    width: 100%;
+    max-width: 1040px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 64px;
+    align-items: center;
+  }
+
+  &__intro {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 580px;
+    padding: 40px;
+    color: var(--taskexec-text);
+    background: var(--taskexec-accent-soft);
+    border: 1px solid var(--taskexec-border);
+    border-radius: 32px;
+    overflow: hidden;
+
+    &::after {
+      content: '';
+      position: absolute;
+      width: 360px;
+      height: 360px;
+      right: -230px;
+      bottom: -150px;
+      border: 1px solid var(--taskexec-accent);
+      opacity: 0.35;
+      border-radius: 50%;
+      box-shadow: 0 0 0 36px rgba(131, 217, 187, 0.035), 0 0 0 72px rgba(131, 217, 187, 0.025);
+      pointer-events: none;
+    }
+  }
+
+  &__brand {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    img { flex-shrink: 0; }
+    > div { min-width: 0; }
+    strong { display: block; font-size: 30px; font-weight: 400; letter-spacing: -0.8px; }
+    b { font-weight: 650; color: var(--taskexec-accent); }
+    span { display: block; margin-top: 3px; color: var(--taskexec-muted); font-size: 12px; }
+  }
+
+  &__eyebrow { color: var(--taskexec-accent); font-size: 11px; font-weight: 600; letter-spacing: 1.6px; text-transform: uppercase; margin-bottom: 18px; }
+  &__intro h1 { max-width: 360px; font-size: 43px; line-height: 1.18; letter-spacing: -0.8px; font-weight: 600; overflow-wrap: anywhere; }
+  &__intro p { color: var(--taskexec-muted); font-size: 15px; line-height: 1.8; margin: 22px 0; }
+  &__tools { display: flex; flex-wrap: wrap; gap: 8px; }
+  &__tools span { padding: 6px 10px; border: 1px solid var(--taskexec-border); border-radius: 8px; font-size: 11px; color: var(--taskexec-muted); }
+  &__signature { display: flex; align-items: center; gap: 8px; color: var(--taskexec-muted); font-size: 11px; }
+  &__signature span { width: 6px; height: 6px; border-radius: 50%; background: var(--taskexec-accent); }
+
+  &__card.v-card { padding: 30px; }
+  &__card > .v-card__text { padding: 0; }
+  &__form { width: 100%; max-width: 370px; margin: 0 auto; }
+  &__form-icon { display: grid; place-items: center; width: 52px; height: 52px; border: 1px solid var(--taskexec-border); background: var(--taskexec-surface); border-radius: 16px; margin-bottom: 26px; }
+  &__form-icon .v-icon { color: var(--taskexec-accent); }
+  &__title { font-size: 30px; line-height: 1.25; letter-spacing: -0.8px; color: var(--taskexec-text); margin-bottom: 12px; }
+  &__subtitle { color: var(--taskexec-muted); font-size: 14px; line-height: 1.7; margin-bottom: 32px; }
+  &__form > h2 { margin-bottom: 28px; }
+  &__form .v-btn--block { border-radius: 12px; min-height: 48px; }
+
+  @media (max-width: 959px) {
+    &__layout { gap: 32px; }
+    &__intro { padding: 28px; }
+    &__intro h1 { font-size: 34px; }
+  }
+
+  @media (max-width: 699px) {
+    padding: 24px;
+    &__shell { max-width: 420px; }
+    &__preferences { margin-bottom: 20px; }
+    &__layout { max-width: 420px; grid-template-columns: 1fr; gap: 28px; }
+    &__intro { min-height: auto; padding: 22px 24px; border-radius: 22px; }
+    &__intro-body, &__signature { display: none; }
+    &__card > .v-card__text { padding: 0; }
+    &__card.v-card { padding: 24px; }
+    &__title { font-size: 27px; }
+    &__form-icon { margin-bottom: 20px; }
+  }
+}

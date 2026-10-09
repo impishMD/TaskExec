@@ -1,9 +1,9 @@
 ---
 swagger: '2.0'
 info:
-  title: JEH API
+  title: TaskExec API
   description: |
-    JEH API provides endpoints for managing and interacting with the Job Executor Hub.
+    TaskExec API provides endpoints for managing and interacting with the TaskExec.
     This documentation outlines the available operations and data models.
   version: "0.0.1"
 
@@ -34,6 +34,123 @@ schemes:
 basePath: /api
 
 definitions:
+  VaultCredential:
+    type: object
+    properties:
+      source:
+        type: string
+        enum: [database, env, file]
+      value:
+        type: string
+        description: Literal value or source reference. Database values are never returned; a blank edit preserves the saved value with the same method/source.
+      configured:
+        type: boolean
+        readOnly: true
+      clear:
+        type: boolean
+        description: Explicitly clear an optional credential (CA or optional AppRole Secret ID).
+  VaultStorage:
+    type: object
+    required: [name, project_id, type, params]
+    properties:
+      id:
+        type: integer
+      project_id:
+        type: integer
+      name:
+        type: string
+      type:
+        type: string
+        enum: [vault]
+        description: HashiCorp Vault KV secret storage.
+      readonly:
+        type: boolean
+      params:
+        type: object
+        required: [url]
+        properties:
+          url:
+            type: string
+          kv_version:
+            type: integer
+            enum: [1, 2]
+            default: 2
+          mount:
+            type: string
+            default: secret
+          namespace:
+            type: string
+          auth_method:
+            type: string
+            enum: [token, approle, kubernetes, jwt, cert]
+            default: token
+          auth_mount:
+            type: string
+            description: Path after auth/, defaulting to the authentication method name.
+          auth_role:
+            type: string
+            description: Required for JWT/Kubernetes; optional certificate role for cert.
+          without_secret_id:
+            type: boolean
+            description: AppRole only. Requires bind_secret_id=false on the Vault role.
+      credentials:
+        type: object
+        description: Supply only the fields for the selected method and optional ca_cert. Persisted encrypted; omitted from mutation responses.
+        additionalProperties:
+          $ref: '#/definitions/VaultCredential'
+        properties:
+          token:
+            $ref: '#/definitions/VaultCredential'
+          role_id:
+            $ref: '#/definitions/VaultCredential'
+          secret_id:
+            $ref: '#/definitions/VaultCredential'
+          jwt:
+            $ref: '#/definitions/VaultCredential'
+          client_cert:
+            $ref: '#/definitions/VaultCredential'
+          client_key:
+            $ref: '#/definitions/VaultCredential'
+          ca_cert:
+            $ref: '#/definitions/VaultCredential'
+      secret:
+        type: string
+        description: Legacy token/source-reference input, retained for compatibility.
+      source_storage_type:
+        type: string
+        enum: [env, file]
+        description: Legacy token source. Omit for database.
+
+  TelegramAlertSettings:
+    type: object
+    properties:
+      channel:
+        type: string
+        enum: [telegram]
+      enabled:
+        type: boolean
+        description: Per-project enablement; false for global settings.
+      chat_id:
+        type: string
+      has_token:
+        type: boolean
+        description: Whether this scope has a saved token. The token is never returned.
+      global_token_configured:
+        type: boolean
+        description: Whether a project can use a saved global token.
+  TelegramAlertUpdate:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+        description: Enables Telegram for the project; ignored for global settings.
+      chat_id:
+        type: string
+        description: Project destination (numeric chat ID or channel @username); ignored for global settings.
+      token:
+        type: string
+        description: Write-only bot token. Omit or use null to preserve, use an empty string to remove. Removing a project token falls back to the global token.
   App:
     type: object
 
@@ -94,8 +211,8 @@ definitions:
         example: test-user
       email:
         type: string
-        x-example: test@ansiblejeh.test
-        example: test@ansiblejeh.test
+        x-example: test@taskexec.test
+        example: test@taskexec.test
       password:
         type: string
         format: password
@@ -119,8 +236,8 @@ definitions:
         example: test-user2
       email:
         type: string
-        x-example: test2@ansiblejeh.test
-        example: test2@ansiblejeh.test
+        x-example: test2@taskexec.test
+        example: test2@taskexec.test
       alert:
         type: boolean
       admin:
@@ -244,7 +361,7 @@ definitions:
 
   ProjectBackup:
     type: object
-    example: {"meta":{"name":"homelab","alert":true,"alert_chat":"Test","max_parallel_tasks":0,"type":null},"templates":[{"inventory":"Build","repository":"Demo","environment":"Empty","name":"Build","playbook":"examples/demo/build.yml","app":"ansible","working_directory":".","arguments":"[]","allow_override_args_in_task":false,"description":"Build Job","vault_key":null,"type":"build","start_version":"1.0.0","build_template":null,"view":"Build","autorun":false,"survey_vars":[],"suppress_success_alerts":false,"suppress_error_alerts":false,"cron":"* * * * *"}],"repositories":[{"name":"Demo","git_url":"https://github.com/impishMD/jeh.git","git_branch":"develop","ssh_key":"None"}],"keys":[{"name":"None","type":"none"},{"name":"Vault Password","type":"login_password"}],"views":[{"title":"Build","position":0}],"inventories":[{"name":"Build","inventory":"","ssh_key":"None","become_key":"None","type":"static"},{"name":"Dev","inventory":"","ssh_key":"None","become_key":"None","type":"file"},{"name":"Prod","inventory":"","ssh_key":"None","become_key":"None","type":"file"}],"environments":[{"name":"Empty","password":null,"json":"{}","env":null}]}
+    example: {"meta":{"name":"homelab","alert":true,"alert_chat":"Test","max_parallel_tasks":0,"type":null},"templates":[{"inventory":"Build","repository":"Demo","environment":"Empty","name":"Build","playbook":"examples/demo/build.yml","app":"ansible","working_directory":".","arguments":"[]","allow_override_args_in_task":false,"description":"Build Job","vault_key":null,"type":"build","start_version":"1.0.0","build_template":null,"view":"Build","autorun":false,"survey_vars":[],"suppress_success_alerts":false,"suppress_error_alerts":false,"cron":"* * * * *"}],"repositories":[{"name":"Demo","git_url":"https://github.com/impishMD/TaskExec.git","git_branch":"develop","ssh_key":"None"}],"keys":[{"name":"None","type":"none"},{"name":"Vault Password","type":"login_password"}],"views":[{"title":"Build","position":0}],"inventories":[{"name":"Build","inventory":"","ssh_key":"None","become_key":"None","type":"static"},{"name":"Dev","inventory":"","ssh_key":"None","become_key":"None","type":"file"},{"name":"Prod","inventory":"","ssh_key":"None","become_key":"None","type":"file"}],"environments":[{"name":"Empty","password":null,"json":"{}","env":null}]}
     properties:
       meta:
         type: object
@@ -397,6 +514,12 @@ definitions:
       name:
         type: string
         example: Test
+      icon:
+        type: string
+        x-nullable: true
+        maxLength: 60000
+        description: Bundled mdi-* glyph name or PNG data URL (up to 256x256). Null or empty restores initials. Omit on update to preserve the current icon.
+        example: mdi-server
       alert:
         type: boolean
       alert_chat:
@@ -424,6 +547,12 @@ definitions:
       created:
         type: string
       #        pattern: ^\d{4}-(?:0[0-9]{1}|1[0-2]{1})-[0-9]{2}T\d{2}:\d{2}:\d{2}Z$
+      icon:
+        type: string
+        x-nullable: true
+        maxLength: 60000
+        description: Bundled mdi-* glyph name or PNG data URL (up to 256x256). Null or empty restores initials. Omit on update to preserve the current icon.
+        example: mdi-server
       alert:
         type: boolean
       alert_chat:
@@ -447,7 +576,7 @@ definitions:
         example: None
       type:
         type: string
-        enum: [none, ssh, login_password]
+        enum: [none, ssh, login_password, string, object]
         x-example: none
       project_id:
         type: integer
@@ -455,6 +584,29 @@ definitions:
         x-example: 2
       override_secret:
         type: boolean
+        description: Explicitly overwrite a secret value. Must be false for reference_only requests.
+      reference_only:
+        type: boolean
+        description: Save only Vault reference metadata, without reading or writing Vault. Requires a source storage and path; secret values and generate_ssh_key must be omitted or empty/false.
+      source_storage_type:
+        type: string
+        enum: [vault, env, file]
+      source_storage_id:
+        type: integer
+        description: Project-scoped Vault connection ID.
+      source_storage_key:
+        type: string
+        description: For Vault, the document path relative to its KV mount. Field selectors (#field) are rejected; use source_mapping.
+        example: proxmox
+      source_mapping:
+        $ref: '#/definitions/VaultKeyMapping'
+      object:
+        type: object
+        additionalProperties: true
+        description: Complete value of a local variable-set key. Omit for reference_only requests.
+      string:
+        type: string
+        description: Value for a local string key or an explicit remote write; omit in reference_only mode.
       login_password:
         type: object
         properties:
@@ -492,9 +644,84 @@ definitions:
         example: Test
       type:
         type: string
-        enum: [none, ssh, login_password]
+        enum: [none, ssh, login_password, string, object]
       project_id:
         type: integer
+      source_storage_type:
+        type: string
+      source_storage_id:
+        type: integer
+      source_storage_key:
+        type: string
+      source_mapping:
+        $ref: '#/definitions/VaultKeyMapping'
+      synchronized:
+        type: boolean
+
+  VaultKeyMapping:
+    type: object
+    description: Document field names, never values. Object keys require no mappings. String requires value; login_password requires password; ssh requires private_key. login and passphrase are optional.
+    properties:
+      value:
+        type: string
+      login:
+        type: string
+      password:
+        type: string
+      private_key:
+        type: string
+      passphrase:
+        type: string
+    additionalProperties: false
+
+  EnvironmentKeyBinding:
+    type: object
+    required: [key_id, name, type]
+    properties:
+      key_id:
+        type: integer
+        description: Shared string or object key in the same project.
+      name:
+        type: string
+        pattern: '^[A-Za-z_][A-Za-z0-9_]*$'
+        maxLength: 255
+        example: blabla
+      type:
+        type: string
+        enum: [var, env]
+      field:
+        type: string
+        x-nullable: true
+        description: Omit or use null for the complete value. For env object bindings, the base variable contains JSON and each top-level field also becomes NAME_FIELD (case preserved, valid shell names required). Otherwise select one top-level field; nested types are preserved, with no expansion.
+        example: dns_server
+
+  EnvironmentKeySource:
+    type: object
+    required: [key_id, prefix]
+    properties:
+      key_id:
+        type: integer
+        description: Shared string or object access key from the same project.
+      prefix:
+        type: string
+        pattern: '^[A-Za-z_][A-Za-z0-9_]*$'
+        maxLength: 255
+        description: Unique within the group. Used in expressions such as '{{ test.password }}'.
+        example: test
+
+  EnvironmentSecretExpression:
+    type: object
+    required: [name, type, expression]
+    properties:
+      name:
+        type: string
+      type:
+        type: string
+        enum: [var, env]
+      expression:
+        type: string
+        example: '{{ test.password }}'
+        description: References configured key_sources. Values are read at task preparation, never persisted by saving this expression.
 
   EnvironmentSecret:
     type: object
@@ -544,6 +771,18 @@ definitions:
       env:
         type: string
         example: '{}'
+      key_sources:
+        type: array
+        items:
+          $ref: '#/definitions/EnvironmentKeySource'
+      secret_expressions:
+        type: array
+        items:
+          $ref: '#/definitions/EnvironmentSecretExpression'
+      key_bindings:
+        type: array
+        items:
+          $ref: '#/definitions/EnvironmentKeyBinding'
       secrets:
         type: array
         items:
@@ -569,6 +808,18 @@ definitions:
       env:
         type: string
         example: '{}'
+      key_sources:
+        type: array
+        items:
+          $ref: '#/definitions/EnvironmentKeySource'
+      secret_expressions:
+        type: array
+        items:
+          $ref: '#/definitions/EnvironmentSecretExpression'
+      key_bindings:
+        type: array
+        items:
+          $ref: '#/definitions/EnvironmentKeyBinding'
       secrets:
         type: array
         items:
@@ -1120,7 +1371,7 @@ definitions:
         description: >-
           Container image used to run the task by the Docker and Kubernetes runner
           executors. Empty means the image configured on the runner is used.
-        example: impishmd/jeh:latest-job
+        example: impishmd/taskexec:latest-job
 
   TemplateSurveyVar:
     type: object
@@ -1379,6 +1630,15 @@ definitions:
       description:
         type: string
 
+  ServerSettings:
+    type: object
+    required: [use_remote_runner]
+    properties:
+      use_remote_runner:
+        type: boolean
+        default: false
+        description: Database-backed server default for new tasks without an explicit runner tag. Enabled selects remote runners marked as default; disabled runs tasks locally. Explicit tags always select remote runners.
+
   InfoType:
     type: object
     properties:
@@ -1390,6 +1650,7 @@ definitions:
         type: string
       use_remote_runner:
         type: boolean
+        description: Current database-backed server setting; administrators can update it through /settings.
       auth_methods:
         type: object
       git_client:
@@ -1398,27 +1659,6 @@ definitions:
         type: string
       features:
         type: object
-
-  ClusterTaskRecord:
-    type: object
-    properties:
-      task_id:
-        type: integer
-      project_id:
-        type: integer
-      template_id:
-        type: integer
-      status:
-        type: string
-      runner_id:
-        type: integer
-      username:
-        type: string
-      alias:
-        type: string
-      node_id:
-        type: string
-        description: owning node, empty if unknown
 
   WorkflowNode:
     type: object
@@ -1499,6 +1739,14 @@ definitions:
       revision_id:
         type: integer
         description: Graph revision the run executes; edits of the workflow do not affect it.
+      started_by_user_id:
+        type: integer
+        readOnly: true
+        description: Initiating user; absent for legacy runs or after the user is deleted.
+      version:
+        type: string
+        readOnly: true
+        description: Version allocated once for this workflow run and shared by its task nodes.
       status:
         type: string
         enum: [running, success, failed, stopped, approval]
@@ -1764,6 +2012,237 @@ parameters:
     x-example: 17
 
 paths:
+  /project/{project_id}/secret_storages/{storage_id}/paths:
+    parameters:
+      - $ref: '#/parameters/project_id'
+      - name: storage_id
+        in: path
+        type: integer
+        required: true
+    post:
+      tags: [key-store]
+      summary: List one Vault directory for secret path completion
+      description: Requires resource-management permission and Vault LIST access. No secret values are read. A missing directory returns an empty list.
+      parameters:
+        - name: directory
+          in: body
+          required: true
+          schema:
+            type: object
+            required: [path]
+            properties:
+              path:
+                type: string
+                description: Directory relative to the KV mount; empty for the root.
+                example: apps/
+      responses:
+        200:
+          description: Relative paths; directories end with a slash. Cache-Control no-store.
+          schema:
+            type: object
+            properties:
+              paths:
+                type: array
+                items:
+                  type: string
+                example: [apps/ci/, apps/db]
+        400:
+          description: Invalid path or Vault LIST failed
+        403:
+          description: Resource-management permission required
+        404:
+          description: Connection not found in the project
+  /project/{project_id}/secret_storages/{storage_id}/fields:
+    parameters:
+      - $ref: '#/parameters/project_id'
+      - name: storage_id
+        in: path
+        type: integer
+        required: true
+    post:
+      tags: [key-store]
+      summary: Read the current document field names and types, without values
+      description: Requires resource-management permission. The response is not cached.
+      parameters:
+        - name: document
+          in: body
+          required: true
+          schema:
+            type: object
+            required: [path]
+            properties:
+              path:
+                type: string
+                example: proxmox
+      responses:
+        200:
+          description: Current field metadata; Cache-Control no-store
+          schema:
+            type: object
+            properties:
+              fields:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    type:
+                      type: string
+                      enum: [string, number, boolean, object, array, 'null']
+        400:
+          description: Invalid reference or Vault read failed
+        403:
+          description: Resource-management permission required
+        404:
+          description: Connection not found in the project
+  /project/{project_id}/keys/{key_id}/fields:
+    parameters:
+      - name: project_id
+        in: path
+        required: true
+        type: integer
+      - name: key_id
+        in: path
+        required: true
+        type: integer
+    post:
+      tags: [project]
+      summary: List current key field paths without secret values
+      description: Requires Manage project resources. Reads the current value of a shared string or object key and returns paths for expression autocomplete. The empty path selects the whole value. Response uses Cache-Control no-store.
+      responses:
+        '200':
+          description: Available paths
+          schema:
+            type: object
+            properties:
+              paths:
+                type: array
+                items:
+                  type: string
+        '400':
+          description: Key type or source cannot be read
+        '403':
+          description: Insufficient permissions
+        '404':
+          description: Key not found in this project
+
+  /project/{project_id}/keys/{key_id}/preview:
+    parameters:
+      - $ref: '#/parameters/project_id'
+      - $ref: '#/parameters/key_id'
+    post:
+      tags: [key-store]
+      summary: Read a fresh string or variable-set key value
+      description: Requires resource-management permission. SSH, login/password and internal keys cannot be previewed. Resolved values are never persisted by this endpoint.
+      responses:
+        200:
+          description: Current value; Cache-Control no-store
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: [string, object]
+              read_at:
+                type: string
+                format: date-time
+              value:
+                description: The native JSON value of the key (string or object).
+        400:
+          description: Unsupported key type or source read failed
+        403:
+          description: Resource-management permission required
+        404:
+          description: Key not found in the project
+  /project/{project_id}/secret_storages:
+    parameters:
+      - $ref: '#/parameters/project_id'
+    get:
+      tags: [key-store]
+      summary: List secret storage connections without credentials
+      responses:
+        200:
+          description: Connections
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/VaultStorage'
+    post:
+      tags: [key-store]
+      summary: Create a HashiCorp Vault compatible connection
+      parameters:
+        - name: storage
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/VaultStorage'
+      responses:
+        201:
+          description: Created; credentials are omitted
+          schema:
+            $ref: '#/definitions/VaultStorage'
+        400:
+          description: Invalid connection or credentials
+  /project/{project_id}/secret_storages/test:
+    parameters:
+      - $ref: '#/parameters/project_id'
+    post:
+      tags: [key-store]
+      summary: Test a draft Vault authentication configuration without saving
+      description: Requires Manage project resources. Include id to preserve saved credentials. Token uses lookup-self; other methods log in, potentially consuming an AppRole Secret ID use. Does not verify access to every KV path.
+      parameters:
+        - name: storage
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/VaultStorage'
+      responses:
+        200:
+          description: Authentication succeeded
+        400:
+          description: Validation, authentication or connection failed
+        403:
+          description: Insufficient project permissions
+  /project/{project_id}/secret_storages/{storage_id}:
+    parameters:
+      - $ref: '#/parameters/project_id'
+      - name: storage_id
+        in: path
+        type: integer
+        required: true
+    get:
+      tags: [key-store]
+      summary: Get a connection with masked credential metadata
+      responses:
+        200:
+          description: Connection
+          schema:
+            $ref: '#/definitions/VaultStorage'
+    put:
+      tags: [key-store]
+      summary: Update connection and credentials atomically
+      parameters:
+        - name: storage
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/VaultStorage'
+      responses:
+        200:
+          description: Updated; credentials are omitted
+        400:
+          description: Invalid configuration or missing credentials
+    delete:
+      tags: [key-store]
+      summary: Delete an unused connection without deleting remote secrets
+      responses:
+        204:
+          description: Deleted
+        400:
+          description: Still referenced by keys or variable groups
+
+
   /ping:
     get:
       summary: PING test
@@ -1794,153 +2273,13 @@ paths:
 
   /info:
     get:
-      summary: Fetches information about jeh
+      summary: Fetches information about taskexec
       description: you must be authenticated to use this
       responses:
         200:
           description: ok
           schema:
             $ref: "#/definitions/InfoType"
-
-  # Cluster Dashboard (admin only)
-#  /cluster:
-#    get:
-#      tags:
-#        - cluster
-#      summary: Fetches cluster (HA) status
-#      description: >
-#        Admin only. Returns HA mode, this node's ID, cluster membership and
-#        Redis stats. When HA is disabled only ha_enabled is returned.
-#      responses:
-#        200:
-#          description: Cluster status
-#          schema:
-#            type: object
-#            properties:
-#              ha_enabled:
-#                type: boolean
-#              node_id:
-#                type: string
-#              nodes:
-#                type: array
-#                items:
-#                  type: object
-#                  properties:
-#                    node_id:
-#                      type: string
-#                    alive:
-#                      type: boolean
-#                    is_self:
-#                      type: boolean
-#                    last_heartbeat:
-#                      type: string
-#                      format: date-time
-#                    started_at:
-#                      type: string
-#                      format: date-time
-#                    version:
-#                      type: string
-#              redis:
-#                type: object
-#                properties:
-#                  addr:
-#                    type: string
-#                  connected:
-#                    type: boolean
-#                  version:
-#                    type: string
-#                  used_memory:
-#                    type: string
-#                  used_memory_bytes:
-#                    type: integer
-#                    format: int64
-#                  total_keys:
-#                    type: integer
-#                  key_groups:
-#                    type: object
-#                    additionalProperties:
-#                      type: integer
-#
-#  /cluster/tasks:
-#    get:
-#      tags:
-#        - cluster
-#      summary: Fetches a snapshot of task pool records
-#      description: >
-#        Admin only. Returns queued, running and active tasks, aliases and
-#        claims kept by the task state store (Redis in HA mode, in-memory
-#        otherwise).
-#      responses:
-#        200:
-#          description: Task state snapshot
-#          schema:
-#            type: object
-#            properties:
-#              queue:
-#                type: array
-#                items:
-#                  $ref: "#/definitions/ClusterTaskRecord"
-#              running:
-#                type: array
-#                items:
-#                  $ref: "#/definitions/ClusterTaskRecord"
-#              active_by_project:
-#                type: object
-#                additionalProperties:
-#                  type: array
-#                  items:
-#                    $ref: "#/definitions/ClusterTaskRecord"
-#              aliases:
-#                type: object
-#                additionalProperties:
-#                  type: integer
-#              claims:
-#                type: array
-#                items:
-#                  type: integer
-#    delete:
-#      tags:
-#        - cluster
-#      summary: Clears task records from the backend
-#      description: >
-#        Admin only. Maintenance action to recover from a stuck cluster state.
-#        The request body scope selects which record groups to clear.
-#      parameters:
-#        - name: Clear Scope
-#          in: body
-#          required: true
-#          schema:
-#            type: object
-#            properties:
-#              scope:
-#                type: object
-#                properties:
-#                  queue:
-#                    type: boolean
-#                  running:
-#                    type: boolean
-#                  active:
-#                    type: boolean
-#                  aliases:
-#                    type: boolean
-#                  claims:
-#                    type: boolean
-#                  runtime_fields:
-#                    type: boolean
-#      responses:
-#        200:
-#          description: Clear result
-#          schema:
-#            type: object
-#            properties:
-#              deleted_keys:
-#                type: integer
-#              per_group:
-#                type: object
-#                additionalProperties:
-#                  type: integer
-#        400:
-#          description: missing body or no record groups selected
 
   # Authentication
   /auth/login:
@@ -2012,7 +2351,7 @@ paths:
       description: The user agent is redirected here by the OIDC provider to complete authentication
       responses:
         302:
-          description: Redirection to the JEH root URL on success, or to the login page on error
+          description: Redirection to the TaskExec root URL on success, or to the login page on error
 
   # User Tokens
   /user/:
@@ -2265,7 +2604,7 @@ paths:
 
   /events:
     get:
-      summary: Get Events related to JEH and projects you are part of
+      summary: Get Events related to TaskExec and projects you are part of
       responses:
         200:
           description: Array of events in chronological order
@@ -2276,7 +2615,7 @@ paths:
   
   /events/last:
     get:
-      summary: Get last 200 Events related to JEH and projects you are part of
+      summary: Get last 200 Events related to TaskExec and projects you are part of
       responses:
         200:
           description: Array of events in chronological order
@@ -2897,6 +3236,12 @@ paths:
       tags:
         - key-store
       summary: Removes access key
+      parameters:
+        - name: reference_only
+          in: query
+          type: boolean
+          default: false
+          description: Remove only the TaskExec reference, keeping the Vault value even in a writable connection. Used by the UI.
       responses:
         204:
           description: access key removed
@@ -3806,19 +4151,100 @@ paths:
             items:
               $ref: "#/definitions/App"
 
-  /project/{project_id}/notifications/test:
-    post:
-      tags:
-        - project
-      summary: Send test notification
-      description: Sends a test notification to all enabled messengers for the project
-      parameters:
-        - $ref: "#/parameters/project_id"
+  /settings:
+    get:
+      tags: [settings]
+      summary: Read general server settings (administrators only)
       responses:
-        409:
-          description: Alerts not enabled for the project
-#        204:
-#          description: Test notification dispatched (or alerts disabled)
+        200:
+          description: Current server settings
+          schema:
+            $ref: "#/definitions/ServerSettings"
+        403:
+          description: Administrator access required
+    put:
+      tags: [settings]
+      summary: Save general server settings (administrators only)
+      description: Persists settings in the database and applies them to newly created tasks without a server restart. Already assigned tasks stay on their runners.
+      parameters:
+        - in: body
+          name: settings
+          required: true
+          schema:
+            $ref: "#/definitions/ServerSettings"
+      responses:
+        200:
+          description: Saved server settings
+          schema:
+            $ref: "#/definitions/ServerSettings"
+        400:
+          description: Missing or invalid boolean setting
+        403:
+          description: Administrator access required
+
+  /alerts/telegram:
+    get:
+      tags: [alerts]
+      summary: Read global Telegram settings (administrators only)
+      responses:
+        200:
+          description: Settings without credentials
+          schema:
+            $ref: "#/definitions/TelegramAlertSettings"
+        403:
+          description: Administrator access required
+    put:
+      tags: [alerts]
+      summary: Save the global Telegram bot token (administrators only)
+      parameters:
+        - in: body
+          name: settings
+          required: true
+          schema:
+            $ref: "#/definitions/TelegramAlertUpdate"
+      responses:
+        200:
+          description: Saved settings without credentials
+          schema:
+            $ref: "#/definitions/TelegramAlertSettings"
+        400:
+          description: Invalid settings
+        403:
+          description: Administrator access required
+
+  /project/{project_id}/alerts/telegram:
+    parameters:
+      - $ref: "#/parameters/project_id"
+    get:
+      tags: [alerts]
+      summary: Read project Telegram settings
+      description: Requires permission to update this project, including for reads.
+      responses:
+        200:
+          description: Settings without credentials
+          schema:
+            $ref: "#/definitions/TelegramAlertSettings"
+        403:
+          description: Permission to update the project required
+    put:
+      tags: [alerts]
+      summary: Configure Telegram for a project
+      description: Requires permission to update this project. Enabling requires a chat and either a project or global token. Other channels are unaffected.
+      parameters:
+        - in: body
+          name: settings
+          required: true
+          schema:
+            $ref: "#/definitions/TelegramAlertUpdate"
+      responses:
+        200:
+          description: Saved settings without credentials
+          schema:
+            $ref: "#/definitions/TelegramAlertSettings"
+        400:
+          description: Invalid settings or missing chat/token
+        403:
+          description: Permission to update the project required
 
   # project runners
   /project/{project_id}/runners:

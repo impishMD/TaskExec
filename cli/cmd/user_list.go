@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 	"github.com/spf13/cobra"
 )
 

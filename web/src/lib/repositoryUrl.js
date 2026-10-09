@@ -1,5 +1,5 @@
 /**
- * Classifies repository URL/path the same way the JEH API expects:
+ * Classifies repository URL/path the same way the TaskExec API expects:
  * Unix absolute (/...), Windows drive (D:/...), UNC (\\server\...), or Git URL.
  *
  * @param {string|null|undefined} url

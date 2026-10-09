@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/util"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

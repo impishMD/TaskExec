@@ -14,10 +14,10 @@ import (
 	"github.com/Masterminds/squirrel"
 	"github.com/go-gorp/gorp/v3"
 	_ "github.com/go-sql-driver/mysql" // imports mysql driver
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/util"
 	_ "github.com/lib/pq"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/util"
 	log "github.com/sirupsen/logrus"
 	_ "modernc.org/sqlite" // Import the driver
 )
@@ -88,6 +88,8 @@ func (d *SqlDbConnection) Connect() {
 	d.sql.AddTableWithName(db.AccessKey{}, "access_key").SetKeys(true, "id")
 	d.sql.AddTableWithName(db.Environment{}, "project__environment").SetKeys(true, "id")
 	d.sql.AddTableWithName(db.Inventory{}, "project__inventory").SetKeys(true, "id")
+	d.sql.AddTableWithName(db.TerraformInventoryAlias{}, "project__terraform_inventory_alias").SetKeys(false, "alias")
+	d.sql.AddTableWithName(db.TerraformInventoryState{}, "project__terraform_inventory_state").SetKeys(true, "id")
 	d.sql.AddTableWithName(db.Project{}, "project").SetKeys(true, "id")
 	d.sql.AddTableWithName(db.Repository{}, "project__repository").SetKeys(true, "id")
 	d.sql.AddTableWithName(db.Task{}, "task").SetKeys(true, "id")
@@ -96,6 +98,13 @@ func (d *SqlDbConnection) Connect() {
 	d.sql.AddTableWithName(db.User{}, "user").SetKeys(true, "id")
 	d.sql.AddTableWithName(db.Session{}, "session").SetKeys(true, "id")
 	d.sql.AddTableWithName(db.TaskParams{}, "project__task_params").SetKeys(true, "id")
+	d.sql.AddTableWithName(db.WorkflowTemplate{}, "project__workflow_template").SetKeys(true, "id")
+	d.sql.AddTableWithName(db.WorkflowRevision{}, "project__workflow_revision").SetKeys(true, "id")
+	d.sql.AddTableWithName(db.WorkflowNode{}, "project__workflow_node").SetKeys(true, "id")
+	d.sql.AddTableWithName(db.WorkflowEdge{}, "project__workflow_edge").SetKeys(true, "id")
+	d.sql.AddTableWithName(db.WorkflowRun{}, "project__workflow_run").SetKeys(true, "id")
+	d.sql.AddTableWithName(db.WorkflowApproval{}, "project__workflow_approval").SetKeys(true, "id")
+	d.sql.AddTableWithName(db.WorkflowDelay{}, "project__workflow_delay").SetKeys(true, "id")
 	d.sql.AddTableWithName(db.UserExternalIdentity{}, "user__external_identity").SetKeys(true, "id")
 
 	if d.GetDialect() == util.DbDriverSQLite {
@@ -241,7 +250,7 @@ func (d *SqlDbConnection) Insert(primaryKeyColumnName string, query string, args
 }
 
 // Begin opens a transaction on the underlying connection for callers outside
-// this package (the Pro stores) that must write several rows atomically.
+// this package (the stores) that must write several rows atomically.
 func (d *SqlDbConnection) Begin() (*gorp.Transaction, error) {
 	return d.sql.Begin()
 }

@@ -1,6 +1,10 @@
 package sql
 
-import "github.com/impishMD/jeh/db"
+import (
+	"fmt"
+
+	"github.com/impishMD/taskexec/db"
+)
 
 func (d *SqlDb) GetGlobalRoleBySlug(slug string) (db.Role, error) {
 	var role db.Role
@@ -64,8 +68,25 @@ func (d *SqlDb) CreateRole(role db.Role) (db.Role, error) {
 
 func (d *SqlDb) DeleteRole(slug string, projectID *int) error {
 	where, args := roleScope(slug, projectID)
-	res, err := d.exec("delete from `role`"+where, args...)
-	return requireDeletedRow(res, err)
+	var existing db.Role
+	if err := d.selectOne(&existing, "select * from `role`"+where, args...); err != nil {
+		return err
+	}
+	res, err := d.exec("delete from `role`"+where+
+		" and not exists (select 1 from project__user where role=?)"+
+		" and not exists (select 1 from project__template_role where role_slug=?)",
+		append(args, slug, slug)...)
+	if err != nil {
+		return err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return fmt.Errorf("role is still assigned to users or templates: %w", db.ErrInvalidOperation)
+	}
+	return nil
 }
 
 func (d *SqlDb) GetProjectRole(projectID int, slug string) (db.Role, error) {

@@ -7,7 +7,7 @@
         @change="updateValue('plan', $event)"
       >
         <template v-slot:label>
-          <div class="text-no-wrap">{{ $t('Plan') }}</div>
+          <div class="text-no-wrap">{{ $t('uiPlan') }}</div>
         </template>
       </v-checkbox>
     </v-col>
@@ -19,7 +19,7 @@
         @change="updateValue('destroy', $event)"
       >
         <template v-slot:label>
-          <div class="text-no-wrap">{{ $t('Destroy') }} <code>-destroy</code></div>
+          <div class="text-no-wrap">{{ $t('uiDestroy') }} <code>-destroy</code></div>
         </template>
       </v-checkbox>
     </v-col>
@@ -31,7 +31,7 @@
         @change="updateValue('auto_approve', $event)"
       >
         <template v-slot:label>
-          <div class="text-no-wrap">{{ $t('Auto Approve') }} <code>-auto-approve</code></div>
+          <div class="text-no-wrap">{{ $t('auto_approve') }} <code>-auto-approve</code></div>
         </template>
       </v-checkbox>
     </v-col>
@@ -43,7 +43,7 @@
         @change="updateValue('upgrade', $event)"
       >
         <template v-slot:label>
-          <div class="text-no-wrap">{{ $t('Upgrade') }} <code>-upgrade</code></div>
+          <div class="text-no-wrap">{{ $t('uiUpgrade') }} <code>-upgrade</code></div>
         </template>
       </v-checkbox>
     </v-col>
@@ -55,7 +55,7 @@
         @change="updateValue('reconfigure', $event)"
       >
         <template v-slot:label>
-          <div class="text-no-wrap">{{ $t('Reconfigure') }} <code>-reconfigure</code></div>
+          <div class="text-no-wrap">{{ $t('uiReconfigure') }} <code>-reconfigure</code></div>
         </template>
       </v-checkbox>
     </v-col>

@@ -3,7 +3,7 @@ package tasks
 import (
 	"testing"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 func TestGetNextBuildVersion(t *testing.T) {

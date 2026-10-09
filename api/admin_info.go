@@ -4,8 +4,10 @@ import (
 	"net/http"
 	"runtime"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/services/alerting"
+	"github.com/impishMD/taskexec/services/server"
+	"github.com/impishMD/taskexec/util"
 )
 
 func getAdminInfo(w http.ResponseWriter, r *http.Request) {
@@ -25,11 +27,7 @@ func getAdminInfo(w http.ResponseWriter, r *http.Request) {
 		} else {
 			authInfo["totp_enabled"] = false
 		}
-		if util.Config.Mfa.Email != nil {
-			authInfo["email_otp_enabled"] = util.Config.Mfa.Email.Enabled
-		} else {
-			authInfo["email_otp_enabled"] = false
-		}
+		authInfo["email_otp_enabled"] = false
 	}
 
 	// LDAP
@@ -43,9 +41,14 @@ func getAdminInfo(w http.ResponseWriter, r *http.Request) {
 	authInfo["oidc_providers"] = oidcProviders
 
 	// Notifications
+	telegram, err := (alerting.Service{Store: helpers.Store(r)}).GetTelegram(0)
+	if err != nil {
+		helpers.WriteError(w, err)
+		return
+	}
 	notifications := map[string]bool{
 		"email":           util.Config.EmailAlert,
-		"telegram":        util.Config.TelegramAlert,
+		"telegram":        telegram.HasToken,
 		"slack":           util.Config.SlackAlert,
 		"rocketchat":      util.Config.RocketChatAlert,
 		"microsoft_teams": util.Config.MicrosoftTeamsAlert,
@@ -53,19 +56,14 @@ func getAdminInfo(w http.ResponseWriter, r *http.Request) {
 		"gotify":          util.Config.GotifyAlert,
 	}
 
-	// Cluster / HA
-	haEnabled := util.HAEnabled()
-	clusterInfo := map[string]any{
-		"ha_enabled": haEnabled,
-	}
-	if haEnabled && util.Config.HA != nil {
-		clusterInfo["node_id"] = util.Config.HA.NodeID
-	}
-
 	// Runners
+	settings, err := server.GetServerSettings(helpers.Store(r))
+	if err != nil {
+		writeServerSettingsError(w, err)
+		return
+	}
 	runnersInfo := map[string]any{
-		"use_remote_runner":          util.Config.IsUseRemoteRunner(),
-		"default_global_runner_mode": util.Config.Runners.DefaultGlobalRunnersMode,
+		"use_remote_runner": settings.UseRemoteRunner,
 	}
 
 	// Task settings
@@ -103,7 +101,6 @@ func getAdminInfo(w http.ResponseWriter, r *http.Request) {
 		"database":      dbInfo,
 		"auth":          authInfo,
 		"notifications": notifications,
-		"cluster":       clusterInfo,
 		"runners":       runnersInfo,
 		"task_settings": taskSettings,
 		"features":      features,

@@ -1,6 +1,7 @@
 // Conversions between the table editor rows of an environment's extra
 // variables and their JSON representation. Pure functions, used by
 // EnvironmentForm.vue.
+import { loadAll, JSON_SCHEMA } from 'js-yaml';
 
 // isPlainObject is true only for a plain name -> value map: the shape
 // extra variables must have at the root.
@@ -56,12 +57,19 @@ export function inferVarType(value) {
 
 // rowToVarValue converts a table row back to its typed JSON value. It throws a
 // descriptive error when the input is invalid.
+function variableError(message, key, row, example) {
+  const error = new Error(message);
+  error.i18nKey = key;
+  error.i18nParams = { name: row.name, ...(example ? { example } : {}) };
+  return error;
+}
+
 export function rowToVarValue(row) {
   switch (row.type) {
     case 'number': {
       const parsed = Number(row.value);
       if (row.value === '' || Number.isNaN(parsed)) {
-        throw new Error(`Variable "${row.name}" must be a number, e.g. 42`);
+        throw variableError(`Variable "${row.name}" must be a number, e.g. 42`, 'variableNumberRequired', row);
       }
       return parsed;
     }
@@ -70,10 +78,10 @@ export function rowToVarValue(row) {
       try {
         parsed = JSON.parse(row.value);
       } catch (e) {
-        throw new Error(`Variable "${row.name}" is not a valid list, e.g. ["a", "b"]`);
+        throw variableError(`Variable "${row.name}" is not a valid list, e.g. ["a", "b"]`, 'variableListRequired', row, '["a", "b"]');
       }
       if (!Array.isArray(parsed)) {
-        throw new Error(`Variable "${row.name}" must be a list, e.g. ["a", "b"]`);
+        throw variableError(`Variable "${row.name}" must be a list, e.g. ["a", "b"]`, 'variableListRequired', row, '["a", "b"]');
       }
       return parsed;
     }
@@ -82,10 +90,10 @@ export function rowToVarValue(row) {
       try {
         parsed = JSON.parse(row.value);
       } catch (e) {
-        throw new Error(`Variable "${row.name}" is not a valid dict, e.g. {"key": "value"}`);
+        throw variableError(`Variable "${row.name}" is not a valid dict, e.g. {"key": "value"}`, 'variableDictRequired', row, '{"key": "value"}');
       }
       if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
-        throw new Error(`Variable "${row.name}" must be a dict, e.g. {"key": "value"}`);
+        throw variableError(`Variable "${row.name}" must be a dict, e.g. {"key": "value"}`, 'variableDictRequired', row, '{"key": "value"}');
       }
       return parsed;
     }
@@ -131,4 +139,27 @@ export function objectToExtraVars(obj) {
       value: type === 'string' ? value : JSON.stringify(value),
     };
   });
+}
+
+export function parseExtraVars(text, format) {
+  const fail = (key) => {
+    const error = new Error(key);
+    error.i18nKey = key;
+    error.i18nParams = { format: format.toUpperCase() };
+    throw error;
+  };
+  let value;
+  try {
+    if (format === 'yaml') {
+      const documents = loadAll(text || '', { schema: JSON_SCHEMA });
+      if (documents.length > 1) fail('extraVarsSyntaxError');
+      value = documents.length === 0 ? {} : documents[0];
+    } else {
+      value = JSON.parse((text || '').trim() || '{}');
+    }
+  } catch (err) { fail('extraVarsSyntaxError'); }
+  if (!isPlainObject(value)) fail('extraVarsObjectRequired');
+  if (!isJsonSafeValue(value)) fail('extraVarsFiniteRequired');
+  try { JSON.stringify(value); } catch (err) { fail('extraVarsSyntaxError'); }
+  return value;
 }

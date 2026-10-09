@@ -8,9 +8,9 @@ import (
 	"slices"
 	"time"
 
-	"github.com/impishMD/jeh/pkg/common_errors"
-	"github.com/impishMD/jeh/pkg/jwt"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/pkg/common_errors"
+	"github.com/impishMD/taskexec/pkg/jwt"
+	"github.com/impishMD/taskexec/util"
 )
 
 // maxJWTAudienceEntries caps the number of audience values to keep the token

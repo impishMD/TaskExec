@@ -1,0 +1,11 @@
+# Local source build; keeps the regular Compose project's database and config volumes.
+services:
+  taskexec:
+    image: taskexec:dev
+    pull_policy: never
+    build:
+      context: .
+      target: server
+      args:
+        VERSION: dev
+        COMMIT: local

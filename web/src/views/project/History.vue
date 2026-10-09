@@ -4,6 +4,7 @@
       <v-app-bar-nav-icon @click="showDrawer()"></v-app-bar-nav-icon>
       <v-toolbar-title>
         {{ $t('dashboard2') }}
+        <div class="taskexec-page-subtitle">{{ $t('executionHistoryHint') }}</div>
       </v-toolbar-title>
     </v-toolbar>
 
@@ -21,6 +22,19 @@
       hide-default-footer
       class="mt-4 HistoryTable"
     >
+      <template v-slot:no-data>
+        <div class="taskexec-empty-state">
+          <div class="taskexec-empty-state__icon">
+            <v-icon size="32">mdi-play-network-outline</v-icon>
+          </div>
+          <h2>{{ $t('noExecutionsYet') }}</h2>
+          <p>{{ $t('noExecutionsHint') }}</p>
+          <v-btn color="primary" depressed :to="`/project/${projectId}/templates`">
+            <v-icon left small>mdi-play-outline</v-icon>
+            {{ $t('openTaskTemplates') }}
+          </v-btn>
+        </div>
+      </template>
       <template v-slot:item.tpl_alias="{ item }">
         <div class="d-flex align-center">
           <v-icon class="mr-3" small>

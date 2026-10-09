@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
 )
 
 // allowedUserOptionKeys lists the suffixes a user is allowed to store via the

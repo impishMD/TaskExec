@@ -6,7 +6,7 @@
       content-class="NestedDialog"
       width="400"
     >
-      <v-card :color="$vuetify.theme.dark ? '#212121' : 'white'">
+      <v-card>
         <v-card-title></v-card-title>
         <v-card-text class="pb-0">
           <v-form
@@ -38,22 +38,22 @@
                 color="primary"
                 v-if="editedVar.type === 'enum'"
                 @click="addEditedVarValue()"
-              >Add Value</v-btn>
+              >{{ $t('uiAddValue') }}</v-btn>
             </div>
           </v-form>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
-            color="blue darken-1"
+            color="primary"
             text
             @click="editDialog = false"
           >
             {{ $t('cancel') }}
           </v-btn>
           <v-btn
-            color="blue darken-1"
-            text
+            color="primary"
+            depressed
             @click="saveVar()"
           >
             {{ editedVarIndex == null ? $t('add') : $t('save') }}
@@ -68,7 +68,7 @@
                      border-radius: 8px;
                      font-size: 12px;"
     >
-      <legend style="padding: 0 3px;">{{ title || $t('Args') }}</legend>
+      <legend style="padding: 0 3px;">{{ title || $t('uiArgs') }}</legend>
       <v-chip-group column style="margin-top: -4px;">
         <draggable
           v-model="modifiedVars"

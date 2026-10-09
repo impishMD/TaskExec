@@ -1,6 +1,6 @@
 package db
 
-import "github.com/impishMD/jeh/pkg/common_errors"
+import "github.com/impishMD/taskexec/pkg/common_errors"
 
 type ViewType string
 

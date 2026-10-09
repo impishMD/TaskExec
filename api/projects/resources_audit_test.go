@@ -11,15 +11,14 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/db/sql"
-	proFactory "github.com/impishMD/jeh/pro/db/factory"
-	"github.com/impishMD/jeh/services/audit"
-	"github.com/impishMD/jeh/services/audit/audittest"
-	"github.com/impishMD/jeh/services/schedules"
-	"github.com/impishMD/jeh/services/server"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/db/sql"
+	"github.com/impishMD/taskexec/services/audit"
+	"github.com/impishMD/taskexec/services/audit/audittest"
+	"github.com/impishMD/taskexec/services/schedules"
+	"github.com/impishMD/taskexec/services/server"
+	"github.com/impishMD/taskexec/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -57,7 +56,6 @@ func (f resourceFixture) request(method, body string, values map[string]any, var
 	r = helpers.SetContextValue(r, "store", f.store)
 	r = helpers.SetContextValue(r, "user", &f.user)
 	r = helpers.SetContextValue(r, "project", f.project)
-	r = helpers.SetContextValue(r, "log_writer", nopLogWriter{})
 	r = helpers.SetContextValue(r, "audit", rec)
 	for key, value := range values {
 		r = helpers.SetContextValue(r, key, value)
@@ -155,7 +153,7 @@ func TestUpdateAndDeleteProject_AreRecorded(t *testing.T) {
 
 func TestBackupExportAndRestore_AreRecorded(t *testing.T) {
 	f := newResourceFixture(t)
-	controller := NewBackupController(proFactory.NewWorkflowStore(f.store))
+	controller := NewBackupController(f.store)
 	integration, err := f.store.CreateIntegration(db.Integration{Name: "hook", ProjectID: f.project.ID, TemplateID: f.template(t).ID})
 	require.NoError(t, err)
 	_, err = f.store.CreateIntegrationAlias(db.IntegrationAlias{Alias: "a1b2c3", ProjectID: f.project.ID, IntegrationID: &integration.ID})
@@ -181,7 +179,7 @@ func TestBackupExportAndRestore_AreRecorded(t *testing.T) {
 func TestRestore_FailedStepIsPartial(t *testing.T) {
 	f := newResourceFixture(t)
 	f.template(t)
-	controller := NewBackupController(proFactory.NewWorkflowStore(f.store))
+	controller := NewBackupController(f.store)
 
 	r, _ := f.request(http.MethodGet, "", nil, nil)
 	w := httptest.NewRecorder()
@@ -573,8 +571,7 @@ func (fakeSecretStorageService) Create(s db.SecretStorage) (db.SecretStorage, er
 	s.ID = 3
 	return s, nil
 }
-func (f fakeSecretStorageService) Delete(int, int) error         { return f.deleteErr }
-func (fakeSecretStorageService) SyncSecrets(db.SecretSync) error { return nil }
+func (f fakeSecretStorageService) Delete(int, int) error { return f.deleteErr }
 
 func TestSecretStorageEvents(t *testing.T) {
 	f := newResourceFixture(t)

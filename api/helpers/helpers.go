@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 func Store(r *http.Request) db.Store {

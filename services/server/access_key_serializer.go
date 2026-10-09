@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 type AccessKeyDeserializer interface {

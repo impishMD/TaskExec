@@ -7,10 +7,9 @@ REST API доступен по `/api`, интерактивный Swagger — п
 
 ```sh
 curl http://localhost:3000/api/ping
-curl -H "Authorization: Bearer $JEH_API_TOKEN" http://localhost:3000/api/projects
+curl -H "Authorization: Bearer $TASKEXEC_API_TOKEN" http://localhost:3000/api/projects
 ```
 
 Токен создаётся в профиле пользователя. Для сессии используйте `POST /api/auth/login`
 с JSON `{"auth":"username","password":"password"}` и полученную cookie.
-Не сохраняйте токены в Git и отчётах об ошибках. API-маршруты и JSON-поля сохранены;
-изменения CLI/окружения описаны в [миграции](migration.md).
+Не сохраняйте токены в Git и отчётах об ошибках.

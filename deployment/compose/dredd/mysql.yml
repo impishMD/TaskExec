@@ -3,8 +3,8 @@ version: "3.4"
 services:
   dredd:
     environment:
-      JEH_DB_DIALECT: mysql
-      JEH_DB_CONFIG: '{"host": "db:3306","user": "jeh","pass": "jeh","name": "jeh"}'
+      TASKEXEC_DB_DIALECT: mysql
+      TASKEXEC_DB_CONFIG: '{"host": "db:3306","user": "taskexec","pass": "taskexec","name": "taskexec"}'
     depends_on:
       - server
       - db

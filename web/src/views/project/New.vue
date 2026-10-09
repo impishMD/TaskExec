@@ -8,26 +8,21 @@
 
     <v-divider/>
 
-    <div
-      style="margin: auto; max-width: 600px; padding: 0 16px;"
-      class="CenterToScreen"
-    >
+    <div class="taskexec-create-project">
       <div class="project-settings-form">
-        <div style="height: 300px;">
-          <ProjectForm
-            item-id="new"
-            ref="editForm"
-            @save="onSave"
-            :system-info="systemInfo"
-            hide-demo-switch
-          />
-        </div>
+        <ProjectForm
+          item-id="new"
+          ref="editForm"
+          @save="onSave"
+          :system-info="systemInfo"
+          hide-demo-switch
+        />
 
-        <div class="text-right">
+        <div class="taskexec-create-project__actions">
           <v-btn
             data-testid="newProject-currentDemoProject"
-            color="success"
-            class="mr-3"
+            color="primary"
+            outlined
             @click="createDemoProject()"
           >
             {{ $t('CreateDemoProject') }}

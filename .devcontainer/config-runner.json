@@ -1,6 +1,6 @@
 {
     "web_host": "http://localhost:3000",
     "runner": {
-        "token_file": "/home/codespace/.jeh-runner-token"
+        "token_file": "/home/codespace/.taskexec-runner-token"
     }
 }

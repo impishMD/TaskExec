@@ -9,13 +9,13 @@
 
 ## Objective
 
-A Git repository can be added using a stored SSH key, and JEH can clone
+A Git repository can be added using a stored SSH key, and TaskExec can clone
 the configured branch on first task launch.
 
 ## Preconditions
 
 * Project `Infra QA` exists.
-* A Git repository (e.g. private GitLab repo) reachable from the JEH host
+* A Git repository (e.g. private GitLab repo) reachable from the TaskExec host
   over SSH on port 22.
 * SSH private key (and matching deploy key registered on the Git provider)
   available as a file.

@@ -10,9 +10,9 @@ services:
     restart: always
     environment:
       MARIADB_ROOT_PASSWORD: root
-      MARIADB_USER: jeh
-      MARIADB_PASSWORD: jeh
-      MARIADB_DATABASE: jeh
+      MARIADB_USER: taskexec
+      MARIADB_PASSWORD: taskexec
+      MARIADB_DATABASE: taskexec
     volumes:
       - mariadb:/var/lib/mysql
     ports:
@@ -22,9 +22,9 @@ services:
     image: postgres:14.3
     restart: always
     environment:
-      POSTGRES_USER: jeh
-      POSTGRES_PASSWORD: jeh
-      POSTGRES_DB: jeh
+      POSTGRES_USER: taskexec
+      POSTGRES_PASSWORD: taskexec
+      POSTGRES_DB: taskexec
     volumes:
       - postgres:/var/lib/postgresql
     ports:

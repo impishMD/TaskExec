@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 // ErrSecretsLeftBehind means the object row is deleted but some of its secrets were not.

@@ -1,6 +1,6 @@
 package sql
 
-import "github.com/impishMD/jeh/db"
+import "github.com/impishMD/taskexec/db"
 
 func (d *SqlDb) GetView(projectID int, viewID int) (view db.View, err error) {
 	err = d.getObject(projectID, db.ViewProps, viewID, &view)

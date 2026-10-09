@@ -4,7 +4,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/impishMD/jeh/pkg/common_errors"
+	"github.com/impishMD/taskexec/pkg/common_errors"
 )
 
 const (

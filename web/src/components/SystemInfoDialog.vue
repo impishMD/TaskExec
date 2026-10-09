@@ -169,30 +169,6 @@
           </v-card-text>
         </v-card>
 
-        <v-subheader class="px-0 mt-2">{{ $t('cluster') }}</v-subheader>
-        <v-card style="background: var(--highlighted-card-bg-color)">
-          <v-card-text class="px-0 py-2">
-            <v-simple-table dense style="background: transparent">
-              <tbody>
-                <tr>
-                  <td class="font-weight-medium" style="width: 200px">
-                    {{ $t('highAvailability') }}
-                  </td>
-                  <td>
-                    <v-icon small :color="info.cluster.ha_enabled ? 'success' : 'grey'">
-                      {{ info.cluster.ha_enabled ? 'mdi-check-circle' : 'mdi-close-circle' }}
-                    </v-icon>
-                  </td>
-                </tr>
-                <tr v-if="info.cluster.ha_enabled">
-                  <td class="font-weight-medium">{{ $t('nodeId') }}</td>
-                  <td>{{ info.cluster.node_id }}</td>
-                </tr>
-              </tbody>
-            </v-simple-table>
-          </v-card-text>
-        </v-card>
-
         <!-- Runners -->
         <v-subheader class="px-0 mt-2">{{ $t('runners') }}</v-subheader>
         <v-card style="background: var(--highlighted-card-bg-color)">
@@ -201,7 +177,7 @@
               <tbody>
                 <tr>
                   <td class="font-weight-medium" style="width: 200px">
-                    {{ $t('useRemoteRunner') }}
+                    {{ $t('remoteRunnersDefault') }}
                   </td>
                   <td>
                     <v-icon small :color="info.runners.use_remote_runner ? 'success' : 'grey'">
@@ -337,7 +313,7 @@ export default {
           })
         ).data;
       } catch (err) {
-        this.error = err.response?.data?.message || err.message || 'Failed to load system info';
+        this.error = err.response?.data?.message || err.message || this.$t('systemInfoLoadFailed');
       } finally {
         this.loading = false;
       }

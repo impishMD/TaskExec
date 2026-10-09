@@ -3,8 +3,8 @@ package cmd
 import (
 	"os"
 
-	"github.com/impishMD/jeh/pkg/ssh"
-	"github.com/impishMD/jeh/services/runners"
+	"github.com/impishMD/taskexec/pkg/ssh"
+	"github.com/impishMD/taskexec/services/runners"
 	"github.com/spf13/cobra"
 )
 

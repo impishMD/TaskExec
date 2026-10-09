@@ -4,8 +4,8 @@
 
     <v-text-field
       v-model="item.name"
-      label="Name"
-      :rules="[(v) => !!v || 'Name is required']"
+      :label="$t('name')"
+      :rules="[(v) => !!v || $t('name_required')]"
       required
       :disabled="formSaving"
     ></v-text-field>
@@ -14,11 +14,11 @@
         <div class="ml-4 mr-4 mt-6">
           <v-select
             v-model="item.value_source"
-            label="Source of the Value"
+            :label="$t('uiSourceOfTheValue')"
             :items="valueSources"
             item-value="id"
             item-text="text"
-            :rules="[(v) => !!v || 'Value Source is required']"
+            :rules="[(v) => !!v || $t('uiValueSourceRequired')]"
             outlined
             dense
             required
@@ -27,12 +27,12 @@
           </v-select>
           <v-select
             v-model="item.body_data_type"
-            label="Data Type of Body"
+            :label="$t('uiDataTypeOfBody')"
             v-if="item.value_source == 'body'"
             :items="bodyDataTypes"
             item-value="id"
             item-text="text"
-            :rules="[(v) => !!v || 'Body Data Type is required']"
+            :rules="[(v) => !!v || $t('uiBodyTypeRequired')]"
             outlined
             dense
             required
@@ -41,8 +41,8 @@
           </v-select>
           <v-text-field
             v-model="item.key"
-            label="Key *"
-            :rules="[(v) => !!v || 'Key is required']"
+            :label="$t('uiKey')"
+            :rules="[(v) => !!v || $t('key_required')]"
             outlined
             dense
             required
@@ -51,11 +51,11 @@
           </v-text-field>
           <v-select
             v-model="item.variable_type"
-            label="Variable Usage *"
+            :label="$t('uiVariableUsage')"
             :items="variableTypes"
             item-value="id"
             item-text="text"
-            :rules="[(v) => !!v || 'Variable Type is required']"
+            :rules="[(v) => !!v || $t('uiVariableTypeRequired')]"
             outlined
             dense
             required
@@ -64,8 +64,8 @@
           </v-select>
           <v-text-field
             v-model="item.variable"
-            label="Variable *"
-            :rules="[(v) => !!v || 'Variable is required']"
+            :label="$t('uiVariable')"
+            :rules="[(v) => !!v || $t('variableRequired')]"
             outlined
             dense
             required
@@ -93,11 +93,11 @@ export default {
       valueSources: [
         {
           id: 'body',
-          text: 'Body',
+          text: this.$t('uiBody'),
         },
         {
           id: 'header',
-          text: 'Header',
+          text: this.$t('uiHeader'),
         },
       ],
       bodyDataTypes: [
@@ -107,17 +107,17 @@ export default {
         },
         {
           id: 'string',
-          text: 'String',
+          text: this.$t('uiString'),
         },
       ],
       variableTypes: [
         {
           id: 'environment',
-          text: 'Variables',
+          text: this.$t('uiVariables'),
         },
         {
           id: 'task',
-          text: 'Task Params',
+          text: this.$t('uiTaskParams'),
         },
       ],
     };

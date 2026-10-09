@@ -16,7 +16,7 @@ execution.
 ## Preconditions
 
 * Server timezone correctly set (default UTC) — or
-  `JEH_SCHEDULE_TIMEZONE` set to a known value.
+  `TASKEXEC_SCHEDULE_TIMEZONE` set to a known value.
 * Template `health-check` (lightweight Bash echo).
 
 ## Test data
@@ -45,7 +45,7 @@ execution.
 * Step 6: save rejected with a parse error from the cron library; previous
   good schedule preserved.
 * Server time vs schedule next-run UI matches the configured timezone (verify
-  by setting `JEH_SCHEDULE_TIMEZONE=America/Los_Angeles` and confirming
+  by setting `TASKEXEC_SCHEDULE_TIMEZONE=America/Los_Angeles` and confirming
   the next-run time shifts).
 
 ## Postconditions

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/impishMD/jeh/pkg/tz"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/pkg/tz"
+	"github.com/impishMD/taskexec/util"
 )
 
 // Migration represents sql schema version
@@ -144,6 +144,14 @@ func GetMigrations(dialect string) []Migration {
 		{Version: "2.20.8"},
 		{Version: "2.20.9"},
 		{Version: "2.20.10"},
+		{Version: "2.20.11"},
+		{Version: "2.20.12"},
+		{Version: "2.20.13"},
+		{Version: "2.20.14"},
+		{Version: "2.20.15"},
+		{Version: "2.20.16"},
+		{Version: "2.20.17"},
+		{Version: "2.20.18"},
 	}
 
 	return append(initScripts, commonScripts...)

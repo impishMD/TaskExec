@@ -20,7 +20,7 @@ export default {
     text: String,
     successMessage: {
       type: String,
-      default: 'Text copied to clipboard!',
+      default: '',
     },
     large: Boolean,
     color: String,
@@ -40,12 +40,12 @@ export default {
 
         EventBus.$emit('i-snackbar', {
           color: 'success',
-          text: this.successMessage,
+          text: this.successMessage || this.$t('copiedToClipboard'),
         });
       } catch (e) {
         EventBus.$emit('i-snackbar', {
           color: 'error',
-          text: `Can't copy to clipboard: ${e.message}`,
+          text: this.$t('clipboardCopyFailed'),
         });
       }
     },

@@ -1,21 +1,13 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-const webpack = require('webpack');
-
 module.exports = {
   configureWebpack: {
     performance: {
       hints: false,
     },
-    plugins: [
-      new webpack.DefinePlugin({
-        'process.env.VUE_APP_BUILD_TYPE': JSON.stringify(process.env.VUE_APP_BUILD_TYPE),
-      }),
-    ],
     devServer: {
       historyApiFallback: true,
       proxy: {
         '^/api': {
-          target: 'http://localhost:3000',
+          target: 'http://127.0.0.1:3000',
         },
       },
     },

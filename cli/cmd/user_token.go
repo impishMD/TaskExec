@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/tz"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/tz"
 	"github.com/spf13/cobra"
 )
 

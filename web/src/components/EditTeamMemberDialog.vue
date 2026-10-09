@@ -3,10 +3,10 @@
     v-model="dialog"
     :save-button-text="(
       itemId === 'new'
-        ? (invitesEnabled ? 'Invite' : 'Link')
+        ? (invitesEnabled ? $t('invite') : $t('uiLink'))
         : $t('save')
     )"
-    :title="$t('teamMember', { expr: itemId === 'new' ? $t('nnew') : $t('edit') })"
+    :title="itemId === 'new' ? $t('newTeamMember') : $t('editTeamMember')"
     @save="onSave"
   >
     <template v-slot:form="{ onSave, onError, needSave, needReset }">

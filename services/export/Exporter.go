@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 )
 
 const (
@@ -13,6 +13,7 @@ const (
 	Project                 = "Project"
 	AccessKey               = "AccessKey"
 	Environment             = "Environment"
+	EnvironmentBindings     = "EnvironmentBindings"
 	Template                = "Template"
 	TemplateVault           = "TemplateVault"
 	TemplateRole            = "TemplateRole"
@@ -417,6 +418,7 @@ func InitProjectExporters(mapper KeyMapper, skipTaskOutput bool, mergeExistingUs
 		TemplateRole:            &TemplateRoleExporter{},
 		AccessKey:               &AccessKeyExporter{},
 		Environment:             &EnvironmentExporter{},
+		EnvironmentBindings:     &EnvironmentBindingsExporter{},
 		Repository:              &RepositoryExporter{},
 		HostConfig:              &HostConfigExporter{},
 		SecretStorage:           &SecretStorageExporter{},

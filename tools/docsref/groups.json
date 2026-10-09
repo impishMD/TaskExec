@@ -2,7 +2,7 @@
   "groups": [
     {
       "title": "Database",
-      "intro": "JEH creates and migrates its own tables on start. Pick the dialect before the first run; changing it later means migrating the data yourself.",
+      "intro": "TaskExec creates and migrates its own tables on start. Pick the dialect before the first run; changing it later means migrating the data yourself.",
       "prefixes": [
         "dialect",
         "mysql.",
@@ -28,7 +28,7 @@
     },
     {
       "title": "Paths and storage",
-      "intro": "Directories JEH writes to. Everything here except the database is a cache that can be recreated.",
+      "intro": "Directories TaskExec writes to. Everything here except the database is a cache that can be recreated.",
       "prefixes": [
         "tmp_path",
         "secrets_path",
@@ -89,7 +89,6 @@
       "title": "Runners",
       "intro": "Server-side switches first, then the keys a runner reads from its own configuration file. See [Runners](../configuration.md).",
       "prefixes": [
-        "use_remote_runner",
         "runner_registration_token",
         "runners.",
         "runner."
@@ -107,7 +106,6 @@
       "intro": "Delivery channels for alerts. See [Notifications](../configuration.md).",
       "prefixes": [
         "email_*",
-        "telegram_*",
         "slack_*",
         "rocketchat_*",
         "microsoft_teams_*",
@@ -134,23 +132,8 @@
       ]
     },
     {
-      "title": "Subscription",
-      "intro": "Upstream subscription interface options. Proprietary implementations are not included in JEH. See [feature scope](../configuration.md#feature-scope).",
-      "prefixes": [
-        "subscription."
-      ]
-    },
-    {
-      "title": "High availability",
-      "intro": "Running several nodes against one database. See [High availability](../configuration.md).",
-      "edition": "enterprise",
-      "prefixes": [
-        "ha."
-      ]
-    },
-    {
       "title": "Audit log",
-      "intro": "Recording who did what in JEH, and sending the events to a SIEM. See [Audit log](../configuration.md).",
+      "intro": "Recording who did what in TaskExec. Events and retention settings are stored in the database.",
       "prefixes": [
         "audit."
       ]
@@ -164,12 +147,11 @@
       ]
     }
   ],
-  "editions": {
-    "audit.syslog.": "pro",
-    "audit.splunk_hec.": "pro",
-    "log.": "pro",
-    "syslog.": "pro",
-    "runner.executor.docker.": "pro",
-    "runner.executor.k8s.": "pro"
-  }
+  "excluded": [
+    "ha.",
+    "runner.executor.k8s.",
+    "mfa.email.",
+    "audit.syslog.",
+    "audit.splunk_hec."
+  ]
 }

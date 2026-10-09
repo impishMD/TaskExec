@@ -10,11 +10,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/db_lib"
-	"github.com/impishMD/jeh/pkg/ssh"
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/db_lib"
+	"github.com/impishMD/taskexec/pkg/ssh"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/util"
 )
 
 type LocalExecutor struct {
@@ -53,8 +53,6 @@ type LocalExecutor struct {
 	// on it is a race. Wired by TaskPool (local) and LocalExecutorProvider
 	// (runner). Must be non-nil when Prepare is called for a git repository.
 	RepoLock *KeyLock
-
-	WorkflowArtifacts map[string]any
 
 	// Prepared state — populated by Prepare(), consumed by Run(). Lifted out of Run()
 	// local variables so the lifecycle phases (Prepare / underlying App.Run / Cleanup)
@@ -183,9 +181,22 @@ func (t *LocalExecutor) getEnvironmentExtraVars(username string, incomingVersion
 		}
 	}
 
+	for _, secret := range t.Environment.Secrets {
+		if secret.Type != db.EnvironmentSecretVar {
+			continue
+		}
+		var value any = secret.Secret
+		if len(secret.JSONValue) > 0 {
+			if err = json.Unmarshal(secret.JSONValue, &value); err != nil {
+				return
+			}
+		}
+		extraVars[secret.Name] = value
+	}
+
 	vars := make(map[string]any)
 	vars["task_details"] = t.getTaskDetails(username, incomingVersion)
-	extraVars["jeh_vars"] = vars
+	extraVars["taskexec_vars"] = vars
 
 	return
 }
@@ -224,11 +235,23 @@ func (t *LocalExecutor) getEnvironmentENV() (res []string, err error) {
 		if secret.Type != db.EnvironmentSecretEnv {
 			continue
 		}
-		res = append(res, fmt.Sprintf("%s=%s", secret.Name, secret.Secret))
+		value := secret.Secret
+		if len(secret.JSONValue) > 0 {
+			var decoded any
+			if err = json.Unmarshal(secret.JSONValue, &decoded); err != nil {
+				return
+			}
+			if str, ok := decoded.(string); ok {
+				value = str
+			} else {
+				value = string(secret.JSONValue)
+			}
+		}
+		res = append(res, fmt.Sprintf("%s=%s", secret.Name, value))
 	}
 
 	if t.JWT != "" {
-		res = append(res, fmt.Sprintf("JEH_JWT=%s", t.JWT))
+		res = append(res, fmt.Sprintf("TASKEXEC_JWT=%s", t.JWT))
 	}
 
 	return
@@ -287,25 +310,25 @@ func (t *LocalExecutor) getSurveyEnvVars() (res []string, err error) {
 	return
 }
 
-// taskIdentityEnv returns the JEH_* variables that identify the task and,
+// taskIdentityEnv returns the TASKEXEC_* variables that identify the task and,
 // when it is part of a workflow run, the workflow. Unlike the task-details
 // variables they are set for every app, Ansible and Terraform included, so a
-// script can always reach back to JEH for the task that started it.
+// script can always reach back to TaskExec for the task that started it.
 func taskIdentityEnv(task db.Task) (env []string) {
 	env = append(env,
-		fmt.Sprintf("JEH_PROJECT_ID=%d", task.ProjectID),
-		fmt.Sprintf("JEH_TASK_ID=%d", task.ID))
+		fmt.Sprintf("TASKEXEC_PROJECT_ID=%d", task.ProjectID),
+		fmt.Sprintf("TASKEXEC_TASK_ID=%d", task.ID))
 
 	if task.WorkflowRunID != nil {
-		env = append(env, fmt.Sprintf("JEH_WORKFLOW_RUN_ID=%d", *task.WorkflowRunID))
+		env = append(env, fmt.Sprintf("TASKEXEC_WORKFLOW_RUN_ID=%d", *task.WorkflowRunID))
 	}
 
 	if task.WorkflowTemplateID != nil {
-		env = append(env, fmt.Sprintf("JEH_WORKFLOW_ID=%d", *task.WorkflowTemplateID))
+		env = append(env, fmt.Sprintf("TASKEXEC_WORKFLOW_ID=%d", *task.WorkflowTemplateID))
 	}
 
 	if workflowUrl := task.GetWorkflowUrl(); workflowUrl != nil {
-		env = append(env, fmt.Sprintf("JEH_WORKFLOW_URL=%s", *workflowUrl))
+		env = append(env, fmt.Sprintf("TASKEXEC_WORKFLOW_URL=%s", *workflowUrl))
 	}
 
 	return
@@ -315,7 +338,7 @@ func (t *LocalExecutor) getShellEnvironmentExtraENV(username string, incomingVer
 	taskDetails := t.getTaskDetails(username, incomingVersion)
 
 	for taskDetail, taskDetailValue := range taskDetails {
-		envVarName := fmt.Sprintf("JEH_TASK_DETAILS_%s", strings.ToUpper(taskDetail))
+		envVarName := fmt.Sprintf("TASKEXEC_TASK_DETAILS_%s", strings.ToUpper(taskDetail))
 
 		detailAsStr := ""
 		switch taskDetailValueOfType := taskDetailValue.(type) {
@@ -364,19 +387,12 @@ func (t *LocalExecutor) getShellArgs(username string, incomingVersion *string) (
 	// Script to run
 	args = append(args, t.Template.Playbook)
 
-	// Include Environment Secret Vars
-	for _, secret := range t.Environment.Secrets {
-		if secret.Type == db.EnvironmentSecretVar {
-			args = append(args, fmt.Sprintf("%s=%s", secret.Name, secret.Secret))
-		}
-	}
-
 	// Include extra args from template
 	args = append(args, templateArgs...)
 
 	// Include ExtraVars and Survey Vars
 	for name, value := range extraVars {
-		if name != "jeh_vars" {
+		if name != "taskexec_vars" {
 			args = append(args, fmt.Sprintf("%s=%s", name, formatVarValue(value)))
 		}
 	}
@@ -415,7 +431,7 @@ func (t *LocalExecutor) getTerraformArgs(username string, incomingVersion *strin
 	// Common args for environment variables
 	varArgs := []string{}
 	for name, value := range extraVars {
-		if name == "jeh_vars" {
+		if name == "taskexec_vars" {
 			continue
 		}
 		varArgs = append(varArgs, "-var", fmt.Sprintf("%s=%s", name, formatVarValue(value)))
@@ -425,15 +441,6 @@ func (t *LocalExecutor) getTerraformArgs(username string, incomingVersion *strin
 	if err != nil {
 		t.Log(err.Error())
 		return
-	}
-
-	// Common args for environment secrets
-	secretArgs := []string{}
-	for _, secret := range t.Environment.Secrets {
-		if secret.Type != db.EnvironmentSecretVar {
-			continue
-		}
-		secretArgs = append(secretArgs, "-var", fmt.Sprintf("%s=%s", secret.Name, secret.Secret))
 	}
 
 	// Merge template and task args maps
@@ -462,7 +469,6 @@ func (t *LocalExecutor) getTerraformArgs(username string, incomingVersion *strin
 		combined := append([]string{}, destroyArgs...)
 		combined = append(combined, argsMap[stage]...)
 		combined = append(combined, varArgs...)
-		combined = append(combined, secretArgs...)
 		argsMap[stage] = combined
 	}
 
@@ -579,13 +585,6 @@ func (t *LocalExecutor) getPlaybookArgs(username string, incomingVersion *string
 		t.Log("Could not remove command environment, if existent it will be passed to --extra-vars. This is not fatal but be aware of side effects")
 	} else if extraVars != "" {
 		args = append(args, "--extra-vars", extraVars)
-	}
-
-	for _, secret := range t.Environment.Secrets {
-		if secret.Type != db.EnvironmentSecretVar {
-			continue
-		}
-		args = append(args, "--extra-vars", fmt.Sprintf("%s=%s", secret.Name, secret.Secret))
 	}
 
 	templateArgs, taskArgs, err := t.getCLIArgs()
@@ -832,6 +831,11 @@ func (t *LocalExecutor) Run(username string, incomingVersion *string, alias stri
 // also performs the SetStatus(running) transition the legacy Run() did inline, since
 // callers driving the lifecycle manually still expect that signal to fire here.
 func (t *LocalExecutor) Prepare(username string, incomingVersion *string, alias string) (err error) {
+	if t.Template.NormalizedExecutorImage() != nil {
+		err = fmt.Errorf("executor_image requires a Docker runner; select its runner tag or clear the image")
+		t.Log(err.Error())
+		return err
+	}
 	if t.prepared {
 		return nil
 	}
@@ -877,7 +881,14 @@ func (t *LocalExecutor) Prepare(username string, incomingVersion *string, alias 
 	}
 
 	if t.Template.App.IsTerraform() && alias != "" {
-		environmentVariables = append(environmentVariables, "TF_HTTP_ADDRESS="+util.GetPublicAliasURL("terraform", alias))
+		address := util.GetPublicAliasURL("terraform", alias)
+		environmentVariables = append(environmentVariables,
+			"TF_HTTP_ADDRESS="+address,
+			"TF_HTTP_LOCK_ADDRESS="+address,
+			"TF_HTTP_UNLOCK_ADDRESS="+address,
+			"TF_HTTP_LOCK_METHOD=LOCK",
+			"TF_HTTP_UNLOCK_METHOD=UNLOCK",
+		)
 	}
 
 	// For Terraform apps, get args first so we can pass init args to prepareRun
@@ -954,7 +965,7 @@ func (t *LocalExecutor) Prepare(username string, incomingVersion *string, alias 
 	// Get extra environment vars for non-Terraform apps
 	switch t.Template.App {
 	case db.AppAnsible:
-		// JEH vars / task details were already passed
+		// TaskExec vars / task details were already passed
 		// as 'extra vars' in JSON format
 		break
 	case db.AppTerraform, db.AppTofu, db.AppTerragrunt:
@@ -973,18 +984,18 @@ func (t *LocalExecutor) Prepare(username string, incomingVersion *string, alias 
 
 	if t.Template.Type != db.TemplateTask {
 
-		environmentVariables = append(environmentVariables, fmt.Sprintf("JEH_TASK_TYPE=%s", t.Template.Type))
+		environmentVariables = append(environmentVariables, fmt.Sprintf("TASKEXEC_TASK_TYPE=%s", t.Template.Type))
 
 		if incomingVersion != nil {
 			environmentVariables = append(
 				environmentVariables,
-				fmt.Sprintf("JEH_TASK_INCOMING_VERSION=%s", *incomingVersion))
+				fmt.Sprintf("TASKEXEC_TASK_INCOMING_VERSION=%s", *incomingVersion))
 		}
 
 		if t.Template.Type == db.TemplateBuild && t.Task.Version != nil {
 			environmentVariables = append(
 				environmentVariables,
-				fmt.Sprintf("JEH_TASK_TARGET_VERSION=%s", *t.Task.Version))
+				fmt.Sprintf("TASKEXEC_TASK_TARGET_VERSION=%s", *t.Task.Version))
 		}
 	}
 

@@ -4,8 +4,8 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/db/sql"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/db/sql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

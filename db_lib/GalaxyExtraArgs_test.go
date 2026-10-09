@@ -3,7 +3,7 @@ package db_lib
 import (
 	"testing"
 
-	"github.com/impishMD/jeh/db"
+	"github.com/impishMD/taskexec/db"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

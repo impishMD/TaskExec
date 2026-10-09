@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/db_lib"
-	"github.com/impishMD/jeh/pkg/task_logger"
-	"github.com/impishMD/jeh/services/tasks"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/db_lib"
+	"github.com/impishMD/taskexec/pkg/task_logger"
+	"github.com/impishMD/taskexec/services/tasks"
+	"github.com/impishMD/taskexec/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -167,14 +167,14 @@ func (d *MockDockerExecutor) Prepare(username string, incomingVersion *string, a
 	}
 
 	envVars := []string{
-		fmt.Sprintf("JEH_TASK_ID=%d", d.Task.ID),
-		fmt.Sprintf("JEH_USER=%s", username),
+		fmt.Sprintf("TASKEXEC_TASK_ID=%d", d.Task.ID),
+		fmt.Sprintf("TASKEXEC_USER=%s", username),
 	}
 	mounts := []string{
 		fmt.Sprintf("/tmp/repo_%d:/workspace", d.Repository.ID),
 	}
 
-	c, err := d.Engine.CreateContainer("impishmd/jeh:latest-job", envVars, mounts)
+	c, err := d.Engine.CreateContainer("impishmd/taskexec:latest-job", envVars, mounts)
 	if err != nil {
 		return err
 	}
@@ -385,7 +385,7 @@ func (k *MockK8sExecutor) Prepare(username string, incomingVersion *string, alia
 		return nil
 	}
 
-	k.Namespace = "jeh-test"
+	k.Namespace = "taskexec-test"
 	k.PodName = fmt.Sprintf("task-%d-pod", k.Task.ID)
 
 	_, err := k.Cluster.CreatePod(k.Namespace, k.PodName)
@@ -603,52 +603,17 @@ func TestExecutorFactory_ProviderRouting(t *testing.T) {
 
 	t.Run("Docker executor provider routing", func(t *testing.T) {
 		provider, err := newExecutorProvider(&util.ExecutorConfig{Type: util.ExecutorTypeDocker}, nil)
-		if err != nil {
-			// In OSS build, stub correctly reports that the executor requires the proprietary build.
-			assert.Nil(t, provider)
-			assert.Contains(t, err.Error(), "docker executor is only available in the proprietary build")
-		} else {
-			// In proprietary build, provider must be instantiated.
-			assert.NotNil(t, provider)
-		}
+		require.NoError(t, err)
+		require.NotNil(t, provider)
+		closer, ok := provider.(interface{ Close() error })
+		require.True(t, ok)
+		require.NoError(t, closer.Close())
 	})
 
 	t.Run("Kubernetes executor provider routing", func(t *testing.T) {
-		// The proprietary provider builds a Kubernetes REST config at construction time.
-		// Without a kubeconfig it falls back to in-cluster mode, which fails outside a
-		// cluster. Point it at a minimal kubeconfig so construction succeeds without
-		// contacting any API server; the OSS stub ignores the config entirely.
-		kubeconfigPath := filepath.Join(t.TempDir(), "kubeconfig")
-		require.NoError(t, os.WriteFile(kubeconfigPath, []byte(`apiVersion: v1
-kind: Config
-clusters:
-- name: test
-  cluster:
-    server: https://127.0.0.1:1
-contexts:
-- name: test
-  context:
-    cluster: test
-    user: test
-current-context: test
-users:
-- name: test
-  user:
-    token: test-token
-`), 0600))
-
-		provider, err := newExecutorProvider(&util.ExecutorConfig{
-			Type: util.ExecutorTypeKubernetes,
-			K8s:  util.RunnerK8sConfig{KubeconfigPath: kubeconfigPath},
-		}, nil)
-		if err != nil {
-			// In OSS build, stub correctly reports that the executor requires the proprietary build.
-			assert.Nil(t, provider)
-			assert.Contains(t, err.Error(), "k8s executor is only available in the proprietary build")
-		} else {
-			// In proprietary build, provider must be instantiated.
-			assert.NotNil(t, provider)
-		}
+		provider, err := newExecutorProvider(&util.ExecutorConfig{Type: util.ExecutorTypeKubernetes}, nil)
+		require.ErrorContains(t, err, "k8s executor is not implemented")
+		require.Nil(t, provider)
 	})
 
 	t.Run("newExecutor factory constructs executor via custom provider interface", func(t *testing.T) {

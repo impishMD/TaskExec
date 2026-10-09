@@ -3,8 +3,8 @@ package sql
 import (
 	"testing"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -30,7 +30,7 @@ func TestMigration_2_19_11(t *testing.T) {
 	target := "2.19.2"
 	require.NoError(t, db.Migrate(store, &target))
 
-	proj, err := store.CreateProject(db.Project{Name: "p"})
+	proj, err := createLegacyTestProject(store, db.Project{Name: "p"})
 	require.NoError(t, err)
 
 	_, err = store.Sql().Exec(

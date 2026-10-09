@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"runtime/debug"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/common_errors"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/common_errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -33,10 +33,6 @@ func WriteErrorStatus(w http.ResponseWriter, err string, code int) {
 }
 
 func WriteError(w http.ResponseWriter, err error) {
-	if errors.Is(err, common_errors.ErrInvalidSubscription) {
-		WriteErrorStatus(w, "You have no subscription.", http.StatusForbidden)
-		return
-	}
 
 	if errors.Is(err, db.ErrNotFound) {
 		w.WriteHeader(http.StatusNotFound)

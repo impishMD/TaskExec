@@ -10,7 +10,7 @@
 ## Objective
 
 A static inventory with multiple groups is parsed correctly by Ansible launched
-via JEH, and group-targeted plays only affect the selected group.
+via TaskExec, and group-targeted plays only affect the selected group.
 
 ## Preconditions
 

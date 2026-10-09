@@ -7,9 +7,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/impishMD/jeh/api/helpers"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/db/sql"
+	"github.com/impishMD/taskexec/api/helpers"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/db/sql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -171,7 +171,7 @@ func TestDeleteUser_RemovesOptions(t *testing.T) {
 	r = helpers.SetContextValue(r, "_user", target)
 	w := httptest.NewRecorder()
 
-	NewUsersController(nil).DeleteUser(w, r)
+	NewUsersController().DeleteUser(w, r)
 
 	assert.Equal(t, http.StatusNoContent, w.Code)
 

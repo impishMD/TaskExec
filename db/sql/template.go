@@ -5,8 +5,8 @@ import (
 	"errors"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/pkg/common_errors"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/pkg/common_errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -433,7 +433,34 @@ func (d *SqlDb) getTemplates(
 }
 
 func (d *SqlDb) GetTemplatesWithPermissions(projectID int, userID int, filter db.TemplateFilter, params db.RetrieveQueryParams) (templates []db.TemplateWithPerms, err error) {
-	return d.getTemplates(projectID, &userID, filter, params, false)
+	templates, err = d.getTemplates(projectID, &userID, filter, params, false)
+	if err != nil {
+		return
+	}
+	member, err := d.GetProjectUser(projectID, userID)
+	if errors.Is(err, db.ErrNotFound) {
+		// Administrators may read projects without a membership.
+		return templates, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	base := member.Role.GetPermissions()
+	if !member.Role.IsValid() {
+		role, roleErr := d.GetProjectOrGlobalRoleBySlug(projectID, string(member.Role))
+		if roleErr != nil && !errors.Is(roleErr, db.ErrNotFound) {
+			return nil, roleErr
+		}
+		base = role.Permissions
+	}
+	for i := range templates {
+		permissions := base
+		if templates[i].Permissions != nil {
+			permissions |= *templates[i].Permissions
+		}
+		templates[i].Permissions = &permissions
+	}
+	return templates, nil
 }
 
 func (d *SqlDb) GetTemplates(projectID int, filter db.TemplateFilter, params db.RetrieveQueryParams) (templates []db.Template, err error) {
@@ -498,11 +525,23 @@ func (d *SqlDb) GetTemplate(projectID int, templateID int) (template db.Template
 }
 
 func (d *SqlDb) DeleteTemplate(projectID int, templateID int) error {
+	refs, err := d.GetTemplateRefs(projectID, templateID)
+	if err != nil {
+		return err
+	}
+	if len(refs.Workflows) > 0 {
+		return db.ErrInvalidOperation
+	}
 	return requireDeletedRow(d.exec("delete from project__template where project_id=? and id=?", projectID, templateID))
 }
 
 func (d *SqlDb) GetTemplateRefs(projectID int, templateID int) (db.ObjectReferrers, error) {
-	return d.getObjectRefs(projectID, db.TemplateProps, templateID)
+	refs, err := d.getObjectRefs(projectID, db.TemplateProps, templateID)
+	if err != nil {
+		return refs, err
+	}
+	_, err = d.selectAll(&refs.Workflows, "select distinct w.id,w.name from project__workflow_template w join project__workflow_node n on n.workflow_template_id=w.id where w.project_id=? and n.template_id=?", projectID, templateID)
+	return refs, err
 }
 
 func (d *SqlDb) GetTemplateRole(projectID int, templateID int, id int) (templateRole db.TemplateRolePerm, err error) {
@@ -553,6 +592,7 @@ func (d *SqlDb) GetTemplatePermission(projectID int, templateID int, userID int)
 		}
 
 		roleSlug = role.Slug
+		perm = role.Permissions
 	}
 
 	query, args, err := sq.Select("permissions").

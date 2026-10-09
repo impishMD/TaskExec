@@ -29,7 +29,7 @@
       outlined
       dense
       required
-      :disabled="formSaving"
+      :disabled="formSaving || !isNew"
       :hint="$t('slugHint')"
     ></v-text-field>
 

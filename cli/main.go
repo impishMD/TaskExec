@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/impishMD/jeh/cli/cmd"
+	"github.com/impishMD/taskexec/cli/cmd"
 )
 
 func main() {

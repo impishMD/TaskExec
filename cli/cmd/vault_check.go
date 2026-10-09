@@ -5,8 +5,8 @@ import (
 	"os"
 	"sort"
 
-	"github.com/impishMD/jeh/db"
-	"github.com/impishMD/jeh/util"
+	"github.com/impishMD/taskexec/db"
+	"github.com/impishMD/taskexec/util"
 	"github.com/spf13/cobra"
 )
 
@@ -17,8 +17,8 @@ func init() {
 var vaultCheckCmd = &cobra.Command{
 	Use:   "check",
 	Short: "Report which key id encrypts each stored secret",
-	Long: "Read-only. Reports, per key id, how many locally stored Access Key secrets\n" +
-		"and the JWT signing key it encrypts, plus the JWT option's status. Use it\n" +
+	Long: "Read-only. Reports, per key id, how many locally stored Access Key secrets,\n" +
+		"alert credentials and the JWT signing key it encrypts, plus the JWT option's status. Use it\n" +
 		"after `vault rekey` to confirm a retired key is safe to remove: a key with\n" +
 		"zero references can be deleted from the keyset. Rows whose key id is missing\n" +
 		"from the keyset are flagged and cause a non-zero exit.",
@@ -52,6 +52,19 @@ var vaultCheckCmd = &cobra.Command{
 		}
 
 		fmt.Printf("Access keys: %d total\n", total)
+
+		channels, err := store.GetAlertChannelsWithSecrets()
+		if err != nil {
+			panic(err)
+		}
+		for _, c := range channels {
+			id := util.SecretKeyID(c.Secret)
+			counts[id]++
+			if id != "" && !util.Config.HasKeyID(id) {
+				missing++
+			}
+		}
+		fmt.Printf("Alert credentials: %d total\n", len(channels))
 
 		// Report every key id seen in the database, plus keyset keys with no rows.
 		ids := map[string]struct{}{}

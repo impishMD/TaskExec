@@ -1,2 +1,2 @@
-Write-Output 'Job Executor Hub execution environment'
+Write-Output 'TaskExec execution environment'
 $PSVersionTable
