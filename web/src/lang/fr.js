@@ -280,7 +280,7 @@ export default {
   playbookFilename: 'Chemin vers le fichier playbook *',
   workingDirectoryToggleLabel: 'Autre répertoire de travail',
   workingDirectory: 'Répertoire de travail *',
-  exampleSiteyml: 'Exemple : deploy/site.yml',
+  examplePath: 'Exemple : {path}',
   inventory2: 'Inventaire *',
   repository: 'Dépôt',
   environment3: 'Groupe de variables *',

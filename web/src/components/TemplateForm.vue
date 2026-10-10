@@ -232,7 +232,7 @@
             clearable
             :required="isFieldRequired('playbook')"
             :disabled="formSaving"
-            :placeholder="$t('exampleSiteyml')"
+            :placeholder="playbookPlaceholder"
             :loading="playbooksLoading"
             @update:search-input="onPlaybookSearch"
           >
@@ -858,6 +858,20 @@ export default {
   },
 
   computed: {
+    playbookPlaceholder() {
+      const examples = {
+        ansible: 'deploy/site.yml',
+        python: 'scripts/deploy.py',
+        powershell: 'scripts/deploy.ps1',
+        bash: 'scripts/deploy.sh',
+        terraform: 'infra/production',
+        tofu: 'infra/production',
+        terragrunt: 'live/production',
+        pulumi: 'infra/app',
+      };
+      return this.$t('examplePath', { path: examples[this.app || 'ansible'] || 'scripts/task' });
+    },
+
     galaxyBadge() {
       const n = this.galaxyCustomizedCount;
       return n ? this.$t('galaxyCustomized', { n }) : null;

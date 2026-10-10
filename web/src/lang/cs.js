@@ -280,7 +280,7 @@ export default {
   playbookFilename: 'Cesta k souboru playbooku *',
   workingDirectoryToggleLabel: 'Jiný pracovní adresář',
   workingDirectory: 'Pracovní adresář *',
-  exampleSiteyml: 'Příklad: deploy/site.yml',
+  examplePath: 'Příklad: {path}',
   inventory2: 'Inventář *',
   repository: 'Repozitář',
   environment3: 'Skupiny proměnných *',

@@ -281,7 +281,7 @@ export default {
   playbookFilename: 'Path to playbook file *',
   workingDirectoryToggleLabel: 'Different working directory',
   workingDirectory: 'Working directory *',
-  exampleSiteyml: 'Example: deploy/site.yml',
+  examplePath: 'Example: {path}',
   inventory2: 'Inventory *',
   repository: 'Repository',
   environment3: 'Variable Groups *',

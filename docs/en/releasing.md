@@ -35,9 +35,16 @@ Environment protection rules remain effective. Do not store token values in this
 
 ## Publication
 
-The Release workflow validates the version and reruns CI/Packages before creating a draft.
-Native amd64/arm64 jobs publish server, runner, job and helper images by digest to Docker Hub
-and GHCR, then smoke-test the actual pushed images. The final job creates and checks
+The Release workflow requires successful CI from a push to `develop` or `main` for the
+exact tagged commit. It waits for an ongoing run; missing or failed CI blocks publication.
+Tests (including `go test -race`) and temporary CI container builds run in branch CI only.
+The check uses the [workflow runs API](https://docs.github.com/en/rest/actions/workflow-runs#list-workflow-runs-for-a-workflow).
+
+Release validates the version and builds/tests release packages before creating a draft.
+Branch packages are `-dev` snapshots; CI containers have the embedded version `dev` and
+are not release artifacts. Native amd64/arm64 jobs build versioned server, runner, job and
+helper images once, push them by digest to Docker Hub and GHCR, and smoke-test those images.
+The final job reuses the verified digests without rebuilding: it creates and checks
 multi-platform version tags, uploads `container-digests.txt`, updates stable aliases and
 publishes the GitHub Release. Prereleases do not update `latest` aliases. Releases are serialized.
 

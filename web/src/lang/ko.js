@@ -280,7 +280,7 @@ export default {
   playbookFilename: '플레이북 파일 경로 *',
   workingDirectoryToggleLabel: '다른 작업 디렉터리 사용',
   workingDirectory: '작업 디렉토리 *',
-  exampleSiteyml: '예: deploy/site.yml',
+  examplePath: '예: {path}',
   inventory2: '인벤토리 *',
   repository: '리포지토리',
   environment3: '변수 그룹 *',

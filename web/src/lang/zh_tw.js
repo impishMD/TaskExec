@@ -280,7 +280,7 @@ export default {
   playbookFilename: 'Playbook 檔案路徑 *',
   workingDirectoryToggleLabel: '使用其他工作目錄',
   workingDirectory: '工作目錄*',
-  exampleSiteyml: '範例： deploy/site.yml',
+  examplePath: '範例： {path}',
   inventory2: '清單 *',
   repository: '儲存庫',
   environment3: '變數群組 *',

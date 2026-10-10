@@ -281,7 +281,7 @@ export default {
   playbookFilename: 'Путь к файлу плейбука *',
   workingDirectoryToggleLabel: 'Другой рабочий каталог',
   workingDirectory: 'Рабочий каталог *',
-  exampleSiteyml: 'Пример: deploy/site.yml',
+  examplePath: 'Пример: {path}',
   inventory2: 'Инвентарь *',
   repository: 'Репозиторий',
   environment3: 'Группы переменных *',

@@ -280,7 +280,7 @@ export default {
   playbookFilename: 'Ścieżka do pliku playbook *',
   workingDirectoryToggleLabel: 'Inny katalog roboczy',
   workingDirectory: 'Katalog roboczy *',
-  exampleSiteyml: 'Przykład: deploy/site.yml',
+  examplePath: 'Przykład: {path}',
   inventory2: 'Inwentarz *',
   repository: 'Repozytorium',
   environment3: 'Grupa zmiennych *',

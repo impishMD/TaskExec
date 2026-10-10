@@ -18,7 +18,19 @@ env:
 
 jobs:
   checks:
-    uses: ./.github/workflows/ci.yml
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Require successful branch CI for the tagged commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/check-release-ci.py --sha "$(git rev-parse HEAD)"
   packages:
     uses: ./.github/workflows/packages.yml
     with:

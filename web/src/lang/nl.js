@@ -280,7 +280,7 @@ export default {
   playbookFilename: 'Pad naar playbook bestand *',
   workingDirectoryToggleLabel: 'Andere werkmap',
   workingDirectory: 'Werkmap *',
-  exampleSiteyml: 'Voorbeeld: deploy/site.yml',
+  examplePath: 'Voorbeeld: {path}',
   inventory2: 'Inventaris *',
   repository: 'Repository',
   environment3: 'Variabele Groep *',

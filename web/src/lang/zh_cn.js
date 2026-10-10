@@ -280,7 +280,7 @@ export default {
   playbookFilename: '剧本文件路径 *',
   workingDirectoryToggleLabel: '使用其他工作目录',
   workingDirectory: '工作目录*',
-  exampleSiteyml: '示例：deploy/site.yml',
+  examplePath: '示例：{path}',
   inventory2: '库存 *',
   repository: '仓库',
   environment3: '变量组 *',
