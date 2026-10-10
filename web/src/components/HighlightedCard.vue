@@ -1,32 +1,10 @@
 <template>
   <v-card
       style="background: var(--highlighted-card-bg-color)"
-      class="mb-6 pt-3"
+      class="mb-6"
   >
-    <div
-        style="
-              position: absolute;
-              background: var(--highlighted-card-bg-color);
-              width: 28px;
-              height: 28px;
-              transform: rotate(45deg);
-              top: -14px;
-              border-radius: 0;
-            "
-        :style="{left: tickLeft}"
-    ></div>
     <v-card-text class="pb-0">
       <slot></slot>
     </v-card-text>
   </v-card>
 </template>
-<script>
-export default {
-  props: {
-    tickLeft: {
-      type: String,
-      default: 'calc(50% - 14px)',
-    },
-  },
-};
-</script>

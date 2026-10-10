@@ -1,6 +1,6 @@
 {
   "name": "taskexec-web",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "private": true,
   "scripts": {
     "sync:api-docs": "node -e \"require('fs').copyFileSync('../api-docs.yml', 'public/swagger/api-docs.yml')\"",

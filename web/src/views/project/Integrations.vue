@@ -81,7 +81,6 @@
       :items="items"
       class="mt-4"
       :items-per-page="Number.MAX_VALUE"
-      style="max-width: calc(var(--breakpoint-xl) - var(--nav-drawer-width) - 200px); margin: auto"
     >
       <template v-slot:item.name="{ item }">
         <router-link :to="`/project/${projectId}/integrations/${item.id}`"

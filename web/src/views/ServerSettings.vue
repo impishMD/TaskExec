@@ -102,5 +102,5 @@ export default {
 </script>
 
 <style scoped>
-.server-settings-page { max-width: 720px; padding: 0 16px 32px; }
+.server-settings-page { padding-bottom: 32px; }
 </style>

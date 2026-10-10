@@ -44,7 +44,6 @@
       type="info"
       text
       class="mt-4"
-      style="max-width: 800px; margin: auto;"
     >{{ $t('hostConfigEmpty') }}</v-alert>
 
     <v-data-table
@@ -54,7 +53,6 @@
       hide-default-footer
       class="mt-4"
       :items-per-page="Number.MAX_VALUE"
-      style="max-width: calc(var(--breakpoint-xl) - var(--nav-drawer-width) - 100px); margin: auto;"
     >
       <template v-slot:item.type="{ item }">
         <v-chip small>{{

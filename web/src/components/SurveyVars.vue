@@ -75,22 +75,10 @@
             <v-card
               v-if="editedVar.type === 'enum' || editedVar.type === 'select'"
               style="background: var(--highlighted-card-bg-color)"
-              class="mb-4 pt-3"
+              class="mb-4"
             >
-              <div
-                style="
-                  position: absolute;
-                  background: var(--highlighted-card-bg-color);
-                  width: 28px;
-                  height: 28px;
-                  transform: rotate(45deg);
-                  left: 60px;
-                  top: -14px;
-                  border-radius: 0;
-                "
-              ></div>
 
-              <v-card-text class="pt-2">
+              <v-card-text>
                 <v-data-table
                   :items="editedValues"
                   :items-per-page="-1"

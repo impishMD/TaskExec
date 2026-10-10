@@ -60,19 +60,8 @@
         <v-card
           v-if="view.id === activeViewId"
           style="background: var(--highlighted-card-bg-color);"
-          class="mb-6 pt-3 mt-5"
+          class="mb-6 mt-5"
         >
-
-          <div style="
-            position: absolute;
-            background: var(--highlighted-card-bg-color);
-            width: 28px;
-            height: 28px;
-            transform: rotate(45deg);
-            right: 45px;
-            top: -14px;
-            border-radius: 0;
-          "></div>
 
           <v-card-text>
             <v-select

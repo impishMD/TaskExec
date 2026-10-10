@@ -58,7 +58,6 @@
 
           <HighlightedCard
               v-if="advancedOptions"
-              tick-left="80px"
               style="width: 350px;"
           >
             <template>
@@ -197,7 +196,6 @@
 
           <HighlightedCard
               v-if="advancedOptions"
-              tick-left="80px"
               style="width: 350px;"
           >
             <template>

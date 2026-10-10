@@ -74,7 +74,6 @@
 
     <div
       class="px-4 py-3 CenterToScreen"
-      style="max-width: 1000px; margin: auto;"
     >
       <div class="mb-6">
         <v-btn-toggle

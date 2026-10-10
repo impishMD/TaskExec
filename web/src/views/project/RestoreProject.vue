@@ -9,7 +9,6 @@
     <v-divider />
 
     <div
-      style="margin: auto; max-width: 600px; padding: 0 16px;"
       class="CenterToScreen"
     >
         <div class="project-settings-form">

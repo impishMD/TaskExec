@@ -174,20 +174,8 @@
         <v-card
           v-if="setBranch"
           style="background: var(--highlighted-card-bg-color)"
-          class="mb-6 pt-3"
+          class="mb-6"
         >
-          <div
-            style="
-              position: absolute;
-              background: var(--highlighted-card-bg-color);
-              width: 28px;
-              height: 28px;
-              transform: rotate(45deg);
-              right: 55px;
-              top: -14px;
-              border-radius: 0;
-            "
-          ></div>
 
           <v-card-text class="pb-0">
             <div v-if="branches != null">

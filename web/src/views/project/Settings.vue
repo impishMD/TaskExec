@@ -19,7 +19,6 @@
     />
 
     <div
-      style="margin: auto; max-width: 600px; padding: 0 16px;"
       class="CenterToScreen"
     >
       <h2 class="mt-8 mb-1">{{ $t('general_settings') }}</h2>
@@ -132,12 +131,10 @@
   @import '~vuetify/src/styles/styles.sass';
 
   .project-settings-form {
-    //max-width: 600px;
     margin: 30px 0;
   }
 
   .project-settings-button {
-    //max-width: 400px;
     margin: 30px 0;
 
     @media #{map-get($display-breakpoints, 'sm-and-down')} {

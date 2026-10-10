@@ -27,5 +27,5 @@ export default {
 };
 </script>
 <style scoped>
-.alerts-page { max-width: 720px; padding: 0 16px 32px; }
+.alerts-page { padding-bottom: 32px; }
 </style>

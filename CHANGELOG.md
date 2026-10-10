@@ -1,5 +1,12 @@
 # Changelog
 
+## [v1.1.2](release-notes/en/v1.1.2.md)
+
+- Consistent option panels without diamond pointers in both themes.
+- Notification dialog close control and aligned Test, Cancel and Save actions.
+- Resource pages and settings fill the available content width.
+- Helm chart 1.0.3 defaults to application v1.1.2.
+
 ## [v1.1.0](release-notes/en/v1.1.0.md)
 
 - Project activity messages and task statuses follow the selected language, including historical records.

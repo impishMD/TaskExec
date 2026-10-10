@@ -531,7 +531,7 @@ html.WorkflowEditor-html body {
 }
 
 .theme--dark {
-  --highlighted-card-bg-color: #262626;
+  --highlighted-card-bg-color: var(--taskexec-soft, #20333d);
 
   // Dialogs opened above another dialog have no overlay; the default Vuetify
   // shadow is too faint on a dark background, so use a wider, denser one.
@@ -542,7 +542,7 @@ html.WorkflowEditor-html body {
 }
 
 .theme--light {
-  --highlighted-card-bg-color: #f8f8f8;
+  --highlighted-card-bg-color: var(--taskexec-soft, #f0f5f4);
 }
 
 .v-dialog > .v-card > .v-card__title {

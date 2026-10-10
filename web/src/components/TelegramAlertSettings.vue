@@ -3,9 +3,9 @@
     <v-progress-linear v-if="loading" indeterminate color="primary" />
     <v-alert v-if="error" type="error" text class="mt-4">{{ error }}</v-alert>
     <v-btn v-if="!settings && !loading" text @click="load">{{ $t('alertsRetry') }}</v-btn>
-    <v-btn v-if="projectId && !settings" text class="ma-4" @click="$emit('cancel')">
-      {{ $t('cancel') }}
-    </v-btn>
+    <div v-if="projectId && !settings" class="d-flex justify-end pa-4">
+      <v-btn text color="primary" @click="$emit('cancel')">{{ $t('cancel') }}</v-btn>
+    </div>
     <v-form v-if="settings" ref="form" @submit.prevent="save" :disabled="busy">
       <div class="telegram-alert-fields px-6 pt-5 pb-2">
         <template v-if="projectId">
@@ -90,22 +90,25 @@
       </div>
       <v-divider class="mt-4" />
       <v-card-actions class="px-6 py-4 telegram-alert-actions">
-        <v-btn v-if="projectId" text :disabled="busy" @click="$emit('cancel')">
-          {{ $t('cancel') }}
-        </v-btn>
-        <v-spacer />
         <v-btn outlined color="primary" type="button" @click="testNotification"
           :loading="testing" :disabled="saving || loading || (!!projectId && !enabled)"
+          class="telegram-alert-test"
           data-testid="alerts-test">
           <v-icon left small>mdi-send-check-outline</v-icon>{{ $t('alertsTest') }}
         </v-btn>
-        <v-btn
-          color="primary"
-          :loading="saving"
-          :disabled="!dirty || loading || testing"
-          type="submit"
-          data-testid="alerts-save"
-        >{{ $t('save') }}</v-btn>
+        <div class="telegram-alert-save-actions">
+          <v-btn v-if="projectId" text color="primary" :disabled="busy" @click="$emit('cancel')"
+            data-testid="alerts-cancel">
+            {{ $t('cancel') }}
+          </v-btn>
+          <v-btn
+            color="primary"
+            :loading="saving"
+            :disabled="!dirty || loading || testing"
+            type="submit"
+            data-testid="alerts-save"
+          >{{ $t('save') }}</v-btn>
+        </div>
       </v-card-actions>
     </v-form>
   </div>
@@ -152,6 +155,7 @@ export default {
     },
   },
   watch: {
+    busy(value) { this.$emit('busy', value); },
     testInput() { this.testResult = null; },
     projectId() { this.load(); },
   },
@@ -230,5 +234,19 @@ export default {
   flex-wrap: wrap;
   gap: 12px;
   .v-btn { margin: 0 !important; }
+  .telegram-alert-test {
+    max-width: 100%;
+    height: auto !important;
+    min-height: 38px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    .v-btn__content { white-space: normal; }
+  }
+}
+.telegram-alert-save-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 12px;
+  margin-left: auto;
 }
 </style>
