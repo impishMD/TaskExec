@@ -9,7 +9,7 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
@@ -27,7 +27,9 @@ jobs:
       - run: make deps
       - run: make check
       - run: python3 -B -m unittest discover -s tools -p 'test_release_ci.py'
-      - run: go test -race -coverprofile=coverage.out ./...
+      # API tests exercise bcrypt with the production cost; race/coverage
+      # instrumentation can exceed Go's default 10-minute package timeout.
+      - run: go test -race -timeout 20m -coverprofile=coverage.out ./...
       - run: npm --prefix web run test:unit
       - run: make build
       - run: bash tools/test-binary.sh ./bin/taskexec "v$(cat VERSION)"
