@@ -12,9 +12,9 @@ describe('ManagementMenu', () => {
 
   afterEach(() => wrapper.destroy());
 
-  it('keeps personal API tokens accessible without exposing administrative controls', () => {
+  it('shows the version without exposing personal tokens or administrative controls', () => {
     render({ isAdmin: false, version: 'dev' });
-    expect(wrapper.find('[data-testid="sidebar-tokens"]').attributes('to')).to.equal('/tokens');
+    expect(wrapper.find('[data-testid="sidebar-tokens"]').exists()).to.equal(false);
     expect(wrapper.find('[data-testid="management-users"]').exists()).to.equal(false);
     expect(wrapper.find('[data-testid="management-settings"]').exists()).to.equal(false);
     expect(wrapper.find('[data-testid="management-alerts"]').exists()).to.equal(false);

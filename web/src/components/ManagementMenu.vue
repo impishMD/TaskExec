@@ -35,10 +35,6 @@
         </v-list-item>
       </template>
 
-      <v-list-item to="/tokens" data-testid="sidebar-tokens">
-        <v-list-item-icon><v-icon>mdi-key-chain-variant</v-icon></v-list-item-icon>
-        <v-list-item-title>{{ $t('api_tokens') }}</v-list-item-title>
-      </v-list-item>
       <v-subheader v-if="!isAdmin && version">TaskExec {{ version }}</v-subheader>
     </v-list>
   </v-menu>

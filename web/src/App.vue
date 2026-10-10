@@ -380,6 +380,16 @@
                 </v-list-item-content>
               </v-list-item>
 
+              <v-list-item key="tokens" to="/tokens" data-testid="sidebar-tokens">
+                <v-list-item-icon>
+                  <v-icon>mdi-key-chain-variant</v-icon>
+                </v-list-item-icon>
+
+                <v-list-item-content>
+                  {{ $t('api_tokens') }}
+                </v-list-item-content>
+              </v-list-item>
+
               <v-divider />
 
               <v-list-item key="sign_out" @click="signOut()" data-testid="sidebar-signout">
@@ -889,7 +899,7 @@ export default {
     },
 
     isManagementPage() {
-      return ['/users', '/runners', '/tasks', '/apps', '/roles', '/tokens', '/alerts', '/settings']
+      return ['/users', '/runners', '/tasks', '/apps', '/roles', '/alerts', '/settings']
         .includes(this.$route.path);
     },
 
