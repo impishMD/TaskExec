@@ -4,6 +4,32 @@ entries:
   - annotations:
       artifacthub.io/license: Apache-2.0
     apiVersion: v2
+    appVersion: 1.1.2
+    created: "2026-10-10T01:32:05.911720188Z"
+    description: Web interface and API for Ansible, Terraform, OpenTofu and scripts
+    digest: 9faaaea4c7a7bd8b9ebf9c78d719c08f3437dbd3d565ce6dd4f88c8dbee6bf2d
+    home: https://github.com/impishMD/TaskExec
+    icon: https://raw.githubusercontent.com/impishMD/TaskExec/develop/web/public/favicon.svg
+    keywords:
+    - ansible
+    - terraform
+    - opentofu
+    - automation
+    kubeVersion: '>=1.26.0-0'
+    maintainers:
+    - name: impishMD
+      url: https://github.com/impishMD
+    name: taskexec
+    sources:
+    - https://github.com/semaphoreui/charts
+    - https://github.com/impishMD/TaskExec
+    type: application
+    urls:
+    - https://github.com/impishMD/TaskExec/releases/download/chart-v1.0.3/taskexec-1.0.3.tgz
+    version: 1.0.3
+  - annotations:
+      artifacthub.io/license: Apache-2.0
+    apiVersion: v2
     appVersion: 1.1.0
     created: "2026-10-10T01:28:12.270189783Z"
     description: Web interface and API for Ansible, Terraform, OpenTofu and scripts
@@ -79,4 +105,4 @@ entries:
     urls:
     - https://github.com/impishMD/TaskExec/releases/download/chart-v1.0.0/taskexec-1.0.0.tgz
     version: 1.0.0
-generated: "2026-10-10T01:28:12.270197377Z"
+generated: "2026-10-10T01:32:05.911740195Z"
