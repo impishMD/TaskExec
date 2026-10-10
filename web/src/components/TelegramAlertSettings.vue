@@ -3,9 +3,6 @@
     <v-progress-linear v-if="loading" indeterminate color="primary" />
     <v-alert v-if="error" type="error" text class="mt-4">{{ error }}</v-alert>
     <v-btn v-if="!settings && !loading" text @click="load">{{ $t('alertsRetry') }}</v-btn>
-    <div v-if="projectId && !settings" class="d-flex justify-end pa-4">
-      <v-btn text color="primary" @click="$emit('cancel')">{{ $t('cancel') }}</v-btn>
-    </div>
     <v-form v-if="settings" ref="form" @submit.prevent="save" :disabled="busy">
       <div class="telegram-alert-fields px-6 pt-5 pb-2">
         <template v-if="projectId">
@@ -97,7 +94,7 @@
           <v-icon left small>mdi-send-check-outline</v-icon>{{ $t('alertsTest') }}
         </v-btn>
         <div class="telegram-alert-save-actions">
-          <v-btn v-if="projectId" text color="primary" :disabled="busy" @click="$emit('cancel')"
+          <v-btn v-if="projectId" text color="primary" :disabled="busy || !dirty" @click="reset"
             data-testid="alerts-cancel">
             {{ $t('cancel') }}
           </v-btn>
@@ -155,12 +152,17 @@ export default {
     },
   },
   watch: {
-    busy(value) { this.$emit('busy', value); },
     testInput() { this.testResult = null; },
     projectId() { this.load(); },
   },
   created() { this.load(); },
   methods: {
+    reset() {
+      this.apply(this.settings);
+      this.error = '';
+      this.testResult = null;
+      this.$refs.form.resetValidation();
+    },
     apply(settings) {
       this.settings = settings;
       this.enabled = settings.enabled;

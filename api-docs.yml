@@ -5,7 +5,7 @@ info:
   description: |
     TaskExec API provides endpoints for managing and interacting with the TaskExec.
     This documentation outlines the available operations and data models.
-  version: "0.0.1"
+  version: "1.2.0"
 
 consumes:
   - application/json
@@ -521,6 +521,77 @@ definitions:
         minimum: 1
       name:
         type: string
+
+  ProjectTokenPolicy:
+    type: object
+    required: [name, scopes]
+    properties:
+      name:
+        type: string
+        maxLength: 100
+      scopes:
+        type: array
+        minItems: 1
+        items:
+          type: string
+          enum: ['templates:read', 'tasks:run', 'tasks:read', 'tasks:logs', 'tasks:stop']
+      all_templates:
+        type: boolean
+        default: false
+        description: Allows all current and future templates in this project. Otherwise supply a nonempty template_ids list.
+      template_ids:
+        type: array
+        maxItems: 1000
+        items:
+          type: integer
+        description: Allowed template IDs in this project. Must be empty when all_templates is true.
+      overrides:
+        type: array
+        items:
+          type: string
+          enum: [git_branch, playbook, inventory_id, arguments, environment, params]
+        description: Task fields this token may override. Requires tasks:run. Without environment, only declared survey variables are accepted.
+      expires_at:
+        type: string
+        format: date-time
+        x-nullable: true
+        description: Future expiry, or null for no expiry.
+
+  ProjectToken:
+    allOf:
+      - $ref: '#/definitions/ProjectTokenPolicy'
+      - type: object
+        properties:
+          id:
+            type: string
+            description: Public ID, not the authentication secret.
+          project_id:
+            type: integer
+          creator_id:
+            type: integer
+            description: Audit snapshot. Token validity does not depend on this account.
+          creator_name:
+            type: string
+          created:
+            type: string
+            format: date-time
+          revoked_at:
+            type: string
+            format: date-time
+            x-nullable: true
+          last_used_at:
+            type: string
+            format: date-time
+            x-nullable: true
+
+  IssuedProjectToken:
+    allOf:
+      - $ref: '#/definitions/ProjectToken'
+      - type: object
+        properties:
+          token:
+            type: string
+            description: Bearer secret, returned only on creation or rotation. Store securely; it cannot be retrieved again.
 
   ProjectRequest:
     type: object
@@ -2474,6 +2545,92 @@ paths:
         400:
           description: Unknown user option key
 
+  /project/{project_id}/tokens:
+    parameters:
+      - $ref: '#/parameters/project_id'
+    get:
+      tags: [authentication, project]
+      summary: List project token metadata
+      description: Server administrators and built-in project owners only. Requires a session or personal token; project tokens cannot manage tokens.
+      responses:
+        200:
+          description: Metadata only; never includes bearer secrets or hashes.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProjectToken'
+        403:
+          description: Project owner or server administrator required.
+    post:
+      tags: [authentication, project]
+      summary: Issue a project API token
+      description: Independent project credential with explicit scopes and allowed templates. Creator removal, blocking or deletion does not revoke it.
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectTokenPolicy'
+      responses:
+        201:
+          description: Token issued; secret is shown once. Cache-Control is no-store.
+          schema:
+            $ref: '#/definitions/IssuedProjectToken'
+        400:
+          description: Invalid policy or request fields.
+        403:
+          description: Project owner or server administrator required.
+        404:
+          description: Project or selected template not found in this project.
+
+  /project/{project_id}/tokens/{token_id}:
+    parameters:
+      - $ref: '#/parameters/project_id'
+      - name: token_id
+        in: path
+        type: string
+        required: true
+    delete:
+      tags: [authentication, project]
+      summary: Revoke a project token
+      description: Server administrators and project owners only. Retains token metadata and task history. Already running tasks continue; queued tasks do not start.
+      responses:
+        204:
+          description: Revoked, or already revoked.
+        403:
+          description: Project owner or server administrator required.
+        404:
+          description: Token not found in this project.
+
+  /project/{project_id}/tokens/{token_id}/rotate:
+    parameters:
+      - $ref: '#/parameters/project_id'
+      - name: token_id
+        in: path
+        type: string
+        required: true
+    post:
+      tags: [authentication, project]
+      summary: Replace a project token atomically
+      description: Server administrators and project owners only. Creates a new ID and secret with the supplied policy, revoking the old token in the same transaction. The replacement cannot stop tasks started by the old token.
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectTokenPolicy'
+      responses:
+        201:
+          description: Replacement token; secret is shown once. Cache-Control is no-store.
+          schema:
+            $ref: '#/definitions/IssuedProjectToken'
+        400:
+          description: Invalid policy or request fields.
+        403:
+          description: Project owner or server administrator required.
+        404:
+          description: Token not found in this project, already revoked, or selected template not found.
+
   # User Profiles
   /users:
     get:
@@ -3576,7 +3733,8 @@ paths:
     get:
       tags:
         - template
-      summary: Get template
+      summary: Get templates
+      description: Project tokens require templates:read and receive only allowed templates with id, project_id, name, app, type and survey_vars (without defaults).
       parameters:
         - name: sort
           in: query
@@ -4011,6 +4169,11 @@ paths:
       tags:
         - task
       summary: Get Tasks related to current project
+      description: >
+        Project tokens require tasks:read. Their results are restricted to allowed
+        templates, at most 100 newest tasks; use before=last_id for pagination.
+        They receive only id, project_id, template_id, status, created, start, end,
+        version, project_token_id and project_token_name.
       responses:
         200:
           description: Array of tasks in chronological order
@@ -4022,13 +4185,22 @@ paths:
       tags:
         - task
       summary: Starts a job
+      description: >
+        A project token requires tasks:run and an allowed template. Supply exactly
+        one of template_id/template_name. It accepts message, environment and secret
+        (JSON objects encoded as strings); other allowed fields require explicit
+        override permissions: git_branch, playbook, inventory_id, arguments, params.
+        Unknown fields are rejected. Without environment override only declared
+        survey variables are accepted. The response contains only id, project_id,
+        template_id, status, created, start, end, version, project_token_id and
+        project_token_name. Project tokens cannot start workflows or approve tasks.
       parameters:
         - name: task
           in: body
           required: true
           description: >
             Either template_id or template_name must be given. When both are
-            given, template_id is used.
+            given, template_id is used for user credentials; project tokens reject both.
           schema:
             type: object
             properties:
@@ -4071,6 +4243,7 @@ paths:
       tags:
         - task
       summary: Get last 200 Tasks related to current project
+      description: Project tokens require tasks:read and receive at most 100 tasks with the same restrictions as GET /project/{project_id}/tasks.
       responses:
         200:
           description: Array of tasks in chronological order
@@ -4088,6 +4261,7 @@ paths:
       tags:
         - task
       summary: Stop a job
+      description: Project tokens require tasks:stop and can stop only their own runs of allowed templates. They must provide a JSON body (an empty object is accepted).
       parameters:
         - name: body
           in: body
@@ -4110,6 +4284,7 @@ paths:
       tags:
         - task
       summary: Get a single task
+      description: Project tokens require tasks:read and an allowed template; response fields are limited as described for the task list.
       responses:
         200:
           description: Task
@@ -4131,6 +4306,7 @@ paths:
       tags:
         - task
       summary: Get task output
+      description: Project tokens require the separate tasks:logs permission and an allowed template.
       responses:
         200:
           description: output

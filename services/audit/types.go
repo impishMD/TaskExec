@@ -72,11 +72,12 @@ func knownReasons() []Reason {
 type ActorType string
 
 const (
-	ActorUser        ActorType = "user"
-	ActorAnonymous   ActorType = "anonymous"
-	ActorSystem      ActorType = "system"
-	ActorRunner      ActorType = "runner"
-	ActorIntegration ActorType = "integration"
+	ActorUser         ActorType = "user"
+	ActorAnonymous    ActorType = "anonymous"
+	ActorSystem       ActorType = "system"
+	ActorRunner       ActorType = "runner"
+	ActorIntegration  ActorType = "integration"
+	ActorProjectToken ActorType = "project_token"
 )
 
 type AuthMethod string
@@ -89,6 +90,7 @@ const (
 const (
 	TargetUser                  = "user"
 	TargetAPIToken              = "api_token"
+	TargetProjectToken          = "project_token"
 	TargetRoute                 = "route"
 	TargetRole                  = "role"
 	TargetProjectRoleDefinition = "project_role_definition"

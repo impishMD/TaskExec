@@ -213,12 +213,23 @@ func (t *TaskRunner) run() {
 	}
 
 	t.SetStatus(task_logger.TaskStartingStatus)
+	if t.Task.ProjectTokenID != nil {
+		token, err := t.pool.store.GetProjectToken(t.Task.ProjectID, *t.Task.ProjectTokenID)
+		if err != nil || !token.IsActive(tz.Now()) || !token.Can(db.TokenRunTasks) || !token.AllowsTemplate(t.Task.TemplateID) {
+			t.Log("Project API token is no longer authorized; queued task cancelled")
+			t.SetStatus(task_logger.TaskStoppedStatus)
+			return
+		}
+	}
 	t.createTaskEvent()
 
 	t.Log("Started task #" + strconv.Itoa(t.Task.ID) + " of template '" + t.Template.Name + "'\n")
 
 	var err error
 	var username string
+	if t.Task.ProjectTokenID != nil {
+		username = t.Task.ProjectTokenName
+	}
 	var incomingVersion *string
 
 	if t.Task.UserID != nil {
@@ -428,7 +439,7 @@ func (t *TaskRunner) startAutorunTasks() {
 			BuildTaskID: &t.Task.ID,
 		}
 		_, err = t.pool.AddTaskFrom(
-			audit.WithActor(context.Background(), audit.SystemActor(audit.ComponentTaskRunner)),
+			t.autorunContext(),
 			audit.TriggerAutorun,
 			task,
 			nil,
@@ -441,6 +452,15 @@ func (t *TaskRunner) startAutorunTasks() {
 			continue
 		}
 	}
+}
+
+// Keep chained deployments inside the original token's template allowlist.
+func (t *TaskRunner) autorunContext() context.Context {
+	actor := audit.SystemActor(audit.ComponentTaskRunner)
+	if t.Task.ProjectTokenID != nil {
+		actor = audit.ProjectTokenActor(*t.Task.ProjectTokenID, t.Task.ProjectTokenName)
+	}
+	return audit.WithActor(context.Background(), actor)
 }
 
 func (t *TaskRunner) prepareError(err error, errMsg string) error {

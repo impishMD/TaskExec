@@ -59,14 +59,16 @@ func TestMigration_2_19_14_DataSurvivesRebuild(t *testing.T) {
 		projectID, repo.ID)
 	require.NoError(t, err)
 
-	task, err := store.CreateTask(db.Task{
+	// Seed task fields available in 2.19.12, before project token attribution.
+	task := db.Task{
 		TemplateID: templateID,
 		ProjectID:  projectID,
 		Status:     "success",
 		Playbook:   "site.yml",
 		UserID:     &user.ID,
 		Created:    now,
-	}, 0)
+	}
+	task.ID, err = store.insert("id", "insert into task (template_id, project_id, status, playbook, user_id, created, environment) values (?, ?, ?, ?, ?, ?, '')", task.TemplateID, task.ProjectID, task.Status, task.Playbook, task.UserID, task.Created)
 	require.NoError(t, err)
 
 	_, err = store.CreateTaskOutput(db.TaskOutput{

@@ -41,6 +41,10 @@ func IntegrationActor(id int, name string) Actor {
 	return Actor{Type: ActorIntegration, ID: strconv.Itoa(id), Name: name}
 }
 
+func ProjectTokenActor(id, name string) Actor {
+	return Actor{Type: ActorProjectToken, ID: id, Name: name, Auth: AuthAPIToken}
+}
+
 func AnonymousActor() Actor {
 	return Actor{Type: ActorAnonymous}
 }

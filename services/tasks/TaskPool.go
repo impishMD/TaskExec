@@ -1178,6 +1178,21 @@ func (p *TaskPool) AddTaskFrom(
 	projectID int,
 	needAlias bool,
 ) (newTask db.Task, err error) {
+	// Source attribution is server-owned, never copied from an API request body.
+	taskObj.ProjectTokenID, taskObj.ProjectTokenName = nil, ""
+	if actor := audit.ActorFrom(ctx); actor.Type == audit.ActorProjectToken {
+		var token db.ProjectToken
+		token, err = p.store.GetProjectToken(projectID, actor.ID)
+		if err != nil {
+			return
+		}
+		if !token.IsActive(tz.Now()) || !token.Can(db.TokenRunTasks) || !token.AllowsTemplate(taskObj.TemplateID) {
+			err = fmt.Errorf("project token does not allow this task")
+			return
+		}
+		taskObj.ProjectTokenID, taskObj.ProjectTokenName = &token.ID, token.Name
+		userID = nil
+	}
 	// Only the workflow engine may associate a task with a saved graph node.
 	if trigger != audit.TriggerWorkflow {
 		taskObj.WorkflowRunID, taskObj.WorkflowNodeID, taskObj.WorkflowTemplateID = nil, nil, nil

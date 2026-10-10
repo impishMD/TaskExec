@@ -1,5 +1,5 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
-  <div>
+  <div class="project-settings-page">
     <YesNoDialog
       v-model="deleteProjectDialog"
       :title="$t('deleteProject')"
@@ -18,124 +18,170 @@
       :can-update-project="true"
     />
 
-    <div
-      class="CenterToScreen"
-    >
-      <h2 class="mt-8 mb-1">{{ $t('general_settings') }}</h2>
+    <v-tabs v-model="settingsTab" show-arrows data-testid="project-settings-tabs">
+      <v-tab href="#general" data-testid="settings-tab-general">
+        {{ $t('general_settings') }}
+      </v-tab>
+      <v-tab href="#alerts" data-testid="settings-tab-alerts">
+        {{ $t('alertsTitle') }}
+      </v-tab>
+      <v-tab v-if="canManageTokens" href="#tokens" data-testid="settings-tab-tokens">
+        {{ $t('api_tokens') }}
+      </v-tab>
+      <v-tab href="#danger" data-testid="settings-tab-danger">
+        {{ $t('danger_zone_settings') }}
+      </v-tab>
+    </v-tabs>
 
-      <v-divider class="mb-8" />
+    <v-tabs-items v-model="settingsTab" :key="projectId" class="project-settings-panels">
+      <v-tab-item value="general" eager>
+        <div class="project-settings-form">
+          <div>
+            <ProjectForm
+              :item-id="projectId"
+              ref="form"
+              @error="onError"
+              @save="onSave"
+              :system-info="systemInfo"
+            />
+          </div>
 
-      <div class="project-settings-form">
-        <div>
-          <ProjectForm
-            :item-id="projectId"
-            ref="form"
-            @error="onError"
-            @save="onSave"
-            :system-info="systemInfo"
-          />
-        </div>
-
-        <div class="d-flex justify-end mt-4">
-          <v-btn color="primary" @click="saveProject()">{{ $t('save') }}</v-btn>
-        </div>
-      </div>
-
-      <h2 class="mt-8 mb-1">{{ $t('danger_zone_settings') }}</h2>
-
-      <v-divider class="mb-8" />
-
-      <div class="project-backup project-settings-button" v-if="projectType === ''">
-        <v-row align="center">
-          <v-col class="shrink">
-
-            <v-btn
-              color="primary"
-              @click="backupProject"
-              :disabled="backupProgress"
-              min-width="170"
-              data-testid="settings-exportProject"
-            >{{ $t('backup') }}
+          <div class="d-flex justify-end mt-4">
+            <v-btn color="primary" @click="saveProject()" data-testid="settings-saveProject">
+              {{ $t('save') }}
             </v-btn>
+          </div>
+        </div>
+      </v-tab-item>
 
-            <v-progress-linear
-              v-if="backupProgress"
-              color="primary accent-4"
-              indeterminate
-              rounded
-              height="36"
-              style="margin-top: -36px"
-            ></v-progress-linear>
+      <v-tab-item value="alerts">
+        <v-card outlined data-testid="project-alert-settings">
+          <v-tabs v-model="alertChannel" show-arrows class="px-4 pt-2"
+            data-testid="project-alert-channels">
+            <v-tab href="#telegram" data-testid="alerts-channel-telegram">
+              <v-icon left size="20">$vuetify.icons.telegram</v-icon>Telegram
+            </v-tab>
+          </v-tabs>
+          <v-divider />
+          <v-tabs-items v-model="alertChannel">
+            <v-tab-item value="telegram">
+              <TelegramAlertSettings :project-id="projectId" />
+            </v-tab-item>
+          </v-tabs-items>
+        </v-card>
+      </v-tab-item>
 
-          </v-col>
-          <v-col class="grow">
-            <div style="font-size: 14px;">
-              {{ $t('downloadTheProjectBackupFile') }}
-            </div>
-          </v-col>
-        </v-row>
-      </div>
+      <v-tab-item v-if="canManageTokens" value="tokens">
+        <ProjectTokens :project-id="projectId" />
+      </v-tab-item>
 
-      <div class="project-backup project-settings-button" v-if="projectType === ''">
-        <v-row align="center">
-          <v-col class="shrink">
+      <v-tab-item value="danger">
+        <div class="project-settings-form" data-testid="project-danger-settings">
+          <div class="project-backup project-settings-button" v-if="projectType === ''">
+            <v-row align="center">
+              <v-col cols="12" sm="auto">
 
-            <v-btn
-              color="blue-grey"
-              @click="clearCache"
-              :disabled="clearCacheProgress"
-              min-width="170"
-              data-testid="settings-clearCache"
-            >{{ $t('clear_cache') }}</v-btn>
+                <v-btn
+                  color="primary"
+                  @click="backupProject"
+                  :disabled="backupProgress"
+                  min-width="170"
+                  data-testid="settings-exportProject"
+                >{{ $t('backup') }}
+                </v-btn>
 
-            <v-progress-linear
-              v-if="clearCacheProgress"
-              color="blue-grey darken-1"
-              indeterminate
-              rounded
-              height="36"
-              style="margin-top: -36px"
-            ></v-progress-linear>
+                <v-progress-linear
+                  v-if="backupProgress"
+                  color="primary accent-4"
+                  indeterminate
+                  rounded
+                  height="36"
+                  style="margin-top: -36px"
+                ></v-progress-linear>
 
-          </v-col>
-          <v-col class="grow">
-            <div style="font-size: 14px">
-              {{ $t('clear_cache_message') }}
-            </div>
-          </v-col>
-        </v-row>
-      </div>
+              </v-col>
+              <v-col cols="12" sm>
+                <div style="font-size: 14px;">
+                  {{ $t('downloadTheProjectBackupFile') }}
+                </div>
+              </v-col>
+            </v-row>
+          </div>
 
-      <div class="project-delete-form project-settings-button">
-        <v-row align="center">
-          <v-col class="shrink">
-            <v-btn
-              color="error"
-              min-width="170"
-              @click="deleteProjectDialog = true"
-              data-testid="settings-deleteProject"
-            >{{ $t('deleteProject2') }}
-            </v-btn>
-          </v-col>
-          <v-col class="grow">
-            <div style="font-size: 14px; color: #ff5252">
-              {{ $t('onceYouDeleteAProjectThereIsNoGoingBackPleaseBeCer') }}
-            </div>
-          </v-col>
-        </v-row>
-      </div>
-    </div>
+          <div class="project-backup project-settings-button" v-if="projectType === ''">
+            <v-row align="center">
+              <v-col cols="12" sm="auto">
+
+                <v-btn
+                  color="blue-grey"
+                  @click="clearCache"
+                  :disabled="clearCacheProgress"
+                  min-width="170"
+                  data-testid="settings-clearCache"
+                >{{ $t('clear_cache') }}</v-btn>
+
+                <v-progress-linear
+                  v-if="clearCacheProgress"
+                  color="blue-grey darken-1"
+                  indeterminate
+                  rounded
+                  height="36"
+                  style="margin-top: -36px"
+                ></v-progress-linear>
+
+              </v-col>
+              <v-col cols="12" sm>
+                <div style="font-size: 14px">
+                  {{ $t('clear_cache_message') }}
+                </div>
+              </v-col>
+            </v-row>
+          </div>
+
+          <div class="project-delete-form project-settings-button">
+            <v-row align="center">
+              <v-col cols="12" sm="auto">
+                <v-btn
+                  color="error"
+                  min-width="170"
+                  @click="deleteProjectDialog = true"
+                  data-testid="settings-deleteProject"
+                >{{ $t('deleteProject2') }}
+                </v-btn>
+              </v-col>
+              <v-col cols="12" sm>
+                <div style="font-size: 14px; color: #ff5252">
+                  {{ $t('onceYouDeleteAProjectThereIsNoGoingBackPleaseBeCer') }}
+                </div>
+              </v-col>
+            </v-row>
+          </div>
+        </div>
+      </v-tab-item>
+    </v-tabs-items>
   </div>
 </template>
 <style lang="scss">
   @import '~vuetify/src/styles/styles.sass';
 
-  .project-settings-form {
-    margin: 30px 0;
+  .project-settings-page .project-settings-panels {
+    margin-top: 20px;
+    background: transparent;
+    .project-settings-form { margin: 0; }
   }
 
   .project-settings-button {
-    margin: 30px 0;
+    margin: 24px 0;
+    .v-btn {
+      max-width: 100%;
+      height: auto !important;
+      min-height: 38px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      .v-btn__content { white-space: normal; }
+    }
+    &:first-child { margin-top: 0; }
+    &:last-child { margin-bottom: 0; }
 
     @media #{map-get($display-breakpoints, 'sm-and-down')} {
       padding: 0 6px;
@@ -145,6 +191,8 @@
 <script>
 import EventBus from '@/event-bus';
 import ProjectForm from '@/components/ProjectForm.vue';
+import TelegramAlertSettings from '@/components/TelegramAlertSettings.vue';
+import ProjectTokens from '@/components/ProjectTokens.vue';
 import { getErrorMessage } from '@/lib/error';
 import axios from 'axios';
 import YesNoDialog from '@/components/YesNoDialog.vue';
@@ -152,19 +200,36 @@ import delay from '@/lib/delay';
 import DashboardMenu from '@/components/DashboardMenu.vue';
 
 export default {
-  components: { DashboardMenu, YesNoDialog, ProjectForm },
+  components: {
+    DashboardMenu, YesNoDialog, ProjectForm, TelegramAlertSettings, ProjectTokens,
+  },
   props: {
     projectId: Number,
     projectType: String,
     systemInfo: Object,
+    userRole: String,
+    isAdmin: Boolean,
+  },
+
+  computed: {
+    canManageTokens() { return this.isAdmin || this.userRole === 'owner'; },
   },
 
   data() {
     return {
+      settingsTab: 'general',
+      alertChannel: 'telegram',
       deleteProjectDialog: null,
       backupProgress: false,
       clearCacheProgress: false,
     };
+  },
+
+  watch: {
+    projectId() {
+      this.settingsTab = 'general';
+      this.alertChannel = 'telegram';
+    },
   },
 
   methods: {

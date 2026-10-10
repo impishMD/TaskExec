@@ -261,6 +261,10 @@ func authenticationHandler(w http.ResponseWriter, r *http.Request) (ok bool, req
 	var tokenFingerprint string
 
 	req = r
+	parts := strings.Fields(r.Header.Get("Authorization"))
+	if len(parts) == 2 && strings.EqualFold(parts[0], "Bearer") && strings.HasPrefix(parts[1], db.ProjectTokenPrefix) {
+		return authenticateProjectToken(w, r, parts[1])
+	}
 
 	authHeader := strings.ToLower(r.Header.Get("authorization"))
 
@@ -351,6 +355,10 @@ func authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ok, r := authenticationHandler(w, r)
 		if ok {
+			if token, isProjectToken := projectTokenFrom(r); isProjectToken {
+				serveProjectToken(w, r, token)
+				return
+			}
 			next.ServeHTTP(w, r)
 		}
 	})
@@ -364,6 +372,10 @@ func authenticationWithStore(next http.Handler) http.Handler {
 		ok, r = authenticationHandler(w, r)
 
 		if ok {
+			if token, isProjectToken := projectTokenFrom(r); isProjectToken {
+				denyProjectToken(w, r, token)
+				return
+			}
 			next.ServeHTTP(w, r)
 		}
 	})

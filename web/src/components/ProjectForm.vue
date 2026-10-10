@@ -31,21 +31,7 @@
       dense
     ></v-text-field>
 
-    <ProjectAlertSettingsDialog
-      v-if="!isNew"
-      v-model="alertDialog"
-      :project-id="Number(itemId)"
-    />
-    <v-btn
-      v-if="!isNew"
-      outlined color="primary" class="mb-4"
-      :disabled="formSaving"
-      @click="alertDialog = true"
-      data-testid="project-configure-alerts"
-    >
-      <v-icon left>mdi-bell-outline</v-icon>{{ $t('alertsConfigure') }}
-    </v-btn>
-    <p v-else class="text-body-2 text--secondary">{{ $t('alertsAfterCreation') }}</p>
+    <p v-if="isNew" class="text-body-2 text--secondary">{{ $t('alertsAfterCreation') }}</p>
 
     <v-switch
       data-testid="newProject-demo"
@@ -58,14 +44,13 @@
   </v-form>
 </template>
 <script>
-import ProjectAlertSettingsDialog from '@/components/ProjectAlertSettingsDialog.vue';
 import ItemFormBase from '@/components/ItemFormBase';
 import ProjectIconPicker from '@/components/ProjectIconPicker.vue';
 
 export default {
   mixins: [ItemFormBase],
-  components: { ProjectAlertSettingsDialog, ProjectIconPicker },
-  data() { return { alertDialog: false, iconLoading: false }; },
+  components: { ProjectIconPicker },
+  data() { return { iconLoading: false }; },
   props: {
     projectNameTitle: {
       type: String,

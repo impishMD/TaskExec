@@ -170,10 +170,11 @@ const TaskStatUnitWeek TaskStatUnit = "week"
 const TaskStatUnitMonth TaskStatUnit = "month"
 
 type TaskFilter struct {
-	Start  *time.Time `json:"start"`
-	End    *time.Time `json:"end"`
-	UserID *int       `json:"user_id"`
-	Status []task_logger.TaskStatus
+	TemplateIDs []int      `json:"-"`
+	Start       *time.Time `json:"start"`
+	End         *time.Time `json:"end"`
+	UserID      *int       `json:"user_id"`
+	Status      []task_logger.TaskStatus
 }
 
 type TaskStat struct {
@@ -440,6 +441,12 @@ type SessionManager interface {
 
 // TokenManager handles token-related operations
 type TokenManager interface {
+	GetProjectTokens(projectID int) ([]ProjectToken, error)
+	GetProjectToken(projectID int, id string) (ProjectToken, error)
+	CreateProjectToken(token ProjectToken, replaceID string) (ProjectToken, error)
+	RevokeProjectToken(projectID int, id string) error
+	TouchProjectToken(projectID int, id string) error
+	GetProjectTokenByID(id string) (ProjectToken, error)
 	GetAPITokens(userID int) ([]APIToken, error)
 	CreateAPIToken(token APIToken) (APIToken, error)
 	GetAPIToken(tokenID string) (APIToken, error)

@@ -12,7 +12,10 @@
         <TaskStatus :status="item.status" :project-id="projectId" :task-id="itemId"
           :output="output.concat(outputBuffer)" data-testid="task-status" />
         <span class="task-log-view__status_part">
-          {{ user
+          {{ item.project_token_id
+            ? $t('projectTokenStartedBy', {
+              name: item.project_token_name, time: $options.filters.formatDate(item.start),
+            }) : user
             ? $t('taskStartedByAt', {
               user: user.name, time: $options.filters.formatDate(item.start),
             })

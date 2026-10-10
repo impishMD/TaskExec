@@ -1,5 +1,14 @@
 # Changelog
 
+## [v1.2.0](release-notes/en/v1.2.0.md)
+
+- Project API tokens with explicit permissions, template restrictions, launch overrides, expiry, rotation and revocation.
+- Token audit events and task attribution; token secrets are shown once and stored as hashes.
+- Project settings tabs for General, Notifications, API tokens and Danger zone.
+- Personal API tokens in the profile menu and the corrected Telegram icon.
+- Compact token selections, status filters and responsive token tables.
+- Helm chart 1.0.4 defaults to application v1.2.0.
+
 ## [v1.1.2](release-notes/en/v1.1.2.md)
 
 - Consistent option panels without diamond pointers in both themes.

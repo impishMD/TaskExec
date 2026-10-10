@@ -9,7 +9,7 @@
       <p class="text-body-1 text--secondary mb-6">{{ $t('alertsPageHint') }}</p>
       <v-card outlined>
         <v-tabs :value="0" class="px-4 pt-2">
-          <v-tab><v-icon left small>mdi-send</v-icon>Telegram</v-tab>
+          <v-tab><v-icon left size="20">$vuetify.icons.telegram</v-icon>Telegram</v-tab>
         </v-tabs>
         <v-divider />
         <TelegramAlertSettings />

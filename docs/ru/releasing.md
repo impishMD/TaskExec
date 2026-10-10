@@ -58,8 +58,8 @@ server/runner/job/helper, отправляют их по digest в Docker Hub и
 
 ## Выпуск Helm-чарта
 
-Теги приложения и чарта независимы: `v1.1.2` выпускает приложение,
-`chart-v1.0.3` — чарт версии `1.0.3`. Для изменений только в чарте увеличивайте `version`
+Теги приложения и чарта независимы: `v1.2.0` выпускает приложение,
+`chart-v1.0.4` — чарт версии `1.0.4`. Для изменений только в чарте увеличивайте `version`
 в `Chart.yaml`; `appVersion` соответствует `VERSION`. Helm CI проверяет рендеринг в Helm 3/4,
 схемы Kubernetes и установку собранного сервера в отдельном kind-кластере: вход, сохранность
 данных при обновлении/перезапуске, подпуть URL и подключение сохранённого PVC.
@@ -88,7 +88,7 @@ Workflow создаёт GitHub Releases и обновляет ветку `gh-pag
 
 ```sh
 make version-check helm-check
-python3 tools/check-chart.py --release-tag chart-v1.0.3
+python3 tools/check-chart.py --release-tag chart-v1.0.4
 helm package charts/taskexec --destination /tmp/taskexec-charts
 ```
 

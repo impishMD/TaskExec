@@ -47,7 +47,7 @@ endpoints with `{"use_remote_runner": true}` or `{"use_remote_runner": false}`.
 Open **Management (gear) → Alerts → Telegram** to save the default bot token
 issued by BotFather. Global settings are available to administrators.
 
-In **Project → Dashboard → Settings**, open **Configure alerts → Telegram**.
+In **Project → Dashboard → Settings**, open the **Alerts → Telegram** tabs.
 Enable Telegram, enter the destination Chat ID and save. Telegram starts disabled
 for every project. The bot needs permission to send messages to that chat.
 Template options that suppress success or failure alerts still apply.

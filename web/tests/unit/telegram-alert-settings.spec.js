@@ -99,7 +99,7 @@ describe('Telegram alert settings', () => {
     expect(saved).to.equal(null);
   });
 
-  it('tests unchanged settings without saving or closing the dialog', async () => {
+  it('tests unchanged settings without saving them', async () => {
     await render({ enabled: true, chat_id: '-100123', has_token: true });
     expect(wrapper.vm.dirty).to.equal(false);
     await wrapper.get('[data-testid="alerts-test"]').trigger('click');
@@ -145,14 +145,37 @@ describe('Telegram alert settings', () => {
     expect(saved).to.equal(null);
   });
 
-  it('keeps the dialog cancellable if loading fails', async () => {
+  it('discards unsaved project changes without removing the stored token', async () => {
+    await render({ enabled: true, chat_id: '-100123', has_token: true });
+    await wrapper.setData({
+      chatId: '@changed',
+      useGlobalToken: true,
+      token: 'unsaved',
+      testResult: { ok: false, text: 'Failed' },
+      error: 'Save failed',
+    });
+    await wrapper.get('[data-testid="alerts-cancel"]').trigger('click');
+    expect(wrapper.vm.chatId).to.equal('-100123');
+    expect(wrapper.vm.useGlobalToken).to.equal(false);
+    expect(wrapper.vm.settings.has_token).to.equal(true);
+    expect(wrapper.vm.token).to.equal('');
+    expect(wrapper.vm.testResult).to.equal(null);
+    expect(wrapper.vm.error).to.equal('');
+    expect(wrapper.vm.dirty).to.equal(false);
+    expect(saved).to.equal(null);
+  });
+
+  it('offers a retry in the page if loading fails', async () => {
     await render();
     axios.get = async () => { throw new Error('Network unavailable'); };
     await wrapper.vm.load();
     expect(wrapper.vm.settings).to.equal(null);
-    const cancel = wrapper.findAll('button').wrappers.find((button) => button.text() === 'cancel');
-    expect(cancel).not.to.equal(undefined);
-    await cancel.trigger('click');
-    expect(wrapper.emitted('cancel')).to.have.length(1);
+    const retry = wrapper.findAll('button').wrappers.find((button) => button.text() === 'alertsRetry');
+    expect(retry).not.to.equal(undefined);
+    axios.get = async () => ({ data: defaults });
+    await retry.trigger('click');
+    await tick();
+    expect(wrapper.vm.settings).to.deep.equal(defaults);
+    expect(wrapper.vm.error).to.equal('');
   });
 });

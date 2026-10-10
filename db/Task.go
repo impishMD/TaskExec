@@ -58,9 +58,11 @@ type Task struct {
 	Arguments   *string `db:"arguments" json:"arguments,omitempty"`
 	GitBranch   *string `db:"git_branch" json:"git_branch,omitempty"`
 
-	UserID        *int `db:"user_id" json:"user_id,omitempty"`
-	IntegrationID *int `db:"integration_id" json:"integration_id,omitempty"`
-	ScheduleID    *int `db:"schedule_id" json:"schedule_id,omitempty"`
+	UserID           *int    `db:"user_id" json:"user_id,omitempty"`
+	ProjectTokenID   *string `db:"project_token_id" json:"project_token_id,omitempty"`
+	ProjectTokenName string  `db:"project_token_name" json:"project_token_name,omitempty"`
+	IntegrationID    *int    `db:"integration_id" json:"integration_id,omitempty"`
+	ScheduleID       *int    `db:"schedule_id" json:"schedule_id,omitempty"`
 	// RunnerID is set while a task is assigned to a remote runner (cleared when the task finishes).
 	// Used so runner progress API can authorize updates on any HA node.
 	RunnerID *int `db:"runner_id" json:"-"`

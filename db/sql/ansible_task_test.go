@@ -20,9 +20,11 @@ func ansibleTaskFixture(t *testing.T, store *SqlDb) db.Task {
 	require.NoError(t, err)
 	inv, err := store.CreateInventory(db.Inventory{ProjectID: project.ID, Type: db.InventoryStatic, Inventory: "localhost ansible_connection=local"})
 	require.NoError(t, err)
-	tpl, err := store.CreateTemplate(db.Template{ProjectID: project.ID, RepositoryID: repo.ID, App: db.AppAnsible, InventoryID: &inv.ID, Name: "summary", Playbook: "test.yml"})
+	// This fixture also seeds an older schema for migration tests.
+	templateID, err := store.insert("id", "insert into project__template (project_id, repository_id, app, inventory_id, name, playbook) values (?, ?, ?, ?, ?, ?)", project.ID, repo.ID, db.AppAnsible, inv.ID, "summary", "test.yml")
 	require.NoError(t, err)
-	task, err := store.CreateTask(db.Task{ProjectID: project.ID, TemplateID: tpl.ID}, 0)
+	task := db.Task{ProjectID: project.ID, TemplateID: templateID, Created: time.Now(), Status: "waiting"}
+	task.ID, err = store.insert("id", "insert into task (project_id, template_id, created, status, playbook, environment) values (?, ?, ?, ?, '', '')", task.ProjectID, task.TemplateID, task.Created, task.Status)
 	require.NoError(t, err)
 	return task
 }

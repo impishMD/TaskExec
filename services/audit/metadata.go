@@ -49,6 +49,14 @@ type RoleMetadata struct {
 	Permissions []string `json:"permissions"`
 }
 
+type ProjectTokenMetadata struct {
+	Scopes       []string `json:"scopes"`
+	TemplateIDs  []int    `json:"template_ids"`
+	AllTemplates bool     `json:"all_templates"`
+	Overrides    []string `json:"overrides"`
+	PreviousID   string   `json:"previous_id,omitempty"`
+}
+
 type TemplatePermissionMetadata struct {
 	TemplateID  int      `json:"template_id"`
 	RoleSlug    string   `json:"role_slug,omitempty"`

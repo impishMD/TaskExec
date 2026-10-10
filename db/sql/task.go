@@ -288,7 +288,7 @@ func (d *SqlDb) getTasks(projectID int, templateID *int, workflowRunID *int, tas
 
 	fields := "task.*"
 	fields += ", tpl.playbook as tpl_playbook" +
-		", `user`.name as user_name" +
+		", case when task.project_token_id is not null then task.project_token_name else `user`.name end as user_name" +
 		", task.runner_id as used_runner_id" +
 		", runner.name as used_runner_name" +
 		", tpl.name as tpl_alias" +
@@ -304,6 +304,9 @@ func (d *SqlDb) getTasks(projectID int, templateID *int, workflowRunID *int, tas
 
 	if params.TaskFilter != nil && len(params.TaskFilter.Status) > 0 {
 		q = q.Where(squirrel.Eq{"status": params.TaskFilter.Status})
+	}
+	if params.TaskFilter != nil && params.TaskFilter.TemplateIDs != nil {
+		q = q.Where(squirrel.Eq{"task.template_id": params.TaskFilter.TemplateIDs})
 	}
 
 	if templateID == nil {

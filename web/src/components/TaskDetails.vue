@@ -75,6 +75,10 @@
                   <td><b>{{ $t('uiMessage') }}</b></td>
                   <td>{{ item.message || '—' }}</td>
                 </tr>
+                <tr v-if="item.project_token_id">
+                  <td><b>{{ $t('uiToken') }}</b></td>
+                  <td>{{ item.project_token_name }}</td>
+                </tr>
                 <tr v-if="item.user_id != null">
                   <td><b>{{ $t('author') }}</b></td>
                   <td>{{ user?.name || '—' }}</td>

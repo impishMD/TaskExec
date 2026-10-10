@@ -4,6 +4,7 @@ import OpenTofuIcon from '@/components/OpenTofuIcon.vue';
 import PulumiIcon from '@/components/PulumiIcon.vue';
 import TerragruntIcon from '@/components/TerragruntIcon.vue';
 import HashicorpVaultIcon from '@/components/HashicorpVaultIcon.vue';
+import TelegramIcon from '@/components/TelegramIcon.vue';
 import {
   cs, de, en, es, fr, it, ja, ko, nl, pl, pt, ru, zhHans, zhHant,
 } from 'vuetify/lib/locale';
@@ -46,6 +47,9 @@ export default new Vuetify({
   },
   icons: {
     values: {
+      telegram: {
+        component: TelegramIcon,
+      },
       tofu: {
         component: OpenTofuIcon,
       },

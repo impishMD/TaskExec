@@ -49,7 +49,7 @@ persistence:
 ```sh
 helm repo add taskexec https://impishmd.github.io/TaskExec
 helm repo update
-helm upgrade --install taskexec taskexec/taskexec --version 1.0.3 \
+helm upgrade --install taskexec taskexec/taskexec --version 1.0.4 \
   --namespace taskexec -f taskexec-values.yaml --wait --timeout 5m
 helm test taskexec -n taskexec --logs
 kubectl -n taskexec port-forward service/taskexec 3000:3000
@@ -57,9 +57,9 @@ kubectl -n taskexec port-forward service/taskexec 3000:3000
 
 Open <http://localhost:3000>. Sign in as `admin` with the password saved above.
 To install directly from this repository, use `./charts/taskexec` instead of
-`taskexec/taskexec --version 1.0.3`. For a custom image, set `image.repository` and `image.tag`.
+`taskexec/taskexec --version 1.0.4`. For a custom image, set `image.repository` and `image.tag`.
 
-The default image is `ghcr.io/impishmd/taskexec:v1.1.2`. You can use Docker Hub by setting
+The default image is `ghcr.io/impishmd/taskexec:v1.2.0`. You can use Docker Hub by setting
 `image.repository: impishmd/taskexec`, or pin `image.digest` to a `sha256:…` digest.
 Private registries require `image.pullSecrets` in the release namespace.
 
@@ -224,7 +224,7 @@ Storage-cluster failure or namespace deletion can still destroy it; retention is
 To reinstall against the retained volume:
 
 ```sh
-helm upgrade --install taskexec taskexec/taskexec --version 1.0.3 -n taskexec \
+helm upgrade --install taskexec taskexec/taskexec --version 1.0.4 -n taskexec \
   -f taskexec-values.yaml --set persistence.existingClaim=taskexec --wait
 ```
 
@@ -251,7 +251,7 @@ spec:
   source:
     repoURL: https://impishmd.github.io/TaskExec
     chart: taskexec
-    targetRevision: 1.0.3
+    targetRevision: 1.0.4
     helm:
       releaseName: taskexec
       valuesObject:

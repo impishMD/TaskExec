@@ -283,6 +283,12 @@ func Route(
 	projectGet.Use(projects.ProjectMiddleware)
 	projectGet.Methods("GET", "HEAD").HandlerFunc(projects.GetProject)
 
+	projectTokensAPI := authenticatedAPI.PathPrefix("/project/{project_id}/tokens").Subrouter()
+	projectTokensAPI.Use(projects.ProjectMiddleware)
+	projectTokensAPI.HandleFunc("", projectTokens).Methods("GET", "HEAD", "POST")
+	projectTokensAPI.HandleFunc("/{token_id}", projectTokens).Methods("DELETE")
+	projectTokensAPI.HandleFunc("/{token_id}/rotate", projectTokens).Methods("POST")
+
 	//
 	// Start and Stop tasks
 	projectTaskStart := authenticatedAPI.PathPrefix("/project/{project_id}").Subrouter()
