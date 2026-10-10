@@ -12,7 +12,7 @@
     />
 
     <v-data-table
-      :headers="headers"
+      :headers="getHeaders()"
       :items="items"
       class="mt-4 CenterToScreen"
       :footer-props="{ itemsPerPageOptions: [20] }"
@@ -21,12 +21,16 @@
       <template v-slot:item.created="{ item }">
         {{ item.created | formatDate }}
       </template>
+      <template v-slot:item.description="{ item }">
+        {{ activityDescription(item) }}
+      </template>
     </v-data-table>
   </div>
 </template>
 <script>
 import ItemListPageBase from '@/components/ItemListPageBase';
 import DashboardMenu from '@/components/DashboardMenu.vue';
+import formatActivityDescription from '@/lib/activity';
 
 export default {
   components: { DashboardMenu },
@@ -34,6 +38,10 @@ export default {
   mixins: [ItemListPageBase],
 
   methods: {
+    activityDescription(event) {
+      return formatActivityDescription(event, (key, params) => this.$t(key, params));
+    },
+
     getHeaders() {
       return [
         {

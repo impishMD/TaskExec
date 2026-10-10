@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.1.0](release-notes/en/v1.1.0.md)
+
+- Project activity messages and task statuses follow the selected language, including historical records.
+- String access keys are supported as Ansible Vault passwords.
+- Template path examples match the selected application.
+- Releases reuse successful CI for the exact commit without repeating race tests or temporary image builds.
+- Helm chart 1.0.2 defaults to application v1.1.0.
+
 ## [v1.0.6](release-notes/en/v1.0.6.md)
 
 - Task dialog scrolling, footer spacing and responsive metadata/tab layout.

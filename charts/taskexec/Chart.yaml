@@ -5,8 +5,8 @@ type: application
 annotations:
   artifacthub.io/license: Apache-2.0
 icon: https://raw.githubusercontent.com/impishMD/TaskExec/develop/web/public/favicon.svg
-version: 1.0.1
-appVersion: "1.0.6"
+version: 1.0.2
+appVersion: "1.1.0"
 kubeVersion: ">=1.26.0-0"
 home: https://github.com/impishMD/TaskExec
 sources:
