@@ -260,6 +260,8 @@ func (KeyInstaller) Install(key db.AccessKey, usage db.AccessKeyRole, logger tas
 		switch key.Type {
 		case db.AccessKeyLoginPassword:
 			installation.Password = key.LoginPassword.Password
+		case db.AccessKeyString:
+			installation.Password = key.String
 		default:
 			err = fmt.Errorf("access key type not supported for ansible password vault")
 		}

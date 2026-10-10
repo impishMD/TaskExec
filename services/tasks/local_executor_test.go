@@ -46,6 +46,44 @@ func TestGetPlaybookArgs_UsesRepositoryRootedPaths(t *testing.T) {
 	assert.Equal(t, filepath.Join(repoRoot, "playbooks", "site.yml"), args[len(args)-1])
 }
 
+func TestGetPlaybookArgs_VaultStringAndPasswordKeys(t *testing.T) {
+	setupExecutorConfig(t)
+
+	for _, keyType := range []db.AccessKeyType{db.AccessKeyString, db.AccessKeyLoginPassword} {
+		t.Run(string(keyType), func(t *testing.T) {
+			const password = "vault-test-password-with-$pecial-characters"
+			key := db.AccessKey{Type: keyType}
+			if keyType == db.AccessKeyString {
+				key.String = password
+			} else {
+				key.LoginPassword = db.LoginPassword{Login: "unused-vault-login", Password: password}
+			}
+			executor := LocalExecutor{
+				KeyInstaller: ssh.KeyInstaller{},
+				Template: db.Template{
+					Playbook: "site.yml",
+					Vaults: []db.TemplateVault{
+						{Type: db.TemplateVaultPassword, Vault: &key},
+						{Type: db.TemplateVaultPassword, Name: new("production"), Vault: &key},
+					},
+				},
+				Inventory:  db.Inventory{Type: db.InventoryFile, Inventory: "hosts.ini"},
+				Repository: db.Repository{GitURL: t.TempDir()},
+			}
+
+			require.NoError(t, executor.installVaultKeyFiles())
+			args, inputs, err := executor.getPlaybookArgs("", nil)
+			require.NoError(t, err)
+			assert.Contains(t, args, "--vault-id=default@prompt")
+			assert.Contains(t, args, "--vault-id=production@prompt")
+			assert.Equal(t, password, inputs["Vault password (default):"])
+			assert.Equal(t, password, inputs["Vault password (production):"])
+			assert.NotContains(t, strings.Join(args, " "), password)
+			assert.NotContains(t, strings.Join(args, " "), "unused-vault-login")
+		})
+	}
+}
+
 // TestGetShellArgs_PassesSurveySecretVar verifies that Survey variables of type
 // "Secret" (delivered via LocalExecutor.Secret) are passed to Bash/Shell tasks,
 // alongside plain survey vars that arrive in Environment.JSON.
